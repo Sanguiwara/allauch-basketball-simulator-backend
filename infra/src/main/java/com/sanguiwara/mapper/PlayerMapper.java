@@ -1,6 +1,6 @@
 package com.sanguiwara.mapper;
 
-import core.Player;
+import baserecords.Player;
 import com.sanguiwara.entity.PlayerEntity;
 import org.mapstruct.Mapper;
 

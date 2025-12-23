@@ -1,6 +1,6 @@
 package com.sanguiwara.controller;
 
-import core.Player;
+import baserecords.Player;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

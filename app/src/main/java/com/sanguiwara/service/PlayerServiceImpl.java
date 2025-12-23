@@ -1,6 +1,6 @@
 package com.sanguiwara.service;
 
-import core.Player;
+import baserecords.Player;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sanguiwara.repository.PlayerRepository;

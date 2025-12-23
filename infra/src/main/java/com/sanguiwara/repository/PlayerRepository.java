@@ -1,6 +1,6 @@
 package com.sanguiwara.repository;
 
-import core.Player;
+import baserecords.Player;
 import lombok.NonNull;
 
 import java.util.Optional;
