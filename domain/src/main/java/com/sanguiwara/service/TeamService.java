@@ -1,0 +1,15 @@
+package com.sanguiwara.service;
+
+import com.sanguiwara.baserecords.AgeCategory;
+import com.sanguiwara.baserecords.Gender;
+import com.sanguiwara.baserecords.Team;
+
+import java.util.UUID;
+
+public interface TeamService {
+    Team getTeam(UUID uuid);
+
+    Team save(Team team);
+
+    Team generateTeam(AgeCategory ageCategory, Gender gender);
+}

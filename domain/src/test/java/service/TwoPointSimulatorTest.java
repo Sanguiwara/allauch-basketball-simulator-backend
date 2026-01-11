@@ -1,12 +1,13 @@
 package service;
 
-import ingame.GamePlan;
-import ingame.InGamePlayer;
-import baserecords.Player;
-import event.TwoPointShotEvent;
-import result.TwoPointShootingResult;
+import com.sanguiwara.factory.PlayerFactory;
+import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.gameevent.TwoPointShotEvent;
+import com.sanguiwara.result.TwoPointShootingResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import simulator.TwoPointSimulator;
+import com.sanguiwara.service.simulator.TwoPointSimulator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,28 +17,34 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TwoPointSimulatorTest {
 
-    private static GamePlan makePlan(PlayerRandomFactory factory, String prefix, long startId) {
-        // Création d'une équipe simple de 5 joueurs
-        List<InGamePlayer> players = new ArrayList<>();
-        players.add(new InGamePlayer(factory.random(startId + 0, prefix + "_PG"), 30, 15, 15));
-        players.add(new InGamePlayer(factory.random(startId + 1, prefix + "_SG"), 15, 15, 15));
-        players.add(new InGamePlayer(factory.random(startId + 2, prefix + "_SF"), 15, 15, 15));
-        players.add(new InGamePlayer(factory.random(startId + 3, prefix + "_PF"), 15, 15, 15));
-        players.add(new InGamePlayer(factory.random(startId + 4, prefix + "_C"), 15, 15, 15));
+    private static final long SEED = 123456789L;
+    private Random random;
+    private PlayerFactory playerFactory;
 
-        // Pas de Team nécessaire pour ces tests
-        return new GamePlan(null, null, players, null);
+    @BeforeEach
+    void setUp() {
+        random = new Random(SEED);
+        playerFactory = new PlayerFactory(random);
     }
 
+    private static List<InGamePlayer> makePlan(PlayerFactory factory, String prefix, long startId) {
+        List<InGamePlayer> players = new ArrayList<>();
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_PG"), 30, 30, 20));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_SG"), 20, 30, 15));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_SF"), 20, 25, 15));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_PF"), 15, 20, 30));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_C"), 10, 15, 30));
+
+        return players;
+    }
     @Test
     void simulate2ptForMatchup_shouldProduceEventsAndPrint() {
         long seed = 12345L;
-        PlayerRandomFactory factory = new PlayerRandomFactory(seed);
-        GamePlan home = makePlan(factory, "HOME", 1);
-        GamePlan away = makePlan(factory, "AWAY", 100);
+        List<InGamePlayer> home = makePlan(playerFactory, "HOME", 1);
+        List<InGamePlayer> away = makePlan(playerFactory, "AWAY", 100);
 
-        InGamePlayer shooter = home.getActivePlayers().get(1);
-        InGamePlayer defender = away.getActivePlayers().get(1);
+        InGamePlayer shooter = home.getFirst();
+        Player defender = away.getFirst().getPlayer();
 
         TwoPointSimulator sim = new TwoPointSimulator(new Random(seed));
 
@@ -61,11 +68,10 @@ class TwoPointSimulatorTest {
     @Test
     void simulateShots_shouldHonorAssistAndTypes() {
         long seed = 777L;
-        PlayerRandomFactory factory = new PlayerRandomFactory(seed);
         List<InGamePlayer> players = new ArrayList<>();
-        players.add(new InGamePlayer(factory.random(1, "A"), 30, 15, 15));
-        players.add(new InGamePlayer(factory.random(2, "B"), 15, 15, 15));
-        players.add(new InGamePlayer(factory.random(3, "C"), 15, 15, 15));
+        players.add(new InGamePlayer(playerFactory.generatePlayer( "A"), 30, 15, 15));
+        players.add(new InGamePlayer(playerFactory.generatePlayer("B"), 15, 15, 15));
+        players.add(new InGamePlayer(playerFactory.generatePlayer( "C"), 15, 15, 15));
 
         InGamePlayer shooter = players.get(0);
         // Donner du poids de passe aux coéquipiers pour permettre des assists
@@ -93,7 +99,7 @@ class TwoPointSimulatorTest {
     @Test
     void computeTwoPointPct_shouldVaryWithTypeAdvantageAndAssist() {
         TwoPointSimulator sim = new TwoPointSimulator(new Random(1));
-        Player p = new PlayerRandomFactory(42L).random(1, "P");
+        Player p = playerFactory.generatePlayer( "P");
 
         double noAssist = sim.computeTwoPointPct( p, 0.0, 0.0);
         double withAssist = sim.computeTwoPointPct( p, 0.0, 0.05);
@@ -111,9 +117,8 @@ class TwoPointSimulatorTest {
     @Test
     void computeAdvantage2pt_shouldReturnReasonableRange() {
         TwoPointSimulator sim = new TwoPointSimulator(new Random());
-        PlayerRandomFactory f = new PlayerRandomFactory();
-        Player off = f.random(1, "OFF");
-        Player def = f.random(2, "DEF");
+        Player off = playerFactory.generatePlayer( "OFF");
+        Player def = playerFactory.generatePlayer( "DEF");
 
         double advMid = sim.computeAdvantage2pt( off, def);
         double advPost = sim.computeAdvantage2pt( off, def);

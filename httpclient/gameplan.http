@@ -1,0 +1,6 @@
+###
+POST http://localhost:8080/gameplans/generate
+
+### Récupérer tous les joueurs
+GET http://localhost:8080/gameplans/56afc092-6032-47a6-b43b-e88524e0fa25
+Accept: application/json

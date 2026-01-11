@@ -1,12 +1,14 @@
 package service;
 
-import ingame.GamePlan;
-import ingame.InGamePlayer;
-import baserecords.Player;
-import event.DriveEvent;
-import result.DriveResult;
-import simulator.DriveSimulator;
+import com.sanguiwara.factory.PlayerFactory;
+import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.gameevent.DriveEvent;
+import com.sanguiwara.result.DriveResult;
+import com.sanguiwara.service.simulator.DriveSimulator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,29 +17,44 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@SpringBootTest
+
 class DriveSimulatorTest {
 
-    private static GamePlan makePlan(PlayerRandomFactory factory, String prefix, long startId) {
-        List<InGamePlayer> players = new ArrayList<>();
-        players.add(new InGamePlayer(factory.random(startId + 0, prefix + "_PG"), 30, 30, 20));
-        players.add(new InGamePlayer(factory.random(startId + 1, prefix + "_SG"), 20, 30, 15));
-        players.add(new InGamePlayer(factory.random(startId + 2, prefix + "_SF"), 20, 25, 15));
-        players.add(new InGamePlayer(factory.random(startId + 3, prefix + "_PF"), 15, 20, 30));
-        players.add(new InGamePlayer(factory.random(startId + 4, prefix + "_C"), 10, 15, 30));
-        return new GamePlan(null, null, players, null);
+    private static final long SEED = 123456789L;
+    private Random random;
+    private PlayerFactory playerFactory;
+
+    @BeforeEach
+    void setUp() {
+        random = new Random(SEED);
+        playerFactory = new PlayerFactory(random);
     }
+
+
+    private static List<InGamePlayer> makePlan(PlayerFactory factory, String prefix, long startId) {
+        List<InGamePlayer> players = new ArrayList<>();
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_PG"), 30, 30, 20));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_SG"), 20, 30, 15));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_SF"), 20, 25, 15));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_PF"), 15, 20, 30));
+        players.add(new InGamePlayer(factory.generatePlayer( prefix + "_C"), 10, 15, 30));
+
+        return players;
+    }
+
 
     @Test
     void simulateDrivesForMatchup_shouldProduceEventsAndPrint() {
-        long seed = 20241221L;
-        PlayerRandomFactory factory = new PlayerRandomFactory(seed);
-        GamePlan offense = makePlan(factory, "HOME", 1);
-        GamePlan defense = makePlan(factory, "AWAY", 100);
 
-        InGamePlayer attacker = offense.getActivePlayers().get(0);
-        InGamePlayer defender = defense.getActivePlayers().get(0);
+        List<InGamePlayer> offense = makePlan(playerFactory, "HOME", 1);
+        List<InGamePlayer> defense = makePlan(playerFactory, "AWAY", 100);
 
-        DriveSimulator sim = new DriveSimulator(new Random(seed));
+        InGamePlayer attacker = offense.getFirst();
+        Player defender = defense.getFirst().getPlayer();
+
+        DriveSimulator sim = new DriveSimulator(random);
         DriveResult res = sim.simulateDrivesForMatchup(
                 offense,
                 attacker,
@@ -62,11 +79,10 @@ class DriveSimulatorTest {
     @Test
     void simulateDriveEvents_shouldHonorAssist() {
         long seed = 424242L;
-        PlayerRandomFactory f = new PlayerRandomFactory(seed);
         List<InGamePlayer> players = new ArrayList<>();
-        players.add(new InGamePlayer(f.random(1, "A"), 30, 30, 10));
-        players.add(new InGamePlayer(f.random(2, "B"), 20, 20, 10));
-        players.add(new InGamePlayer(f.random(3, "C"), 20, 20, 10));
+        players.add(new InGamePlayer(playerFactory.generatePlayer( "A"), 30, 30, 10));
+        players.add(new InGamePlayer(playerFactory.generatePlayer( "B"), 20, 20, 10));
+        players.add(new InGamePlayer(playerFactory.generatePlayer( "C"), 20, 20, 10));
 
         InGamePlayer attacker = players.get(0);
         players.get(1).setAssistWeight(8.0);
@@ -91,10 +107,9 @@ class DriveSimulatorTest {
 
     @Test
     void computeAdvantageDrive_shouldReturnReasonableRange() {
-        DriveSimulator sim = new DriveSimulator(new Random(7));
-        PlayerRandomFactory f = new PlayerRandomFactory(7L);
-        Player off = f.random(1, "OFF");
-        Player def = f.random(2, "DEF");
+        DriveSimulator sim = new DriveSimulator(random);
+        Player off = playerFactory.generatePlayer( "OFF");
+        Player def = playerFactory.generatePlayer( "DEF");
         double adv = sim.computeAdvantageDrive(off, def);
         System.out.println("[DRIVE advantage]=" + adv);
         assertTrue(adv >= -100 && adv <= 100);
@@ -103,7 +118,7 @@ class DriveSimulatorTest {
     @Test
     void computeDriveSuccessPct_shouldReactToAdvantageAndAssist() {
         DriveSimulator sim = new DriveSimulator(new Random(8));
-        Player p = new PlayerRandomFactory(8L).random(1, "P");
+        Player p = playerFactory.generatePlayer( "P");
         double base = sim.computeDriveSuccessPct(p, 0.0, 0.0);
         double withAssist = sim.computeDriveSuccessPct(p, 0.0, 0.05);
         double withAdv = sim.computeDriveSuccessPct(p, 25.0, 0.0);
@@ -143,10 +158,9 @@ class DriveSimulatorTest {
         assertEquals(30, clampedI);
 
         // pickAssisterWeighted
-        PlayerRandomFactory f = new PlayerRandomFactory(seed);
-        InGamePlayer attacker = new InGamePlayer(f.random(1, "S"), 30, 30, 10);
-        InGamePlayer p1 = new InGamePlayer(f.random(2, "P1"), 20, 20, 10);
-        InGamePlayer p2 = new InGamePlayer(f.random(3, "P2"), 20, 20, 10);
+        InGamePlayer attacker = new InGamePlayer(playerFactory.generatePlayer( "S"), 30, 30, 10);
+        InGamePlayer p1 = new InGamePlayer(playerFactory.generatePlayer( "P1"), 20, 20, 10);
+        InGamePlayer p2 = new InGamePlayer(playerFactory.generatePlayer( "P2"), 20, 20, 10);
         p1.setAssistWeight(10.0);
         p2.setAssistWeight(1.0);
         List<InGamePlayer> passers = List.of(attacker, p1, p2);

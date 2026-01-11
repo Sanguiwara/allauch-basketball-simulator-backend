@@ -1,6 +1,6 @@
 package com.sanguiwara.mapper;
 
-import baserecords.Player;
+import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.entity.PlayerEntity;
 import org.mapstruct.Mapper;
 
@@ -10,4 +10,5 @@ public interface PlayerMapper {
     Player toDomain(PlayerEntity entity);
 
 
+    PlayerEntity toEntity(Player player);
 }

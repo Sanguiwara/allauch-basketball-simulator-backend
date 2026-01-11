@@ -2,99 +2,118 @@ package com.sanguiwara.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "players")
 public class PlayerEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
     @Column(nullable = false)
     private String name;
 
+    // Format: YYYYMMDD (ex: 19981225)
+    @Column(name = "birth_date", nullable = false)
+    private int birthDate;
+
     // Tirs / finition
     @Column(name = "tir_3_pts", nullable = false)
-    private Short tir3Pts;
+    private int tir3Pts;
 
     @Column(name = "tir_2_pts", nullable = false)
-    private Short tir2Pts;
+    private int tir2Pts;
 
     @Column(name = "lancer_franc", nullable = false)
-    private Short lancerFranc;
+    private int lancerFranc;
 
     @Column(name = "floater", nullable = false)
-    private Short floater;
+    private int floater;
 
     @Column(name = "finition_au_cercle", nullable = false)
-    private Short finitionAuCercle;
+    private int finitionAuCercle;
+
+    @Column(name = "speed", nullable = false)
+    private int speed;
+
+    @Column(name = "ballhandling", nullable = false)
+    private int ballhandling;
+
+    @Column(name = "size", nullable = false)
+    private int size;
+
+    @Column(name = "weight", nullable = false)
+    private int weight;
+
+    @Column(name = "agressivite", nullable = false)
+    private int agressivite;
 
     // Défense / rebond
     @Column(name = "def_exterieur", nullable = false)
-    private Short defExterieur;
+    private int defExterieur;
 
     @Column(name = "def_poste", nullable = false)
-    private Short defPoste;
+    private int defPoste;
 
     @Column(name = "protection_cercle", nullable = false)
-    private Short protectionCercle;
+    private int protectionCercle;
 
     @Column(name = "timing_rebond", nullable = false)
-    private Short timingRebond;
+    private int timingRebond;
 
     @Column(name = "agressivite_rebond", nullable = false)
-    private Short agressiviteRebond;
+    private int agressiviteRebond;
+
+    @Column(name = "steal", nullable = false)
+    private int steal;
 
     // Physique / mental / skills
     @Column(name = "physique", nullable = false)
-    private Short physique;
+    private int physique;
 
     @Column(name = "basketball_iq_off", nullable = false)
-    private Short basketballIqOff;
+    private int basketballIqOff;
 
     @Column(name = "basketball_iq_def", nullable = false)
-    private Short basketballIqDef;
+    private int basketballIqDef;
 
     @Column(name = "passing_skills", nullable = false)
-    private Short passingSkills;
+    private int passingSkills;
 
     @Column(name = "iq", nullable = false)
-    private Short iq;
+    private int iq;
 
     @Column(name = "endurance", nullable = false)
-    private Short endurance;
+    private int endurance;
 
     @Column(name = "solidite", nullable = false)
-    private Short solidite;
+    private int solidite;
 
     // Potentiel
     @Column(name = "potentiel_skill", nullable = false)
-    private Short potentielSkill;
+    private int potentielSkill;
 
     @Column(name = "potentiel_physique", nullable = false)
-    private Short potentielPhysique;
+    private int potentielPhysique;
 
     // Attitude / comportement
     @Column(name = "coachability", nullable = false)
-    private Short coachability;
+    private int coachability;
 
     @Column(name = "ego", nullable = false)
-    private Short ego;
+    private int ego;
 
     @Column(name = "soft_skills", nullable = false)
-    private Short softSkills;
+    private int softSkills;
 
     @Column(name = "leadership", nullable = false)
-    private Short leadership;
-
-    @Column(name = "birthYear", nullable = false)
-    private String birthYear;
-
+    private int leadership;
 }
