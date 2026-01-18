@@ -31,12 +31,11 @@ public class InGamePlayer {
     private final int usageDrive;
     private final int usagePost;
 
+    private boolean starter;
     // -------------------------
     // Match inputs accumulation
     // -------------------------
-    public void addPlaymakingContribution(double delta) {
-        this.playmakingContribution += delta;
-    }
+
 
 
 

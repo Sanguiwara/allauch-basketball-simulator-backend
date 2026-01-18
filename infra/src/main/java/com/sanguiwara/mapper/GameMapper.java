@@ -1,8 +1,8 @@
 package com.sanguiwara.mapper;
 
 
-import com.sanguiwara.entity.GameEntity;
 import com.sanguiwara.baserecords.Game;
+import com.sanguiwara.entity.GameEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
@@ -13,4 +13,6 @@ public interface GameMapper {
 
 
     GameEntity toEntity(Game player);
+
+
 }

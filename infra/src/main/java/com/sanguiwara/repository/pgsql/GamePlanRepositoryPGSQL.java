@@ -2,6 +2,7 @@ package com.sanguiwara.repository.pgsql;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.mapper.GamePlanMapper;
+import com.sanguiwara.mapper.InGamePlayerMapper;
 import com.sanguiwara.repository.GamePlanRepository;
 import com.sanguiwara.repository.jpa.GamePlanJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
     private final GamePlanJpaRepository gamePlanJpaRepository;
     private final GamePlanMapper gamePlanMapper;
+    private final InGamePlayerMapper inGamePlayerMapper;
 
 
     @Override
@@ -25,9 +27,25 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
     @Override
     public GamePlan save(GamePlan gamePlan) {
-        var gamePlanEntity = gamePlanMapper.toEntity(gamePlan);
-        var savedEntity = gamePlanJpaRepository.save(gamePlanEntity);
-        return gamePlanMapper.toDomain(savedEntity);
+        var gamePlanEntity = gamePlanJpaRepository.findById(gamePlan.getId())
+                .orElseThrow();
+
+        // 1) update des champs simples via mapstruct
+        gamePlanMapper.updateEntity(gamePlanEntity, gamePlan);
+
+        // 2) replace activePlayers "à la main"
+        gamePlanEntity.getActivePlayers().clear();
+
+        if (gamePlan.getActivePlayers() != null) {
+            for (var activePlayer : gamePlan.getActivePlayers()) {
+                var activePlayerEntity = inGamePlayerMapper.toEntity(activePlayer); // ton mapper existant
+                activePlayerEntity.setGamePlan(gamePlanEntity);                         // backref FK
+                gamePlanEntity.getActivePlayers().add(activePlayerEntity);
+            }
+        }
+
+        var saved = gamePlanJpaRepository.save(gamePlanEntity);
+        return gamePlanMapper.toDomain(saved);
     }
 
     @Override

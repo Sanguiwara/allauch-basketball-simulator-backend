@@ -15,15 +15,15 @@ import java.util.UUID;
 public class InGamePlayerEntity {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.UUID) // Hibernate 6 / Spring Boot 3
     private UUID id;
 
     // InGamePlayerEntity
-    @ManyToOne
-    @JoinColumn(name="gameplan_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "gameplan_id", nullable = false)
     private GamePlanEntity gamePlan;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
@@ -68,4 +68,7 @@ public class InGamePlayerEntity {
 
     @Column(name = "two_pm", nullable = false)
     private int twoPm;
+
+    @Column(name = "is_starter", nullable = false)
+    private boolean starter;
 }

@@ -46,7 +46,7 @@ Content-Type: application/json
 }
 
 ### Récupérer un joueur par son ID
-GET http://localhost:8080/players/1
+GET http://localhost:8080/players/1f5f56d4-116e-4865-ae21-e243377b2a19
 Accept: application/json
 
 ### Supprimer un joueur par son ID
