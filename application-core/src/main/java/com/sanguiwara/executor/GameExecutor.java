@@ -1,9 +1,9 @@
 package com.sanguiwara.executor;
 
-import com.sanguiwara.gameevent.BoxScore;
+import com.sanguiwara.result.BoxScore;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.repository.GameRepository;
-import com.sanguiwara.service.GameCalculator;
+import com.sanguiwara.calculator.GameCalculator;
 import lombok.RequiredArgsConstructor;import org.springframework.stereotype.Service;
 
 import java.util.Optional;

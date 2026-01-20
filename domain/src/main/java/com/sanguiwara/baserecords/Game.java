@@ -1,6 +1,6 @@
 package com.sanguiwara.baserecords;
 
-import com.sanguiwara.gameevent.BoxScore;
+import com.sanguiwara.result.BoxScore;
 import lombok.Getter;
 import lombok.Setter;
 

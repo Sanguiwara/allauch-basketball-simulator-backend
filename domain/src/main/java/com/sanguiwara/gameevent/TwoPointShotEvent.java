@@ -2,12 +2,13 @@ package com.sanguiwara.gameevent;
 
 import java.util.UUID;
 
-public record TwoPointShotEvent(
+public record TwoPointShotEvent  (
         UUID shooterId,
-        int shotNumber,
+        int index,
         boolean assisted,
         UUID assisterId,
-        double shotPct,
+        double successPct,
         boolean made,
-        double advantage2pt
-) {}
+        double advantageMatchup
+)  implements ShotEvent
+{}

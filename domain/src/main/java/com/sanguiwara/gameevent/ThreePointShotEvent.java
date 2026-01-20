@@ -4,9 +4,12 @@ import java.util.UUID;
 
 public record ThreePointShotEvent(
         UUID shooterId,
-        int shotIndex,
+        int index,
         boolean assisted,
-        UUID assisterPlayerId,  // -1 si pas assisté
-        double shotPct,
-        boolean made
-) {}
+        UUID assisterId,
+        double successPct,
+        boolean made,
+        double advantageMatchup
+
+) implements ShotEvent {
+}

@@ -1,15 +1,15 @@
-package com.sanguiwara.service;
+package com.sanguiwara.calculator;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.gameevent.BoxScore;
+import com.sanguiwara.result.BoxScore;
+import com.sanguiwara.gameevent.DriveEvent;
+import com.sanguiwara.gameevent.ThreePointShotEvent;
+import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.service.simulator.DriveSimulator;
-import com.sanguiwara.service.simulator.ThreePointSimulator;
-import com.sanguiwara.service.simulator.TwoPointSimulator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,24 +17,25 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GameCalculator {
 
-    private final TwoPointSimulator twoPointSimulator;
-    private final DriveSimulator driveSimulator;
+
+    private final ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator;
+    private final ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator;
+    private final ShotSimulator<DriveEvent, DriveResult> driveSimulator;
 
 
 
     public BoxScore calculate(GamePlan home, GamePlan visitor) {
-
-
         double totalPlayMakingContribution = getTotalPlaymakingContribution(home, visitor);
-        double assistedShotPercentage = getAssistedShotPercentage(totalPlayMakingContribution);
+        double assistProbability = getAssistedShotPercentage(totalPlayMakingContribution);
         ThreePointShootingResult threePointShootingResult =
-                ThreePointSimulator.getTotal3ptsContribution(home, visitor, assistedShotPercentage );
-        TwoPointShootingResult twoPointShootingResult = twoPointSimulator.get2ptsTotalContribution(home, visitor,assistedShotPercentage);
-        DriveResult driveResult = driveSimulator.getDriveTotalContribution(home.getActivePlayers(), visitor, assistedShotPercentage);
+                threePointSimulator.getTotalShotContribution(home, visitor, assistProbability);
+        TwoPointShootingResult twoPointShootingResult =
+                twoPointSimulator.getTotalShotContribution(home, visitor, assistProbability);
 
-        return new BoxScore(threePointShootingResult,driveResult,twoPointShootingResult);
+        DriveResult driveResult =
+                driveSimulator.getTotalShotContribution(home, visitor, assistProbability);
 
-
+        return new BoxScore(threePointShootingResult, driveResult, twoPointShootingResult);
 
 
     }
@@ -59,16 +60,9 @@ public class GameCalculator {
         double finalDuelAdvantage = totalPlayMakingContribution;
         home.getActivePlayers().forEach(activePlayer -> activePlayer.setAssistWeight(finalDuelAdvantage / activePlayer.getPlaymakingContribution()));
 
-        //duelAdvantage = duelAdvantage + home.calculateOffsenseTeamAdvantage() - visitor.calculateDefenseTeamAdvantage();
         totalPlayMakingContribution = clamp(totalPlayMakingContribution, -50, 100);
-        //log.info(String.valueOf(duelAdvantage));
         return totalPlayMakingContribution;
     }
-
-
-
-
-
 
 
     public double getIndividualPlayMakingContribution(InGamePlayer inGameOff, Player def) {
@@ -95,9 +89,7 @@ public class GameCalculator {
                         + 0.10 * def.steal();
 
 
-        double adv = offScore - defScore; // ~[-100;+100]
-        //log.info(offScore + " - " + defScore + " = " + adv);
-
+        double adv = offScore - defScore;
         double advantage = clamp(adv, -5, 20);
         inGameOff.setPlaymakingContribution(advantage);
         return advantage;

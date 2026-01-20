@@ -9,7 +9,8 @@ public record DriveResult(
         int made,
         int foulsDrawn,
         List<DriveEvent> events
-) {
+) implements ShotResult<DriveEvent>
+{
     public double fgPct() {
         return attempts == 0 ? 0.0 : (made * 1.0 / attempts);
     }

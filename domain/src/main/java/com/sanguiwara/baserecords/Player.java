@@ -1,6 +1,7 @@
 package com.sanguiwara.baserecords;
 
 
+import java.util.Objects;
 import java.util.UUID;
 
 public record Player(
@@ -53,6 +54,11 @@ public record Player(
 ) {
 
 
-
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Player other)) return false;
+        return Objects.equals(id, other.id);
+    }
+    @Override public int hashCode() { return Objects.hash(id); }
 
 }
