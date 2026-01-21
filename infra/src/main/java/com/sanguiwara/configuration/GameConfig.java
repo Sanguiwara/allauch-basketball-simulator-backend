@@ -1,11 +1,20 @@
 package com.sanguiwara.configuration;
 
+import com.sanguiwara.calculator.PlaymakingCalculator;
+import com.sanguiwara.calculator.ShotSimulator;
+import com.sanguiwara.calculator.spec.DriveSpecification;
+import com.sanguiwara.calculator.spec.ThreePointSpecification;
+import com.sanguiwara.calculator.spec.TwoPointSpecification;
 import com.sanguiwara.factory.GamePlanFactory;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.factory.TeamFactory;
-import com.sanguiwara.service.GameCalculator;
-import com.sanguiwara.service.simulator.DriveSimulator;
-import com.sanguiwara.service.simulator.TwoPointSimulator;
+import com.sanguiwara.gameevent.DriveEvent;
+import com.sanguiwara.gameevent.ThreePointShotEvent;
+import com.sanguiwara.gameevent.TwoPointShotEvent;
+import com.sanguiwara.result.DriveResult;
+import com.sanguiwara.result.ThreePointShootingResult;
+import com.sanguiwara.result.TwoPointShootingResult;
+import com.sanguiwara.calculator.ScoringCalculator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,21 +38,52 @@ public class GameConfig {
     @Bean
     public GamePlanFactory gamePlanFactory() { return new GamePlanFactory();}
 
-
-
     @Bean
-    public TwoPointSimulator twoPointSimulator(Random random){
-        return new TwoPointSimulator(random);
+    public ThreePointSpecification threePointSpecification(Random random) {
+        return new ThreePointSpecification(random);
     }
 
     @Bean
-    public DriveSimulator driveSimulator(Random random){
-        return new DriveSimulator(random);
+    public TwoPointSpecification twoPointSpecification(Random random) {
+        return new TwoPointSpecification(random);
     }
 
     @Bean
-    public GameCalculator gameCalculator(TwoPointSimulator twoPointSimulator,
-                                         DriveSimulator driveSimulator) {
-        return new GameCalculator(twoPointSimulator, driveSimulator);
+    public DriveSpecification driveSpecification(Random random) {
+        return new DriveSpecification(random);
     }
+
+    @Bean
+    public PlaymakingCalculator playmakingCalculator() { return new PlaymakingCalculator();}
+
+    @Bean
+    public ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator(
+            Random random,
+            ThreePointSpecification spec) {
+        return new ShotSimulator<>( random, spec);
+    }
+
+    @Bean
+    public ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator(
+            Random random,
+            TwoPointSpecification spec) {
+        return new ShotSimulator<>( random, spec);
+    }
+
+    @Bean
+    public ShotSimulator<DriveEvent, DriveResult> driveSimulator(
+            Random random,
+            DriveSpecification spec) {
+        return new ShotSimulator<>(random,  spec);
+    }
+
+    @Bean
+    public ScoringCalculator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
+                                            ShotSimulator<DriveEvent, DriveResult> driveSimulator,
+                                            ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
+                                            PlaymakingCalculator playmakingCalculator) {
+        return new ScoringCalculator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator);
+    }
+
+
 }

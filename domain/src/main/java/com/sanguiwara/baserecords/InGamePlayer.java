@@ -12,8 +12,8 @@ public class InGamePlayer {
     private final Player player;
 
     // --- Inputs calculés pour ce match ---
-    private double playmakingContribution;  // somme des adv vs matchups
-    private double assistWeight;            // calculé après contributions
+    private double playmakingContribution;
+    private double assistWeight;
 
     // --- Outputs (boxscore) ---
     private int assists;
@@ -30,6 +30,8 @@ public class InGamePlayer {
     private final int usageShoot;
     private final int usageDrive;
     private final int usagePost;
+
+
 
     private boolean starter;
     // -------------------------
