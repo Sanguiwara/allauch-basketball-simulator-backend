@@ -1,6 +1,6 @@
 package service;
 
-import com.sanguiwara.calculator.GameCalculator;
+import com.sanguiwara.calculator.ScoringCalculator;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -13,7 +13,7 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.calculator.AssistManager;
+import com.sanguiwara.calculator.PlaymakingCalculator;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-class GameCalculatorTest {
+class ScoringCalculatorTest {
 
     private static final long SEED = 123456789L;
     private static Random random;
@@ -41,16 +41,16 @@ class GameCalculatorTest {
 
     private record GamePlans(GamePlan home, GamePlan away) {}
 
-    private static  GameCalculator getGameCalculator() {
-        AssistManager assistManager = new AssistManager(random);
+    private static ScoringCalculator getGameCalculator() {
+        PlaymakingCalculator playmakingCalculator = new PlaymakingCalculator();
         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
-                new ShotSimulator<>(assistManager, random, new ThreePointSpecification(random));
+                new ShotSimulator<>( random, new ThreePointSpecification(random));
         ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator =
-                new ShotSimulator<>(assistManager, random, new TwoPointSpecification(random));
+                new ShotSimulator<>( random, new TwoPointSpecification(random));
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
-                new ShotSimulator<>(assistManager, random, new DriveSpecification(random));
+                new ShotSimulator<>( random, new DriveSpecification(random));
 
-        return new GameCalculator(threePointSimulator, twoPointSimulator, driveSimulator);
+        return new ScoringCalculator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator);
     }
 
     private static GamePlans makePlans(PlayerFactory factory) {
@@ -93,42 +93,21 @@ class GameCalculatorTest {
         return pos;
     }
 
-    @Test
-    void playmakingAdvantageTest() {
 
-        GameCalculator calc = getGameCalculator();
-
-        int samples = 10000;
-
-        double mean = 0;
-        long runSeed = System.currentTimeMillis(); // seed différente à chaque relance mais présente pour qu'on puisse la rejouer au cas ou
-
-
-        for (int i = 1; i <= samples; i++) {
-            //possibilité d'ajouter une seed
-            GamePlans plans = makePlans(playerFactory);
-            double base = calc.getTotalPlaymakingContribution(plans.home(), plans.away());
-            mean += base;
-        }
-        log.info(String.valueOf(runSeed));
-        log.info(String.valueOf(mean / samples));
-        assertTrue(true);
-    }
 
 
 
     @Test
-    void calculate_shouldPrintDetailedThreePointTimeline_singleMatch() {
+    void calculate_ScoreForTeam_shouldPrintDetailedThreePointTimeline_singleMatch() {
 
-        GameCalculator calc = getGameCalculator();
+        ScoringCalculator calc = getGameCalculator();
 
         GamePlans plans = makePlans(playerFactory);
         GamePlan home = plans.home();
         GamePlan away = plans.away();
 
 
-        double pm = calc.getTotalPlaymakingContribution(home, away);
-        BoxScore res = calc.calculate(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away);
         ThreePointShootingResult threePointShotRes = res.threePointShootingResult();
 
         assertNotNull(res);
@@ -146,7 +125,6 @@ class GameCalculatorTest {
         System.out.println("MATCH REPORT (3PTS)");
         System.out.println("=======================================");
         System.out.println("seed = " + SEED);
-        System.out.printf ("playmakingContribution(team) = %.3f%n", pm);
         System.out.println("3PA = " + attempts);
         System.out.println("3PM = " + made);
         System.out.printf ("3P%% = %.1f%%%n", pct);
@@ -174,17 +152,16 @@ class GameCalculatorTest {
     }
 
     @Test
-    void calculate_shouldPrintDetailedTwoPointTimeline_singleMatch() {
+    void calculate_ScoreForTeam_shouldPrintDetailedTwoPointTimeline_singleMatch() {
 
-        GameCalculator calc = getGameCalculator();
+        ScoringCalculator calc = getGameCalculator();
         GamePlans plans = makePlans(playerFactory);
 
         GamePlan home = plans.home();
         GamePlan away = plans.away();
 
 
-        double pm = calc.getTotalPlaymakingContribution(home, away);
-        BoxScore res = calc.calculate(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away);
         TwoPointShootingResult twoPointShotRes = res.twoPointShootingResult();
 
         assertNotNull(res);
@@ -202,7 +179,6 @@ class GameCalculatorTest {
         System.out.println("MATCH REPORT (2PTS)");
         System.out.println("=======================================");
         System.out.println("seed = " + SEED);
-        System.out.printf ("playmakingContribution(team) = %.3f%n", pm);
         System.out.println("2PA = " + attempts);
         System.out.println("2PM = " + made);
         System.out.printf ("2P%% = %.1f%%%n", pct);
@@ -222,8 +198,8 @@ class GameCalculatorTest {
     }
 
     @Test
-    void calculate_shouldPrintDetailedDriveTimeline_singleMatch() {
-        GameCalculator calc = getGameCalculator();
+    void calculate_ScoreForTeam_shouldPrintDetailedDriveTimeline_singleMatch() {
+        ScoringCalculator calc = getGameCalculator();
         GamePlans plans = makePlans(playerFactory);
 
         GamePlan home = plans.home();
@@ -231,8 +207,7 @@ class GameCalculatorTest {
 
 
 
-        double pm = calc.getTotalPlaymakingContribution(home, away);
-        BoxScore res = calc.calculate(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away);
         DriveResult driveRes = res.driveResult();
 
         assertNotNull(res);
@@ -251,7 +226,6 @@ class GameCalculatorTest {
         System.out.println("MATCH REPORT (DRIVES)");
         System.out.println("=======================================");
         System.out.println("seed = " + SEED);
-        System.out.printf ("playmakingContribution(team) = %.3f%n", pm);
         System.out.println("Drive Attempts = " + attempts);
         System.out.println("Drive Makes    = " + made);
         System.out.println("Fouls Drawn    = " + fouls);
@@ -273,15 +247,15 @@ class GameCalculatorTest {
 
 
     @Test
-    void calculate_shouldPrintFullMatchBoxScore_WithPlayerAdvantages() {
-        GameCalculator calc = getGameCalculator();
+    void calculate_ScoreForTeam_shouldPrintFullMatchBoxScore_WithPlayerAdvantages() {
+        ScoringCalculator calc = getGameCalculator();
 
 
         GamePlans plans = makePlans(playerFactory);
 
         // Calcul des deux phases du match
-        BoxScore homeStats = calc.calculate(plans.home(), plans.away());
-        BoxScore awayStats = calc.calculate(plans.away(), plans.home());
+        BoxScore homeStats = calc.calculateScoreForTeam(plans.home(), plans.away());
+        BoxScore awayStats = calc.calculateScoreForTeam(plans.away(), plans.home());
 
         System.out.println("============================================================");
         System.out.println("                 MATCH ANALYSIS & BOXSCORE                  ");
@@ -295,8 +269,8 @@ class GameCalculatorTest {
         printPlayerAdvantages("AWAY TEAM", plans.away());
         printTeamBoxScore("AWAY STATS", awayStats);
 
-        int homeTotal = calculateTotalPoints(homeStats);
-        int awayTotal = calculateTotalPoints(awayStats);
+        int homeTotal = calculateScoreForTeamTotalPoints(homeStats);
+        int awayTotal = calculateScoreForTeamTotalPoints(awayStats);
 
         System.out.println("============================================================");
         System.out.printf("   FINAL SCORE: HOME %d - %d AWAY   %n", homeTotal, awayTotal);
@@ -308,10 +282,8 @@ class GameCalculatorTest {
         System.out.printf("%-10s | %-12s | %-12s | %-12s%n", "Pos", "Drive Adv", "2pt Adv", "3pt Adv");
         System.out.println("------------------------------------------------------------");
 
-        plan.getActivePlayers().forEach(( player) -> {
-            System.out.printf("%-10s ",
-                    player.getPlaymakingContribution());
-        });
+        plan.getActivePlayers().forEach(( player) -> System.out.printf("%-10s ",
+                player.getPlaymakingContribution()));
         System.out.println();
     }
 
@@ -333,7 +305,7 @@ class GameCalculatorTest {
                 tps.made(), tps.attempts(), tpsPct, tps.events().stream().filter(ThreePointShotEvent::assisted).count());
     }
 
-    private int calculateTotalPoints(BoxScore stats) {
+    private int calculateScoreForTeamTotalPoints(BoxScore stats) {
         return (stats.driveResult().made() * 2)
                 + (stats.twoPointShootingResult().made() * 2)
                 + (stats.threePointShootingResult().made() * 3);

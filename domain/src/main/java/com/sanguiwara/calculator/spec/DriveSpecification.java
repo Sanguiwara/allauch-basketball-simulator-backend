@@ -14,8 +14,6 @@ import java.util.UUID;
 public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     private static final int MIN_ATTEMPTS = 0;
     private static final int MAX_ATTEMPTS = 20;
-    private static final double MIN_ADVANTAGE = -50;
-    private static final double MAX_ADVANTAGE = 50;
     private static final double ASSIST_BONUS_PCT = 0.15;
 
     // Success Pct Constants
@@ -106,11 +104,13 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
                         + DEF_POSTE_WEIGHT * defender.defPoste();
 
         return offScore - defScore;
+        //TODO Clamp?
     }
 
     @Override
-    public DriveEvent create(UUID playerId, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
-        return new DriveEvent(playerId, shotNumber, assisted, assisterId, pct, made, advantage);
+    public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+        inGamePlayer.recordTwoPointShot(made);
+        return new DriveEvent(inGamePlayer.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
     }
 
     @Override

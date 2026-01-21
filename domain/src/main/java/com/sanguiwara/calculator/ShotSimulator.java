@@ -16,7 +16,6 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
 
-    private final AssistManager assistManager;
     private final Random random;
     private final ShotSpec<E,R> spec;
 
@@ -35,7 +34,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
 
         for (int i = 0; i < attempts; i++) {
 
-            InGamePlayer assister = assistManager.getAssister(shooter, potentialPassers, assistedShotProbability);
+            InGamePlayer assister = getAssister(shooter, potentialPassers, assistedShotProbability);
             boolean isAssistedShot = assister != null;
 
 
@@ -55,7 +54,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
             }
 
             events.add(spec.create(
-                    shooter.getPlayer().id(),
+                    shooter,
                     i + 1,
                     isAssistedShot,
                     isAssistedShot ? assister.getPlayer().id() : null,
@@ -96,6 +95,32 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
                     }
                 })
                 .reduce(spec.empty(), spec::combine);
+    }
+
+
+    public InGamePlayer getAssister(InGamePlayer shooter, List<InGamePlayer> potentialPassers, double assistedShotPercentage) {
+        boolean assisted = random.nextDouble() < assistedShotPercentage;
+        InGamePlayer assister = null;
+        if (assisted) {
+            InGamePlayer result = null;
+            double total = 0.0;
+            for (InGamePlayer p : potentialPassers) {
+                if (p == shooter) continue;
+                total += Math.max(0.0, p.getAssistWeight());
+            }
+
+            double r = random.nextDouble() * total;
+            for (InGamePlayer p : potentialPassers) {
+                if ( p == shooter) continue;
+                r -= Math.max(0.0, p.getAssistWeight());
+                if (r <= 0.0) {
+                    result = p;
+                    break;
+                }
+            }
+            assister = result;
+        }
+        return assister;
     }
 
 

@@ -1,6 +1,6 @@
 package com.sanguiwara.configuration;
 
-import com.sanguiwara.calculator.AssistManager;
+import com.sanguiwara.calculator.PlaymakingCalculator;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
@@ -14,7 +14,7 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.calculator.GameCalculator;
+import com.sanguiwara.calculator.ScoringCalculator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,37 +54,35 @@ public class GameConfig {
     }
 
     @Bean
-    public AssistManager assistManager(Random random) { return new AssistManager(random);}
+    public PlaymakingCalculator playmakingCalculator() { return new PlaymakingCalculator();}
 
     @Bean
     public ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator(
-            AssistManager assistManager,
             Random random,
             ThreePointSpecification spec) {
-        return new ShotSimulator<>(assistManager, random, spec);
+        return new ShotSimulator<>( random, spec);
     }
 
     @Bean
     public ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator(
-            AssistManager assistManager,
             Random random,
             TwoPointSpecification spec) {
-        return new ShotSimulator<>(assistManager, random, spec);
+        return new ShotSimulator<>( random, spec);
     }
 
     @Bean
     public ShotSimulator<DriveEvent, DriveResult> driveSimulator(
-            AssistManager assistManager,
             Random random,
             DriveSpecification spec) {
-        return new ShotSimulator<>(assistManager, random,  spec);
+        return new ShotSimulator<>(random,  spec);
     }
 
     @Bean
-    public GameCalculator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
-                                         ShotSimulator<DriveEvent, DriveResult> driveSimulator,
-                                         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator) {
-        return new GameCalculator(threePointSimulator, twoPointSimulator, driveSimulator);
+    public ScoringCalculator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
+                                            ShotSimulator<DriveEvent, DriveResult> driveSimulator,
+                                            ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
+                                            PlaymakingCalculator playmakingCalculator) {
+        return new ScoringCalculator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator);
     }
 
 

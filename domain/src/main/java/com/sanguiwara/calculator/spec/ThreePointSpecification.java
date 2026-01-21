@@ -93,8 +93,9 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     }
 
     @Override
-    public ThreePointShotEvent create(UUID playerId, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
-        return new ThreePointShotEvent(playerId, shotNumber, assisted, assisterId, pct, made, advantage);
+    public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+        shooter.recordThreePointShot(made);
+        return new ThreePointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
     }
 
 

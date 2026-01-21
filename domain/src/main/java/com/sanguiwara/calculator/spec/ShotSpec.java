@@ -14,7 +14,7 @@ public interface ShotSpec<E extends ShotEvent, R extends ShotResult<E>> {
     double evaluateMatchupAdvantage(Player attacker, Player defender );
 
 
-    E create(java.util.UUID playerId, int shotNumber, boolean assisted, java.util.UUID assisterId, double pct, boolean made, double advantage);
+    E create(InGamePlayer shooter, int shotNumber, boolean assisted, java.util.UUID assisterId, double pct, boolean made, double advantage);
 
 
     R createResult(int attempts, int made, List<E> events);

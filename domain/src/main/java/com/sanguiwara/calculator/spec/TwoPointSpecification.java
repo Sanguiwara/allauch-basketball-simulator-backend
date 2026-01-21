@@ -101,11 +101,13 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
                         + DEF_STEAL_COEFF * defender.steal()
                         + DEF_INTERIOR_POST_COEFF * defender.defPoste();
         return offScore - defScore;
+        //TODO Ajouter un clamp?
     }
 
     @Override
-    public TwoPointShotEvent create(UUID playerId, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
-        return new TwoPointShotEvent(playerId, shotNumber, assisted, assisterId, pct, made, advantage);
+    public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+        shooter.recordTwoPointShot(made);
+        return new TwoPointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
     }
 
     @Override
