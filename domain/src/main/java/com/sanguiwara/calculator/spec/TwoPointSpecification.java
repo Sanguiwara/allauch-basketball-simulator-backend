@@ -14,8 +14,6 @@ import java.util.UUID;
 public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPointShootingResult> {
     private static final int MIN_ATTEMPTS = 0;
     private static final int MAX_ATTEMPTS = 20;
-    private static final double MIN_ADVANTAGE = -50;
-    private static final double MAX_ADVANTAGE = 50;
     private static final double ASSIST_BONUS_PCT = 0.15;
 
     // Constants for Shot Percentage Calculation
