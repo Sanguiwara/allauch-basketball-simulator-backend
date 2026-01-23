@@ -24,5 +24,44 @@ public class GamePlan {
 
     private  Map<Player, Player> matchups;
     private  Map<Position, InGamePlayer> positions;
+    private int totalShotNumber;
+
+    private double threePointAttemptShare; //[0;1]
+    private double midRangeAttemptShare;
+    private double driveAttemptShare;
+
+
+    public void setThreePointAttemptShare(double share) {
+        if (share < 0.0 || share > 1.0) {
+            throw new IllegalArgumentException(
+                    "threePointAttemptShare must be in [0.0, 1.0], got=" + share
+            );
+        }
+        this.threePointAttemptShare = share;
+    }
+    public void setMidRangeAttemptShare(double share) {
+        if (share < 0.0 || share > 1.0) {
+            throw new IllegalArgumentException(
+                    "midRangeAttemptShare must be in [0.0, 1.0], got=" + share
+            );
+        }
+        this.midRangeAttemptShare = share;
+    }
+    public void setDriveAttemptShare(double share) {
+        if (share < 0.0 || share > 1.0) {
+            throw new IllegalArgumentException("driveAttemptShare must be in [0.0, 1.0], got=" + share);
+        }
+        this.driveAttemptShare = share;
+    }
+
+    public int getThreePointAttempts() {
+        return Math.toIntExact(Math.round(totalShotNumber * threePointAttemptShare));
+    }
+    public int getMidRangeAttempts() {
+        return Math.toIntExact(Math.round(totalShotNumber * midRangeAttemptShare));
+    }
+    public int getDriveAttempts() {
+        return Math.toIntExact(Math.round(totalShotNumber * driveAttemptShare));
+    }
 
 }

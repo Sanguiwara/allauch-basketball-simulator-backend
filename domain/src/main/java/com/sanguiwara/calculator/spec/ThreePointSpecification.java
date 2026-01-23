@@ -1,5 +1,6 @@
 package com.sanguiwara.calculator.spec;
 
+import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
@@ -25,14 +26,6 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     private static final double NORMALIZED_USAGE_COEFFICIENT = 0.70;
     private static final double NORMALIZED_AGGRESSIVENESS_COEFFICIENT = 0.30;
 
-    private static final double EXPECTED_ATTEMPTS_BASE = 1.8;
-    private static final double EXPECTED_ATTEMPTS_MULTIPLIER = 12.5;
-
-    private static final double STD_DEV_BASE = 1.2;
-    private static final double STD_DEV_MULTIPLIER = 0.8;
-
-    private static final int MIN_ATTEMPTS = 0;
-    private static final int MAX_ATTEMPTS = 20;
 
     private static final double SCORE_SPEED_WEIGHT_OFF = 0.05;
     private static final double SCORE_SIZE_WEIGHT_OFF = 0.05;
@@ -53,17 +46,28 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
 
 
     @Override
-    public int sampleAttempts(InGamePlayer shooter) {
-        double usage01 = (shooter.getUsageShoot() - USAGE_MIN_THRESHOLD) / USAGE_NORMALIZATION_DIVISOR;
-        double aggr01 = shooter.getPlayer().agressivite() / AGGRESSIVENESS_NORMALIZATION_DIVISOR;
+    public void distributeShotAttempts(GamePlan team) {
+        double totalWeight = 0.0;
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double usage01 = (inGamePlayer.getUsageShoot() - USAGE_MIN_THRESHOLD) / USAGE_NORMALIZATION_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_NORMALIZATION_DIVISOR;
+            double intensity = NORMALIZED_USAGE_COEFFICIENT * usage01 + NORMALIZED_AGGRESSIVENESS_COEFFICIENT * aggr01;
+            totalWeight += intensity;
+            inGamePlayer.setThreePointContribution(intensity);
+        }
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double threePointWeight = inGamePlayer.getThreePointContribution() / totalWeight;
+            inGamePlayer.setThreePointWeight(
+                    threePointWeight);
+        }
 
-        double intensity = NORMALIZED_USAGE_COEFFICIENT * usage01 + NORMALIZED_AGGRESSIVENESS_COEFFICIENT * aggr01;
-        double expected = EXPECTED_ATTEMPTS_BASE + EXPECTED_ATTEMPTS_MULTIPLIER * intensity;
-        double std = STD_DEV_BASE + STD_DEV_MULTIPLIER * intensity;
+        for (int i = 0; i < team.getThreePointAttempts(); i++) {
+            InGamePlayer shooter = pickShooter(team.getActivePlayers());
+            shooter.addThreePointShot();
+        }
 
-        int sampled = (int) Math.round(expected + random.nextGaussian() * std);
-        return Math.max(MIN_ATTEMPTS, Math.min(MAX_ATTEMPTS, sampled));
     }
+
 
     @Override
     public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) {
@@ -93,6 +97,11 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     }
 
     @Override
+    public int getAttempts(InGamePlayer shooter) {
+        return shooter.getThreePointAttempt();
+    }
+
+    @Override
     public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
         shooter.recordThreePointShot(made);
         return new ThreePointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
@@ -112,5 +121,24 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public ThreePointShootingResult combine(ThreePointShootingResult a, ThreePointShootingResult b) {
         return ThreePointShootingResult.combine(a, b);
+    }
+
+    public InGamePlayer pickShooter(List<InGamePlayer> potentialShooters) {
+        double total = 0.0;
+        for (InGamePlayer p : potentialShooters) {
+            total += p.getThreePointWeight();
+        }
+        InGamePlayer playerToReturn = null;
+
+        double r = random.nextDouble() * total;
+        for (InGamePlayer p : potentialShooters) {
+            r -= p.getThreePointWeight();
+            if (r <= 0.0) {
+                playerToReturn = p;
+                return playerToReturn;
+            }
+        }
+        return playerToReturn;
+
     }
 }

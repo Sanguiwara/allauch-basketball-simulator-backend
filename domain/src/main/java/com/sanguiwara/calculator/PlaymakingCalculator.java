@@ -63,7 +63,11 @@ public class PlaymakingCalculator {
                 .sum();
 
         double finalTotalPlayMakingContribution = totalPlayMakingContribution;
-        home.getActivePlayers().forEach(activePlayer -> activePlayer.setAssistWeight(activePlayer.getPlaymakingContribution() / finalTotalPlayMakingContribution));
+        home.getActivePlayers().forEach(activePlayer -> {
+
+            double assistWeight = Math.clamp(activePlayer.getPlaymakingContribution() / finalTotalPlayMakingContribution, 0.0, 1.0);
+            activePlayer.setAssistWeight(assistWeight);
+        });
 
         totalPlayMakingContribution = clamp(totalPlayMakingContribution, MIN_TOTAL_PLAYMAKING, MAX_TOTAL_PLAYMAKING);
         return getAssistedShotPercentage(totalPlayMakingContribution);

@@ -1,6 +1,7 @@
 package service;
 
-import com.sanguiwara.calculator.ScoringCalculator;
+import com.sanguiwara.calculator.GameSimulator;
+import com.sanguiwara.calculator.ReboundCalculator;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -27,7 +28,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-class ScoringCalculatorTest {
+class GameSimulatorTest {
 
     private static final long SEED = 123456789L;
     private static Random random;
@@ -41,7 +42,7 @@ class ScoringCalculatorTest {
 
     private record GamePlans(GamePlan home, GamePlan away) {}
 
-    private static ScoringCalculator getGameCalculator() {
+    private static GameSimulator getGameCalculator() {
         PlaymakingCalculator playmakingCalculator = new PlaymakingCalculator();
         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
                 new ShotSimulator<>( random, new ThreePointSpecification(random));
@@ -49,8 +50,9 @@ class ScoringCalculatorTest {
                 new ShotSimulator<>( random, new TwoPointSpecification(random));
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
                 new ShotSimulator<>( random, new DriveSpecification(random));
+        ReboundCalculator reboundCalculator = new ReboundCalculator(random);
 
-        return new ScoringCalculator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator);
     }
 
     private static GamePlans makePlans(PlayerFactory factory) {
@@ -79,6 +81,19 @@ class ScoringCalculatorTest {
 
         homePlan.setMatchups(homeMatchups);
         awayPlan.setMatchups(awayMatchups);
+
+        homePlan.setTotalShotNumber(70);
+        awayPlan.setTotalShotNumber(70);
+
+        homePlan.setDriveAttemptShare(0.33);
+        awayPlan.setDriveAttemptShare(0.33);
+
+        homePlan.setMidRangeAttemptShare(0.33);
+        awayPlan.setMidRangeAttemptShare(0.33);
+
+        homePlan.setThreePointAttemptShare(0.33);
+        awayPlan.setThreePointAttemptShare(0.33);
+
 //TODO A changer pour utiliser la GamePlanFactory, pour les matchups, a voir
         return new GamePlans(homePlan, awayPlan);
     }
@@ -100,7 +115,7 @@ class ScoringCalculatorTest {
     @Test
     void calculate_ScoreForTeam_shouldPrintDetailedThreePointTimeline_singleMatch() {
 
-        ScoringCalculator calc = getGameCalculator();
+        GameSimulator calc = getGameCalculator();
 
         GamePlans plans = makePlans(playerFactory);
         GamePlan home = plans.home();
@@ -154,7 +169,7 @@ class ScoringCalculatorTest {
     @Test
     void calculate_ScoreForTeam_shouldPrintDetailedTwoPointTimeline_singleMatch() {
 
-        ScoringCalculator calc = getGameCalculator();
+        GameSimulator calc = getGameCalculator();
         GamePlans plans = makePlans(playerFactory);
 
         GamePlan home = plans.home();
@@ -199,7 +214,7 @@ class ScoringCalculatorTest {
 
     @Test
     void calculate_ScoreForTeam_shouldPrintDetailedDriveTimeline_singleMatch() {
-        ScoringCalculator calc = getGameCalculator();
+        GameSimulator calc = getGameCalculator();
         GamePlans plans = makePlans(playerFactory);
 
         GamePlan home = plans.home();
@@ -248,7 +263,7 @@ class ScoringCalculatorTest {
 
     @Test
     void calculate_ScoreForTeam_shouldPrintFullMatchBoxScore_WithPlayerAdvantages() {
-        ScoringCalculator calc = getGameCalculator();
+        GameSimulator calc = getGameCalculator();
 
 
         GamePlans plans = makePlans(playerFactory);

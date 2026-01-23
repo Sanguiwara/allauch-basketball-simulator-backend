@@ -51,7 +51,13 @@ class ShotSimulatorTest {
         }
         //TODO Ajouter des tests unitaires pour les 3 ShootSpec
 
-        @Override public int sampleAttempts(InGamePlayer shooter) { return attempts; }
+        @Override public int getAttempts(InGamePlayer shooter) { return attempts; }
+
+        @Override
+        public void distributeShotAttempts(GamePlan plan) {
+
+        }
+
         @Override public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) { return pct; }
         @Override public double evaluateMatchupAdvantage(Player attacker, Player defender) { return 0.0; }
         @Override public TestShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
@@ -68,7 +74,7 @@ class ShotSimulatorTest {
     }
 
     @Test
-    void getAssister_shouldRespectAssistProbability_andWeights() {
+    void pickAssister_shouldRespectAssistProbability_andWeights() {
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 1.0));
 
         InGamePlayer shooter = new InGamePlayer(p("SHOOTER"), 20, 10, 10);
@@ -76,15 +82,15 @@ class ShotSimulatorTest {
         InGamePlayer p2 = new InGamePlayer(p("P2"), 10, 10, 10);
         p1.setAssistWeight(1.0);
         p2.setAssistWeight(3.0);
-        List<InGamePlayer> all = List.of(shooter, p1, p2);
+        List<InGamePlayer> all = List.of( p1, p2);
 
         // With 0 probability -> no assist
-        InGamePlayer none = sim.getAssister(shooter, all, 0.0);
+        InGamePlayer none = sim.pickAssister( all, 0.0);
         log.info("Assister with 0.0 prob: {}", none);
         assertNull(none);
 
         // With 1 probability -> always assisted and not the shooter
-        InGamePlayer a = sim.getAssister(shooter, all, 1.0);
+        InGamePlayer a = sim.pickAssister( all, 1.0);
         log.info("Assister with 1.0 prob (one pick): {}", a != null ? a.getPlayer().name() : null);
         assertNotNull(a);
         assertNotEquals(shooter, a);
@@ -92,50 +98,15 @@ class ShotSimulatorTest {
         // Statistical preference for higher weight
         int countP1 = 0, countP2 = 0;
         for (int i = 0; i < 2000; i++) {
-            InGamePlayer as = sim.getAssister(shooter, all, 1.0);
+            InGamePlayer as = sim.pickAssister( all, 1.0);
             if (as == p1) countP1++; else if (as == p2) countP2++;
         }
         log.info("Assister distribution over 2000 picks -> p1: {}, p2: {}", countP1, countP2);
         assertTrue(countP2 > countP1, "Heavier assistWeight should be picked more often");
     }
 
-    @Test
-    void simulateShots_allUnassisted_allMade_andNoAssistsRecorded() {
-        // pct=1.0 ensures all made
-        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(10, 1.0));
 
-        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"), 20, 10, 10);
-        InGamePlayer other = new InGamePlayer(p("OTHER"), 10, 10, 10);
-        other.setAssistWeight(1.0);
 
-        TestShotResult res = sim.simulateShots(shooter, List.of(shooter, other), 0.0, 0.0);
-
-        assertEquals(10, res.attempts());
-        assertEquals(10, res.made());
-        long assistedCount = res.events().stream().filter(TestShotEvent::assisted).count();
-        log.info("Unassisted scenario -> attempts: {}, made: {}, assisted events: {}", res.attempts(), res.made(), assistedCount);
-        assertEquals(0, assistedCount);
-        assertEquals(0, shooter.getAssists());
-        assertEquals(0, other.getAssists());
-    }
-
-    @Test
-    void simulateShots_allAssisted_allMade_andAssistsIncremented() {
-        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(8, 1.0));
-        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"), 20, 10, 10);
-        InGamePlayer passer = new InGamePlayer(p("P1"), 10, 10, 10);
-        passer.setAssistWeight(1.0);
-
-        TestShotResult res = sim.simulateShots(shooter, List.of(shooter, passer), 1.0, 0.0);
-
-        assertEquals(8, res.attempts());
-        assertEquals(8, res.made());
-        long assistedCount = res.events().stream().filter(TestShotEvent::assisted).count();
-        log.info("All assisted scenario -> attempts: {}, made: {}, assisted events: {}, passer assists: {}",
-                res.attempts(), res.made(), assistedCount, passer.getAssists());
-        assertEquals(8, assistedCount);
-        assertEquals(8, passer.getAssists());
-    }
 
     @Test
     void getTotalShotContribution_aggregatesAcrossPlayers() {

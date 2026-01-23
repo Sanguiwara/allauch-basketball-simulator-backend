@@ -20,21 +20,27 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
     private final ShotSpec<E,R> spec;
 
 
-    public R simulateShots(
+    private R simulateShots(
             InGamePlayer shooter,
             List<InGamePlayer> potentialPassers,
             double assistedShotProbability,
             double matchupAdvantage
     ) {
 
-        int attempts = spec.sampleAttempts(shooter);
+        int attempts = spec.getAttempts(shooter);
 
         List<E> events = new ArrayList<>(attempts);
         int madeCount = 0;
 
         for (int i = 0; i < attempts; i++) {
 
-            InGamePlayer assister = getAssister(shooter, potentialPassers, assistedShotProbability);
+            List<InGamePlayer> passersWithoutShooter =
+                    potentialPassers.stream()
+                            .filter(p -> p != shooter) // ou !p.equals(shooter)
+                            .toList(); // Java 16+
+
+
+            InGamePlayer assister = pickAssister(passersWithoutShooter, assistedShotProbability);
             boolean isAssistedShot = assister != null;
 
 
@@ -73,6 +79,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
             GamePlan defenseTeamGamePlan,
             double assistProbability
     ) {
+        spec.distributeShotAttempts(offenseTeamGamePlan);
         List<InGamePlayer> offenseTeamActivePlayers = offenseTeamGamePlan.getActivePlayers();
         Map<Player, Player> matchups = defenseTeamGamePlan.getMatchups();
         return offenseTeamActivePlayers.stream()
@@ -98,20 +105,18 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
     }
 
 
-    public InGamePlayer getAssister(InGamePlayer shooter, List<InGamePlayer> potentialPassers, double assistedShotPercentage) {
+    public InGamePlayer pickAssister( List<InGamePlayer> potentialPassers, double assistedShotPercentage) {
         boolean assisted = random.nextDouble() < assistedShotPercentage;
         InGamePlayer assister = null;
         if (assisted) {
             InGamePlayer result = null;
             double total = 0.0;
             for (InGamePlayer p : potentialPassers) {
-                if (p == shooter) continue;
                 total += Math.max(0.0, p.getAssistWeight());
             }
 
             double r = random.nextDouble() * total;
             for (InGamePlayer p : potentialPassers) {
-                if ( p == shooter) continue;
                 r -= Math.max(0.0, p.getAssistWeight());
                 if (r <= 0.0) {
                     result = p;
@@ -122,6 +127,9 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
         }
         return assister;
     }
+
+
+
 
 
 }
