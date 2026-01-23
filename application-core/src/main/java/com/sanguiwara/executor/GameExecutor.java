@@ -3,7 +3,7 @@ package com.sanguiwara.executor;
 import com.sanguiwara.result.BoxScore;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.repository.GameRepository;
-import com.sanguiwara.calculator.ScoringCalculator;
+import com.sanguiwara.calculator.GameSimulator;
 import lombok.RequiredArgsConstructor;import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GameExecutor  {
 
-    private final ScoringCalculator scoringCalculator;
+    private final GameSimulator gameSimulator;
     private final GameRepository gameRepository;
 
 
@@ -22,7 +22,7 @@ public class GameExecutor  {
     public void executeGame(UUID gameId) {
         Optional<Game> optionalGame = gameRepository.findById(gameId);
         Game game  = optionalGame.orElseThrow();
-        BoxScore boxScore = scoringCalculator.calculateScoreForTeam(game.getHomeGamePlan(), game.getAwayGamePlan());
+        BoxScore boxScore = gameSimulator.calculateScoreForTeam(game.getHomeGamePlan(), game.getAwayGamePlan());
         game.setBoxScore(boxScore);
         gameRepository.save(game);
     }

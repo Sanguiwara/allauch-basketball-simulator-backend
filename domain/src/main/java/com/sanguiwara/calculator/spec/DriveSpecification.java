@@ -1,5 +1,6 @@
 package com.sanguiwara.calculator.spec;
 
+import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.DriveEvent;
@@ -12,8 +13,6 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
-    private static final int MIN_ATTEMPTS = 0;
-    private static final int MAX_ATTEMPTS = 20;
     private static final double ASSIST_BONUS_PCT = 0.15;
 
     // Success Pct Constants
@@ -31,10 +30,6 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     private static final double AGGRESSIVENESS_DIVISOR = 100.0;
     private static final double INTENSITY_USAGE_WEIGHT = 0.55;
     private static final double INTENSITY_AGGR_WEIGHT = 0.45;
-    private static final double EXPECTED_BASE = 4.0;
-    private static final double EXPECTED_MULTIPLIER = 16.0;
-    private static final double STD_DEV_BASE = 1.6;
-    private static final double STD_DEV_MULTIPLIER = 1.0;
 
     // Offensive Score Weights
     private static final double OFF_SPEED_WEIGHT = 0.20;
@@ -55,17 +50,29 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     private static final double DEF_POSTE_WEIGHT = 0.10;
     private final Random random;
 
+
+
     @Override
-    public int sampleAttempts(InGamePlayer shooter) {
-        double usage01 = (shooter.getUsageShoot() - USAGE_THRESHOLD) / USAGE_DIVISOR;
-        double aggr01 = shooter.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+    public void distributeShotAttempts(GamePlan team){
+        double totalWeight = 0.0;
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double usage01 = (inGamePlayer.getUsageShoot() - USAGE_THRESHOLD) / USAGE_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+            double intensity = INTENSITY_USAGE_WEIGHT * usage01 + INTENSITY_AGGR_WEIGHT * aggr01;
+            totalWeight += intensity;
+            inGamePlayer.setDriveContribution(intensity);
+        }
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double weight = inGamePlayer.getDriveContribution() / totalWeight;
+            inGamePlayer.setDriveWeight(
+                    weight);
+        }
 
-        double intensity = INTENSITY_USAGE_WEIGHT * usage01 + INTENSITY_AGGR_WEIGHT * aggr01;
-        double expected = EXPECTED_BASE + EXPECTED_MULTIPLIER * intensity;
-        double std = STD_DEV_BASE + STD_DEV_MULTIPLIER * intensity;
+        for(int i =0; i< team.getDriveAttempts(); i++){
+            InGamePlayer shooter = pickShooter(team.getActivePlayers());
+            shooter.addDrive();
+        }
 
-        int sampled = (int) Math.round(expected + random.nextGaussian() * std);
-        return Math.max(MIN_ATTEMPTS, Math.min(MAX_ATTEMPTS, sampled));
     }
 
     @Override
@@ -108,8 +115,13 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     }
 
     @Override
+    public int getAttempts(InGamePlayer shooter) {
+        return shooter.getDriveAttempts();
+    }
+
+    @Override
     public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
-        inGamePlayer.recordTwoPointShot(made);
+        inGamePlayer.recordDrive(made);
         return new DriveEvent(inGamePlayer.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
     }
 
@@ -130,6 +142,25 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
 
     private static double clamp(double v) {
         return Math.max(DriveSpecification.MIN_SUCCESS_PCT, Math.min(DriveSpecification.MAX_SUCCESS_PCT, v));
+    }
+
+    public InGamePlayer pickShooter( List<InGamePlayer> potentialShooters) {
+        double total = 0.0;
+        for (InGamePlayer p : potentialShooters) {
+            total += p.getDriveWeight();
+        }
+        InGamePlayer playerToReturn = null;
+
+        double r = random.nextDouble() * total;
+        for (InGamePlayer p : potentialShooters) {
+            r -=  p.getDriveWeight();
+            if (r <= 0.0) {
+                playerToReturn = p;
+                return playerToReturn;
+            }
+        }
+        return playerToReturn;
+
     }
 
 }

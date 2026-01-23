@@ -1,6 +1,7 @@
 package com.sanguiwara.configuration;
 
 import com.sanguiwara.calculator.PlaymakingCalculator;
+import com.sanguiwara.calculator.ReboundCalculator;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
@@ -14,7 +15,7 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.calculator.ScoringCalculator;
+import com.sanguiwara.calculator.GameSimulator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,13 +77,17 @@ public class GameConfig {
             DriveSpecification spec) {
         return new ShotSimulator<>(random,  spec);
     }
+    @Bean
+    public ReboundCalculator reboundCalculator(Random random) { return new ReboundCalculator(random);}
 
     @Bean
-    public ScoringCalculator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
-                                            ShotSimulator<DriveEvent, DriveResult> driveSimulator,
-                                            ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
-                                            PlaymakingCalculator playmakingCalculator) {
-        return new ScoringCalculator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator);
+    public GameSimulator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
+                                        ShotSimulator<DriveEvent, DriveResult> driveSimulator,
+                                        ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
+                                        PlaymakingCalculator playmakingCalculator,
+                                        ReboundCalculator reboundCalculator
+    ) {
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator);
     }
 
 

@@ -1,5 +1,6 @@
 package com.sanguiwara.calculator.spec;
 
+import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
@@ -12,8 +13,6 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPointShootingResult> {
-    private static final int MIN_ATTEMPTS = 0;
-    private static final int MAX_ATTEMPTS = 20;
     private static final double ASSIST_BONUS_PCT = 0.15;
 
     // Constants for Shot Percentage Calculation
@@ -45,26 +44,32 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     private static final double USAGE_DIVISOR = 20.0;
     private static final double USAGE_WEIGHT = 0.65;
     private static final double AGGR_WEIGHT = 0.35;
-    private static final double ATTEMPTS_BASE_VAL = 2.0;
-    private static final double ATTEMPTS_MULT_VAL = 8.0;
-    private static final double STD_DEV_BASE = 1.4;
-    private static final double STD_DEV_MULT = 0.8;
     public static final double MAX_MATCHUP_ADVANTAGE = 50.0;
     public static final double AGGRESSIVENESS_DIVISOR = 100.0;
     private final Random random;
 
 
-    @Override
-    public int sampleAttempts(InGamePlayer shooter) {
-        double usage01 = (shooter.getUsageShoot() - USAGE_BASE_OFFSET) / USAGE_DIVISOR;
-        double aggr01 = shooter.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+   @Override
+    public void distributeShotAttempts(GamePlan team){
+        double totalWeight = 0.0;
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double usage01 = (inGamePlayer.getUsagePost() - USAGE_BASE_OFFSET) / USAGE_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+            double intensity = USAGE_WEIGHT * usage01 + AGGR_WEIGHT * aggr01;
+            totalWeight += intensity;
+            inGamePlayer.setTwoPointContribution(intensity);
+        }
+        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
+            double twoPointWeight = inGamePlayer.getTwoPointContribution() / totalWeight;
+            inGamePlayer.setTwoPointWeight(
+                    twoPointWeight);
+        }
 
-        double intensity = USAGE_WEIGHT * usage01 + AGGR_WEIGHT * aggr01;
-        double expected = ATTEMPTS_BASE_VAL + ATTEMPTS_MULT_VAL * intensity;
-        double std = STD_DEV_BASE + STD_DEV_MULT * intensity;
+        for(int i =0; i< team.getMidRangeAttempts(); i++){
+            InGamePlayer shooter = pickShooter(team.getActivePlayers());
+            shooter.addTwoPointShot();
+        }
 
-        int sampled = (int) Math.round(expected + random.nextGaussian() * std);
-        return Math.max(MIN_ATTEMPTS, Math.min(MAX_ATTEMPTS, sampled));
     }
 
     @Override
@@ -103,6 +108,11 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     }
 
     @Override
+    public int getAttempts(InGamePlayer shooter) {
+        return shooter.getTwoPointAttempts();
+    }
+
+    @Override
     public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
         shooter.recordTwoPointShot(made);
         return new TwoPointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
@@ -126,5 +136,26 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     private static double clamp(double v) {
         return Math.max(TwoPointSpecification.MIN_SHOT_PCT, Math.min(TwoPointSpecification.MAX_SHOT_PCT, v));
     }
+
+    public InGamePlayer pickShooter( List<InGamePlayer> potentialShooters) {
+        double total = 0.0;
+        for (InGamePlayer p : potentialShooters) {
+            total += p.getTwoPointWeight();
+        }
+        InGamePlayer playerToReturn = null;
+
+        double r = random.nextDouble() * total;
+        for (InGamePlayer p : potentialShooters) {
+            r -=  p.getTwoPointWeight();
+            if (r <= 0.0) {
+                playerToReturn = p;
+                return playerToReturn;
+            }
+        }
+        return playerToReturn;
+
+    }
+
+
 
 }

@@ -13,16 +13,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ScoringCalculator {
+public class GameSimulator {
 
 
     private final ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator;
     private final ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator;
     private final ShotSimulator<DriveEvent, DriveResult> driveSimulator;
     private final PlaymakingCalculator playmakingCalculator;
+    private final ReboundCalculator reboundCalculator;
+
+
 
 
     public BoxScore calculateScoreForTeam(GamePlan home, GamePlan visitor) {
+
+
+        int offensiveReboundForTeam = reboundCalculator.evaluateOffensiveReboundForTeam(home, visitor);
+        home.setTotalShotNumber(offensiveReboundForTeam + home.getTotalShotNumber());
         double assistProbability = playmakingCalculator.getTotalPlaymakingContribution(home, visitor);
         ThreePointShootingResult threePointShootingResult =
                 threePointSimulator.getTotalShotContribution(home, visitor, assistProbability);
