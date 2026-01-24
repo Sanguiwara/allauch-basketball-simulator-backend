@@ -1,8 +1,6 @@
 package com.sanguiwara.configuration;
 
-import com.sanguiwara.calculator.PlaymakingCalculator;
-import com.sanguiwara.calculator.ReboundCalculator;
-import com.sanguiwara.calculator.ShotSimulator;
+import com.sanguiwara.calculator.*;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import com.sanguiwara.calculator.spec.TwoPointSpecification;
@@ -15,7 +13,6 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.calculator.GameSimulator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,13 +78,17 @@ public class GameConfig {
     public ReboundCalculator reboundCalculator(Random random) { return new ReboundCalculator(random);}
 
     @Bean
+    public BlockCalculator blockCalculator(){ return new BlockCalculator();}
+
+    @Bean
     public GameSimulator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
                                         ShotSimulator<DriveEvent, DriveResult> driveSimulator,
                                         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
                                         PlaymakingCalculator playmakingCalculator,
-                                        ReboundCalculator reboundCalculator
+                                        ReboundCalculator reboundCalculator,
+                                        BlockCalculator blockCalculator
     ) {
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator);
     }
 
 

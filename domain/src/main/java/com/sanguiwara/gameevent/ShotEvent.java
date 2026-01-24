@@ -10,4 +10,5 @@ public interface ShotEvent {
     double successPct();     // shotPct / successPct
     boolean made();
     double advantageMatchup();
+    boolean blocked();
 }

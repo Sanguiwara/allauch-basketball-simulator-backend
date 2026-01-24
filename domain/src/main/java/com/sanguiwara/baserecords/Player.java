@@ -28,6 +28,7 @@ public record Player(
         int timingRebond,
         int agressiviteRebond,
         int steal,
+        int timingBlock,
 
         // Physique / mental / skills
         int physique,
@@ -36,6 +37,7 @@ public record Player(
         int passingSkills,
         int iq,
         int endurance,
+
 
 
 

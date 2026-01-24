@@ -12,31 +12,40 @@ import java.util.List;
 @Slf4j
 public class ReboundCalculator {
     public static final double MIN_OFFENSIVE_REBOUND_PROBABILITY = 0.00;
-    public static final double MAX_OFFENSIVE_REBOUND_PROBABILITY = 1.00;
-    private final java.util.Random random;
-
+    public static final double MAX_OFFENSIVE_REBOUND_PROBABILITY = 0.50;
 
     public static final int TOTAL_MINUTES_FOR_TEAM = 200;
 
+    private static final double ADVANTAGE_SHIFT = 1.0;
+    private static final double ADVANTAGE_SCALE = 2.0;
 
+    private static final double REB_SIZE_COEFF = 0.18;
+    private static final double REB_WEIGHT_COEFF = 0.10;
+    private static final double REB_AGGR_COEFF = 0.10;
+    private static final double REB_AGGR_REB_COEFF = 0.18;
+    private static final double REB_TIMING_COEFF = 0.18;
+    private static final double REB_PHYSIQUE_COEFF = 0.14;
+    private static final double REB_IQ_COEFF = 0.06;
+    private static final double REB_ENDURANCE_COEFF = 0.06;
+
+    private final java.util.Random random;
 
     public int evaluateOffensiveReboundForTeam(GamePlan offenseGamePlan, GamePlan defenseGamePlan) {
         double reboundAdvantage = evaluateReboundAdvantage(offenseGamePlan, defenseGamePlan);
 
+        double normalizedAdvantage = (reboundAdvantage + ADVANTAGE_SHIFT) / ADVANTAGE_SCALE;
 
+        double offensiveReboundProbability =
+                MIN_OFFENSIVE_REBOUND_PROBABILITY
+                        + normalizedAdvantage * (MAX_OFFENSIVE_REBOUND_PROBABILITY - MIN_OFFENSIVE_REBOUND_PROBABILITY);
 
-        double normalizedAdvantage = (reboundAdvantage + 1.0) / 2.0;
-
-        double offensiveReboundProbability = MIN_OFFENSIVE_REBOUND_PROBABILITY + normalizedAdvantage * (MAX_OFFENSIVE_REBOUND_PROBABILITY - MIN_OFFENSIVE_REBOUND_PROBABILITY);
-
-
-            log.debug("ReboundAdvantage for team: {} (normalized: {}), offensiveRebProb: {}",
-                    String.format("%.4f", reboundAdvantage),
-                    String.format("%.4f", normalizedAdvantage),
-                    String.format("%.4f", offensiveReboundProbability));
+        log.debug("ReboundAdvantage for team: {} (normalized: {}), offensiveRebProb: {}",
+                String.format("%.4f", reboundAdvantage),
+                String.format("%.4f", normalizedAdvantage),
+                String.format("%.4f", offensiveReboundProbability));
 
         int offensiveRebounds = 0;
-        for (int i = 0; i <  offenseGamePlan.getTotalShotNumber(); i++) {
+        for (int i = 0; i < offenseGamePlan.getTotalShotNumber(); i++) {
             if (random.nextDouble() < offensiveReboundProbability) {
                 InGamePlayer rebounder = pickRebounder(offenseGamePlan.getActivePlayers());
                 rebounder.addOffensiveRebound();
@@ -53,59 +62,55 @@ public class ReboundCalculator {
         return offensiveRebounds;
     }
 
-
     private double evaluateReboundAdvantage(GamePlan home, GamePlan visitor) {
         double homeReboundScore = getHomeReboundScore(home);
-
         double visitorReboundScore = getHomeReboundScore(visitor);
 
-        return  ( homeReboundScore - visitorReboundScore) / ( homeReboundScore + visitorReboundScore);
-
+        return (homeReboundScore - visitorReboundScore) / (homeReboundScore + visitorReboundScore);
     }
 
     private double getHomeReboundScore(GamePlan gamePlan) {
         double homeReboundScore = 0.0;
 
         for (InGamePlayer inGamePlayer : gamePlan.getActivePlayers()) {
-            double playerReboundScore = getPlayerReboundScore(inGamePlayer);
+            double minutesShare = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
+            double playerReboundScore = getPlayerReboundScore(inGamePlayer) * minutesShare;
             inGamePlayer.setReboundContribution(playerReboundScore);
-            homeReboundScore += playerReboundScore * ((double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM);
+            homeReboundScore += playerReboundScore;
         }
         for (InGamePlayer inGamePlayer : gamePlan.getActivePlayers()) {
-            inGamePlayer.setReboundWeight(inGamePlayer.getReboundContribution()/homeReboundScore);
+            inGamePlayer.setReboundWeight(inGamePlayer.getReboundContribution() / homeReboundScore);
         }
         return homeReboundScore;
     }
 
     private static double getPlayerReboundScore(InGamePlayer inGamePlayer) {
         Player player = inGamePlayer.getPlayer();
-        return 0.18 * player.size() +
-                0.10 * player.weight() +
-                0.10 * player.agressivite() +
-                0.18 * player.agressiviteRebond() +
-                0.18 * player.timingRebond() +
-                0.14 * player.physique() +
-                0.06 * player.iq() +
-                0.06 * player.endurance();
+        return REB_SIZE_COEFF * player.size()
+                + REB_WEIGHT_COEFF * player.weight()
+                + REB_AGGR_COEFF * player.agressivite()
+                + REB_AGGR_REB_COEFF * player.agressiviteRebond()
+                + REB_TIMING_COEFF * player.timingRebond()
+                + REB_PHYSIQUE_COEFF * player.physique()
+                + REB_IQ_COEFF * player.iq()
+                + REB_ENDURANCE_COEFF * player.endurance();
     }
 
+    private InGamePlayer pickRebounder(List<InGamePlayer> potentialRebounders) {
+        double total = 0.0;
+        for (InGamePlayer p : potentialRebounders) {
+            total += p.getReboundWeight();
+        }
+        InGamePlayer playerToReturn = null;
 
-    private InGamePlayer pickRebounder( List<InGamePlayer> potentialRebounders) {
-            double total = 0.0;
-            for (InGamePlayer p : potentialRebounders) {
-                total +=  p.getReboundWeight();
+        double r = random.nextDouble() * total;
+        for (InGamePlayer p : potentialRebounders) {
+            r -= p.getReboundWeight();
+            if (r <= 0.0) {
+                playerToReturn = p;
+                break;
             }
-            InGamePlayer playerToReturn = null;
-
-            double r = random.nextDouble() * total;
-            for (InGamePlayer p : potentialRebounders) {
-                r -=  p.getReboundWeight();
-                if (r <= 0.0) {
-                    playerToReturn = p;
-                    break;
-                }
-            }
-            return playerToReturn;
-
+        }
+        return playerToReturn;
     }
 }

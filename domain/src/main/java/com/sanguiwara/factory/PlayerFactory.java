@@ -53,6 +53,8 @@ public final class PlayerFactory {
                 r(30, 95), // passingSkills
                 r(30, 95), // iq
                 r(30, 95), // endurance
+                r(30, 95), // timingBlock
+
 
                 r(30, 95), // solidite
 

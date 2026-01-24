@@ -102,9 +102,9 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     }
 
     @Override
-    public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+    public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordThreePointShot(made);
-        return new ThreePointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
+        return new ThreePointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
 
@@ -121,6 +121,11 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public ThreePointShootingResult combine(ThreePointShootingResult a, ThreePointShootingResult b) {
         return ThreePointShootingResult.combine(a, b);
+    }
+
+    @Override
+    public double getBlockProbabilityCoefficient() {
+        return 0.2;
     }
 
     public InGamePlayer pickShooter(List<InGamePlayer> potentialShooters) {

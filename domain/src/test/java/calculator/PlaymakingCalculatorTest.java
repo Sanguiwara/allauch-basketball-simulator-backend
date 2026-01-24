@@ -31,6 +31,7 @@ class PlaymakingCalculatorTest {
                 base, // size
                 base, // weight
                 base, // agressivite
+                base,
                 // defense / rebond
                 base, // defExterieur
                 base, // defPoste
