@@ -27,7 +27,7 @@ class ShotSimulatorTest {
     }
 
     // Minimal event/result types for testing generic ShotSimulator
-    private record TestShotEvent(UUID shooterId, int index, boolean assisted, UUID assisterId, double successPct, boolean made, double advantageMatchup) implements ShotEvent {}
+    private record TestShotEvent(UUID shooterId, int index, boolean assisted, UUID assisterId, double successPct, boolean made, double advantageMatchup, boolean blocked) implements ShotEvent {}
     private record TestShotResult(int attempts, int made, List<TestShotEvent> events) implements ShotResult<TestShotEvent> {}
 
     private static Player p(String name) {
@@ -36,6 +36,7 @@ class ShotSimulatorTest {
                 v, v, v, v, v, v, v, v, v, v,
                 v, v, v, v, v, v,
                 v, v, v, v, v, v,
+                v,
                 v,
                 v, v,
                 v, v, v, v);
@@ -60,8 +61,8 @@ class ShotSimulatorTest {
 
         @Override public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) { return pct; }
         @Override public double evaluateMatchupAdvantage(Player attacker, Player defender) { return 0.0; }
-        @Override public TestShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
-            return new TestShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
+        @Override public TestShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
+            return new TestShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
         }
         @Override public TestShotResult createResult(int attempts, int made, List<TestShotEvent> events) { return new TestShotResult(attempts, made, events); }
         @Override public TestShotResult empty() { return new TestShotResult(0,0, List.of()); }
@@ -70,6 +71,11 @@ class ShotSimulatorTest {
             ev.addAll(a.events());
             ev.addAll(b.events());
             return new TestShotResult(a.attempts()+b.attempts(), a.made()+b.made(), Collections.unmodifiableList(ev));
+        }
+
+        @Override
+        public double getBlockProbabilityCoefficient() {
+            return 1;
         }
     }
 
@@ -130,7 +136,7 @@ class ShotSimulatorTest {
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
 
-        TestShotResult total = sim.getTotalShotContribution(home, defense, 1.0);
+        TestShotResult total = sim.getTotalShotContribution(home, defense, 1.0, 0.1);
         // Each of the two players attempts 5 -> total 10, all made due to pct=1.0
         log.info("Aggregated result -> attempts: {}, made: {}, events: {}", total.attempts(), total.made(), total.events().size());
         assertEquals(10, total.attempts());

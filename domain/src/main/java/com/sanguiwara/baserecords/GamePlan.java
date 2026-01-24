@@ -30,6 +30,10 @@ public class GamePlan {
     private double midRangeAttemptShare;
     private double driveAttemptShare;
 
+    private double blockScore;
+    private double blockProbability;
+
+
 
     public void setThreePointAttemptShare(double share) {
         if (share < 0.0 || share > 1.0) {

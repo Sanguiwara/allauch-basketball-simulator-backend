@@ -26,6 +26,12 @@ public class InGamePlayer {
     private double driveContribution;
     private double driveWeight;
 
+    private double blockContribution;
+    private double blockWeight;
+    private double stealContribution;
+    private double stealWeight;
+
+
     // --- Outputs (boxscore) ---
     private int assists;
     private int points;
@@ -50,7 +56,10 @@ public class InGamePlayer {
     private final int usageDrive;
     private final int usagePost;
 
+
     private int minutesPlayed = 20;
+
+
 
 
 
@@ -78,6 +87,9 @@ public class InGamePlayer {
     public void addDrive(){
         this.fga++;
         this.driveAttempts++;
+    }
+    public void addBlock(){
+        this.blocks++;
     }
 
 

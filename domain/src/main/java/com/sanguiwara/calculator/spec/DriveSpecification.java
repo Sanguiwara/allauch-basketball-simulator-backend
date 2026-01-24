@@ -120,9 +120,9 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     }
 
     @Override
-    public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+    public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         inGamePlayer.recordDrive(made);
-        return new DriveEvent(inGamePlayer.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
+        return new DriveEvent(inGamePlayer.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
     @Override
@@ -139,6 +139,14 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     public DriveResult combine(DriveResult a, DriveResult b) {
         return DriveResult.combine(a, b);
     }
+
+    @Override
+    public double getBlockProbabilityCoefficient() {
+        return 1;
+
+    }
+
+
 
     private static double clamp(double v) {
         return Math.max(DriveSpecification.MIN_SUCCESS_PCT, Math.min(DriveSpecification.MAX_SUCCESS_PCT, v));

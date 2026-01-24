@@ -9,7 +9,8 @@ public record ThreePointShotEvent(
         UUID assisterId,
         double successPct,
         boolean made,
-        double advantageMatchup
+        double advantageMatchup,
+        boolean blocked
 
 ) implements ShotEvent {
 }

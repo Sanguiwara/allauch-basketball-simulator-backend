@@ -1,7 +1,6 @@
 package service;
 
-import com.sanguiwara.calculator.GameSimulator;
-import com.sanguiwara.calculator.ReboundCalculator;
+import com.sanguiwara.calculator.*;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -14,8 +13,6 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
-import com.sanguiwara.calculator.PlaymakingCalculator;
-import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,8 +48,9 @@ class GameSimulatorTest {
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
                 new ShotSimulator<>( random, new DriveSpecification(random));
         ReboundCalculator reboundCalculator = new ReboundCalculator(random);
+        BlockCalculator blockCalculator = new BlockCalculator();
 
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator);
     }
 
     private static GamePlans makePlans(PlayerFactory factory) {
@@ -199,6 +197,7 @@ class GameSimulatorTest {
         System.out.printf ("2P%% = %.1f%%%n", pct);
         System.out.println("assisted shots  = " + assistedShots);
         System.out.println("assisted makes  = " + assistedMakes);
+
         System.out.println();
 
         System.out.println("--- Events (shot by shot) ---");
@@ -206,6 +205,7 @@ class GameSimulatorTest {
             System.out.println(e);
             System.out.println("=======================================");
         }
+
 
         assertTrue(attempts >= 0);
         assertTrue(made <= attempts);
@@ -284,12 +284,20 @@ class GameSimulatorTest {
         printPlayerAdvantages("AWAY TEAM", plans.away());
         printTeamBoxScore("AWAY STATS", awayStats);
 
+
         int homeTotal = calculateScoreForTeamTotalPoints(homeStats);
         int awayTotal = calculateScoreForTeamTotalPoints(awayStats);
 
         System.out.println("============================================================");
         System.out.printf("   FINAL SCORE: HOME %d - %d AWAY   %n", homeTotal, awayTotal);
         System.out.println("============================================================");
+
+        for(InGamePlayer p : plans.home().getActivePlayers()) {
+            System.out.println(p.getBlocks());
+        }
+        for(InGamePlayer p : plans.away().getActivePlayers()) {
+            System.out.println(p.getBlocks());
+        }
     }
 
     private void printPlayerAdvantages(String teamLabel, GamePlan plan) {

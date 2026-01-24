@@ -113,9 +113,9 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     }
 
     @Override
-    public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage) {
+    public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordTwoPointShot(made);
-        return new TwoPointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage);
+        return new TwoPointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
     @Override
@@ -131,6 +131,11 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     @Override
     public TwoPointShootingResult combine(TwoPointShootingResult a, TwoPointShootingResult b) {
         return TwoPointShootingResult.combine(a,b);
+    }
+
+    @Override
+    public double getBlockProbabilityCoefficient() {
+        return 0.6;
     }
 
     private static double clamp(double v) {

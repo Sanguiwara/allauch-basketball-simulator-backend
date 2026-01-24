@@ -19,7 +19,7 @@ public interface ShotSpec<E extends ShotEvent, R extends ShotResult<E>> {
 
 
 
-    E create(InGamePlayer shooter, int shotNumber, boolean assisted, java.util.UUID assisterId, double pct, boolean made, double advantage);
+    E create(InGamePlayer shooter, int shotNumber, boolean assisted, java.util.UUID assisterId, double pct, boolean made, double advantage, boolean blocked);
 
 
     R createResult(int attempts, int made, List<E> events);
@@ -29,4 +29,5 @@ public interface ShotSpec<E extends ShotEvent, R extends ShotResult<E>> {
     R combine(R a, R b);
 
 
+    double getBlockProbabilityCoefficient();
 }

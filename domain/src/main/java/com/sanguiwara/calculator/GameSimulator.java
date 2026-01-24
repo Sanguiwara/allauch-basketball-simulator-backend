@@ -21,23 +21,27 @@ public class GameSimulator {
     private final ShotSimulator<DriveEvent, DriveResult> driveSimulator;
     private final PlaymakingCalculator playmakingCalculator;
     private final ReboundCalculator reboundCalculator;
+    private final BlockCalculator blockCalculator;
+
 
 
 
 
     public BoxScore calculateScoreForTeam(GamePlan home, GamePlan visitor) {
 
+         double blockProbability = blockCalculator.populateGamePlanWithBlockScore(visitor);
+
 
         int offensiveReboundForTeam = reboundCalculator.evaluateOffensiveReboundForTeam(home, visitor);
         home.setTotalShotNumber(offensiveReboundForTeam + home.getTotalShotNumber());
         double assistProbability = playmakingCalculator.getTotalPlaymakingContribution(home, visitor);
         ThreePointShootingResult threePointShootingResult =
-                threePointSimulator.getTotalShotContribution(home, visitor, assistProbability);
+                threePointSimulator.getTotalShotContribution(home, visitor, assistProbability, blockProbability);
         TwoPointShootingResult twoPointShootingResult =
-                twoPointSimulator.getTotalShotContribution(home, visitor, assistProbability);
+                twoPointSimulator.getTotalShotContribution(home, visitor, assistProbability, blockProbability);
 
         DriveResult driveResult =
-                driveSimulator.getTotalShotContribution(home, visitor, assistProbability);
+                driveSimulator.getTotalShotContribution(home, visitor, assistProbability, blockProbability);
 
         return new BoxScore(threePointShootingResult, driveResult, twoPointShootingResult);
 
