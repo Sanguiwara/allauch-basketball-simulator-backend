@@ -10,8 +10,8 @@ public class PlaymakingCalculator {
     // Constantes pour le calcul du pourcentage de passes décisives
     private static final double ASSIST_CONTRIBUTION_DIVISOR = 50.0;
     private static final double ASSIST_PROBABILITY_MULTIPLIER = 0.60;
-    private static final double MIN_ASSIST_PROBABILITY = 0.10;
-    private static final double MAX_ASSIST_PROBABILITY = 0.50;
+    public static final double MIN_ASSIST_PROBABILITY = 0.10;
+    public static final double MAX_ASSIST_PROBABILITY = 0.50;
 
     // Constantes pour la contribution globale au playmaking
     private static final double MIN_TOTAL_PLAYMAKING = -50.0;
@@ -47,7 +47,7 @@ public class PlaymakingCalculator {
         return clamp((playmakingContribution / ASSIST_CONTRIBUTION_DIVISOR) * ASSIST_PROBABILITY_MULTIPLIER, MIN_ASSIST_PROBABILITY, MAX_ASSIST_PROBABILITY);
     }
 
-    public double getTotalPlaymakingContribution(GamePlan home, GamePlan visitor) {
+    public double setAssistProbability(GamePlan home, GamePlan visitor) {
 
 
         double totalPlayMakingContribution = home.getActivePlayers().stream()

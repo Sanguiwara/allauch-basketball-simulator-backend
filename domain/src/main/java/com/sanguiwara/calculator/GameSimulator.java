@@ -4,10 +4,7 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
-import com.sanguiwara.result.BoxScore;
-import com.sanguiwara.result.DriveResult;
-import com.sanguiwara.result.ThreePointShootingResult;
-import com.sanguiwara.result.TwoPointShootingResult;
+import com.sanguiwara.result.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,19 +19,47 @@ public class GameSimulator {
     private final PlaymakingCalculator playmakingCalculator;
     private final ReboundCalculator reboundCalculator;
     private final BlockCalculator blockCalculator;
+    private final StealSimulator stealSimulator;
+
+
+    public GameResult calculateGame(GamePlan home, GamePlan visitor){
+
+        double homeAssistProbability = playmakingCalculator.setAssistProbability(home, visitor);
+        double visitorAssistProbability = playmakingCalculator.setAssistProbability(visitor, home);
+
+        computePossessions(home,visitor, homeAssistProbability, visitorAssistProbability);
+        BoxScore homeBoxScore = calculateScoreForTeam(home,visitor,homeAssistProbability);
+        BoxScore awayBoxScore = calculateScoreForTeam(visitor,home, visitorAssistProbability);
+
+        return new GameResult(homeBoxScore, awayBoxScore);
+
+    }
+
+    public void computePossessions(GamePlan home, GamePlan visitor, double homeAssistProbability, double visitorAssistProbability){
+
+
+        int offensiveReboundForHomeTeam = reboundCalculator.evaluateOffensiveReboundForTeam(home, visitor);
+        int offensiveReboundForVisitorTeam = reboundCalculator.evaluateOffensiveReboundForTeam(visitor, home);
+        int stealsFromVisitor = stealSimulator.calculateSteals(home,visitor, homeAssistProbability);
+        int stealsFromHome = stealSimulator.calculateSteals(visitor,home, visitorAssistProbability);
+
+        visitor.addPossessions(offensiveReboundForVisitorTeam + stealsFromVisitor);
+        visitor.removePossessions(offensiveReboundForHomeTeam - stealsFromHome);
+
+        home.addPossessions(offensiveReboundForHomeTeam + stealsFromHome);
+        home.removePossessions(offensiveReboundForVisitorTeam + stealsFromVisitor);
+
+    }
 
 
 
 
-
-    public BoxScore calculateScoreForTeam(GamePlan home, GamePlan visitor) {
+    public BoxScore calculateScoreForTeam(GamePlan home, GamePlan visitor, double assistProbability) {
 
          double blockProbability = blockCalculator.populateGamePlanWithBlockScore(visitor);
 
 
-        int offensiveReboundForTeam = reboundCalculator.evaluateOffensiveReboundForTeam(home, visitor);
-        home.setTotalShotNumber(offensiveReboundForTeam + home.getTotalShotNumber());
-        double assistProbability = playmakingCalculator.getTotalPlaymakingContribution(home, visitor);
+
         ThreePointShootingResult threePointShootingResult =
                 threePointSimulator.getTotalShotContribution(home, visitor, assistProbability, blockProbability);
         TwoPointShootingResult twoPointShootingResult =

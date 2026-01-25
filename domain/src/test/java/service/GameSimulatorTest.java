@@ -6,13 +6,10 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Position;
-import com.sanguiwara.result.BoxScore;
+import com.sanguiwara.result.*;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
-import com.sanguiwara.result.DriveResult;
-import com.sanguiwara.result.ThreePointShootingResult;
-import com.sanguiwara.result.TwoPointShootingResult;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,8 +46,9 @@ class GameSimulatorTest {
                 new ShotSimulator<>( random, new DriveSpecification(random));
         ReboundCalculator reboundCalculator = new ReboundCalculator(random);
         BlockCalculator blockCalculator = new BlockCalculator();
+        StealSimulator stealSimulator = new StealSimulator(random);
 
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
     private static GamePlans makePlans(PlayerFactory factory) {
@@ -120,7 +118,7 @@ class GameSimulatorTest {
         GamePlan away = plans.away();
 
 
-        BoxScore res = calc.calculateScoreForTeam(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away, 0.2);
         ThreePointShootingResult threePointShotRes = res.threePointShootingResult();
 
         assertNotNull(res);
@@ -174,7 +172,7 @@ class GameSimulatorTest {
         GamePlan away = plans.away();
 
 
-        BoxScore res = calc.calculateScoreForTeam(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away, 0.2);
         TwoPointShootingResult twoPointShotRes = res.twoPointShootingResult();
 
         assertNotNull(res);
@@ -222,7 +220,7 @@ class GameSimulatorTest {
 
 
 
-        BoxScore res = calc.calculateScoreForTeam(home, away);
+        BoxScore res = calc.calculateScoreForTeam(home, away, 0.2);
         DriveResult driveRes = res.driveResult();
 
         assertNotNull(res);
@@ -268,9 +266,11 @@ class GameSimulatorTest {
 
         GamePlans plans = makePlans(playerFactory);
 
+        GameResult gameResult = calc.calculateGame(plans.home,plans.away);
+
         // Calcul des deux phases du match
-        BoxScore homeStats = calc.calculateScoreForTeam(plans.home(), plans.away());
-        BoxScore awayStats = calc.calculateScoreForTeam(plans.away(), plans.home());
+        BoxScore homeStats = gameResult.homeScore();
+        BoxScore awayStats = gameResult.awayScore();
 
         System.out.println("============================================================");
         System.out.println("                 MATCH ANALYSIS & BOXSCORE                  ");
@@ -278,11 +278,13 @@ class GameSimulatorTest {
 
         printPlayerAdvantages("HOME TEAM", plans.home());
         printTeamBoxScore("HOME STATS", homeStats);
+        printPlayerStats("HOME TEAM INDIVIDUAL STATS", plans.home().getActivePlayers());
 
         System.out.println();
 
         printPlayerAdvantages("AWAY TEAM", plans.away());
         printTeamBoxScore("AWAY STATS", awayStats);
+        printPlayerStats("AWAY TEAM INDIVIDUAL STATS", plans.away().getActivePlayers());
 
 
         int homeTotal = calculateScoreForTeamTotalPoints(homeStats);
@@ -291,13 +293,6 @@ class GameSimulatorTest {
         System.out.println("============================================================");
         System.out.printf("   FINAL SCORE: HOME %d - %d AWAY   %n", homeTotal, awayTotal);
         System.out.println("============================================================");
-
-        for(InGamePlayer p : plans.home().getActivePlayers()) {
-            System.out.println(p.getBlocks());
-        }
-        for(InGamePlayer p : plans.away().getActivePlayers()) {
-            System.out.println(p.getBlocks());
-        }
     }
 
     private void printPlayerAdvantages(String teamLabel, GamePlan plan) {
@@ -307,6 +302,51 @@ class GameSimulatorTest {
 
         plan.getActivePlayers().forEach(( player) -> System.out.printf("%-10s ",
                 player.getPlaymakingContribution()));
+        System.out.println();
+    }
+
+    private void printPlayerStats(String label, List<InGamePlayer> players) {
+        System.out.println("[" + label + "]");
+        System.out.printf("%-20s | %-5s | %-5s | %-5s | %-5s | %-5s | %-5s | %-5s | %-5s | %-6s | %-6s | %-6s%n",
+                "Player", "Pts", "Ast", "Blk", "Stl", "OR", "DR", "FGM", "FGA", "FG%", "3PM", "3PA");
+        System.out.println("-----------------------------------------------------------------------------------------------------");
+
+        for (InGamePlayer p : players) {
+            Player player = p.getPlayer();
+            int fgm = p.getFgm();
+            int fga = p.getFga();
+            double fgPct = fga == 0 ? 0.0 : (100.0 * fgm / fga);
+
+            int threePointMade = p.getThreePointMade();
+            int threePointAttempt = p.getThreePointAttempt();
+
+            int twoPointMade = p.getTwoPointMade();
+            int twoPointAttempts = p.getTwoPointAttempts();
+            double twoPct = twoPointAttempts == 0 ? 0.0 : (100.0 * twoPointMade / twoPointAttempts);
+
+            System.out.printf("%-20s | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %5.1f%% | %-5d | %-5d%n",
+                    player.name(),
+                    p.getPoints(),
+                    p.getAssists(),
+                    p.getBlocks(),
+                    p.getSteals(),
+                    p.getOffensiveRebounds(),
+                    p.getDefensiveRebounds(),
+                    fgm,
+                    fga,
+                    fgPct,
+                    threePointMade,
+                    threePointAttempt);
+
+            // Ligne supplémentaire avec détails 2PT et Drive
+            System.out.printf("  → 2PT: %d/%d (%.1f%%) | Drive: %d/%d (%.1f%%)%n",
+                    twoPointMade,
+                    twoPointAttempts,
+                    twoPct,
+                    p.getDriveMade(),
+                    p.getDriveAttempts(),
+                    p.getDriveAttempts() == 0 ? 0.0 : (100.0 * p.getDriveMade() / p.getDriveAttempts()));
+        }
         System.out.println();
     }
 

@@ -98,8 +98,6 @@ public class InGamePlayer {
     }
 
     public void recordThreePointShot(boolean made) {
-        this.fga++;
-        this.threePointAttempt++;
         if (made) {
             this.fgm++;
             this.threePointMade++;
@@ -108,8 +106,7 @@ public class InGamePlayer {
     }
 
     public void recordTwoPointShot(boolean made) {
-        this.fga++;
-        this.twoPointAttempts++;
+
         if (made) {
             this.fgm++;
             this.twoPointMade++;
@@ -118,8 +115,6 @@ public class InGamePlayer {
     }
 
     public void recordDrive(boolean made) {
-        this.fga++;
-        this.driveAttempts++;
         if (made) {
             this.fgm++;
             this.driveMade++;

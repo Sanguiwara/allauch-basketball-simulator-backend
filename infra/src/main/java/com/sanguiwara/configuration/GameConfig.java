@@ -55,6 +55,9 @@ public class GameConfig {
     public PlaymakingCalculator playmakingCalculator() { return new PlaymakingCalculator();}
 
     @Bean
+    public StealSimulator stealSimulator(Random random) { return new StealSimulator(random);}
+
+    @Bean
     public ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator(
             Random random,
             ThreePointSpecification spec) {
@@ -86,9 +89,10 @@ public class GameConfig {
                                         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
                                         PlaymakingCalculator playmakingCalculator,
                                         ReboundCalculator reboundCalculator,
-                                        BlockCalculator blockCalculator
+                                        BlockCalculator blockCalculator,
+                                        StealSimulator stealSimulator
     ) {
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
 

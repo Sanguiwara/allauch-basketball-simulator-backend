@@ -100,7 +100,7 @@ class PlaymakingCalculatorTest {
     }
 
     @Test
-    void getTotalPlaymakingContribution_setsAssistWeights_andReturnsProbability() {
+    void setAssistProbability_setsAssistWeights_andReturnsProbability() {
         PlaymakingCalculator calc = new PlaymakingCalculator();
 
         // Build two players vs two defenders with different strengths to avoid zero division
@@ -127,7 +127,7 @@ class PlaymakingCalculatorTest {
         GamePlan visitor = new GamePlan(null, null, null);
         visitor.setMatchups(matchups);
 
-        double assistedPct = calc.getTotalPlaymakingContribution(home, visitor);
+        double assistedPct = calc.setAssistProbability(home, visitor);
         log.info("Total assisted shot probability: {}", assistedPct);
 
         // Probability is clamped between 0.10 and 0.50

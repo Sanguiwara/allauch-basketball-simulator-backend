@@ -33,6 +33,15 @@ public class GamePlan {
     private double blockScore;
     private double blockProbability;
 
+    private double assistProbability;
+
+    public void addPossessions(int steals){
+        totalShotNumber = totalShotNumber + steals;
+    }
+    public void removePossessions(int steals){
+        totalShotNumber = totalShotNumber - steals;
+    }
+
 
 
     public void setThreePointAttemptShare(double share) {

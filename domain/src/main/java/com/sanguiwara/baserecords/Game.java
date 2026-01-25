@@ -1,6 +1,6 @@
 package com.sanguiwara.baserecords;
 
-import com.sanguiwara.result.BoxScore;
+import com.sanguiwara.result.GameResult;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,17 +9,16 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class Game  {
+public class Game {
 
     private final GamePlan homeGamePlan;
     private final GamePlan awayGamePlan;
     private final UUID id;
     private final Instant executeAt;
-    private BoxScore boxScore;
+    private GameResult gameResult;
 
 
-
-    public Game(UUID id, Instant executeAt, GamePlan homeGamePlan , GamePlan awayGamePlan) {
+    public Game(UUID id, Instant executeAt, GamePlan homeGamePlan, GamePlan awayGamePlan) {
         this.id = id;
         this.homeGamePlan = homeGamePlan;
         this.awayGamePlan = awayGamePlan;
