@@ -17,7 +17,7 @@ public class TeamFactory {
     public Team generateTeam(AgeCategory ageCategory, Gender gender, List<Player> players) {
 
 
-        var team = new Team(UUID.randomUUID(), ageCategory, gender);
+        var team = new Team(null, ageCategory, gender);
         team.setPlayers(players);
 
 

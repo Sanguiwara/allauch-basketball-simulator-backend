@@ -9,6 +9,8 @@ public interface GamePlanRepository {
 
     Optional<GamePlan> findById(UUID id);
 
+    GamePlan update(GamePlan gamePlan);
+
     GamePlan save(GamePlan gamePlan);
 
     void deleteById(UUID id);

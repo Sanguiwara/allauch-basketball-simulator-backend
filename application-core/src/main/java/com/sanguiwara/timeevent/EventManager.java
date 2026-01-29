@@ -1,6 +1,10 @@
 package com.sanguiwara.timeevent;
 
 
+import com.sanguiwara.repository.GameTimeEventRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,7 +17,11 @@ import java.util.stream.Collectors;
  * Designed for a "simulation/game loop" style:
  * you call {@link #runDueEvents(Instant)} whenever your game time advances.
  */
+@RequiredArgsConstructor
+@Service
 public class EventManager {
+
+    private final GameTimeEventRepository gameTimeEventRepository;
 
     // Next events first
     private final PriorityQueue<TimeEvent> queue = new PriorityQueue<>(
@@ -27,11 +35,17 @@ public class EventManager {
     public void schedule(TimeEvent timeEvent) {
         Objects.requireNonNull(timeEvent, "event");
 
-        if (eventById.containsKey(timeEvent.getId())) {
-            throw new IllegalArgumentException("Event id already scheduled: " + timeEvent.getId());
-        }
         eventById.put(timeEvent.getId(), timeEvent);
         queue.add(timeEvent);
+    }
+
+    public void populateFromDatabase() {
+
+
+            gameTimeEventRepository.findAll().forEach(this::schedule);
+
+
+
     }
 
     /** Cancel a scheduled event by id. Returns true if it existed. */
@@ -98,11 +112,4 @@ public class EventManager {
         return executed;
     }
 
-    /**
-     * Convenience: advance game time to `newTime` and run due events.
-     * If you track game time elsewhere, you can ignore this method.
-     */
-    public int advanceTo(Instant newTime) {
-        return runDueEvents(newTime);
-    }
 }

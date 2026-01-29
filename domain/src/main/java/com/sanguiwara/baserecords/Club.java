@@ -1,6 +1,17 @@
 package com.sanguiwara.baserecords;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public record Club(List<Team> teams,Long id, String name) {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@Getter
+public class Club {
+
+    private List<Team> teams = new ArrayList<>();
+    private UUID id;
+    private final String name;
 }

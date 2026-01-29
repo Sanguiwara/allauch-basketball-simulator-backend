@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -17,7 +18,8 @@ import java.util.UUID;
 public class LeagueEntity {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @UuidGenerator
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     @Enumerated(EnumType.STRING)

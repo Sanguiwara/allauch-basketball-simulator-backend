@@ -1,4 +1,6 @@
 package com.sanguiwara.baserecords;
 
-public record League(AgeCategory ageCategory, Gender gender) {
+import java.util.UUID;
+
+public record League(UUID id, AgeCategory ageCategory, Gender gender, int level) {
 }

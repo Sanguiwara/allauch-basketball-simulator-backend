@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,6 +19,7 @@ public class LeagueSeasonEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
+    @UuidGenerator
     private UUID id;
 
     @Column(name = "year", nullable = false)
@@ -27,11 +29,7 @@ public class LeagueSeasonEntity {
     @JoinColumn(name = "league_id", nullable = false)
     private LeagueEntity league;
 
-    @ManyToMany
-    @JoinTable(
-            name = "league_season_teams",
-            joinColumns = @JoinColumn(name = "league_season_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_id")
-    )
-    private Set<TeamEntity> teams = new HashSet<>();
+    // LeagueSeasonEntity
+    @OneToMany(mappedBy = "leagueSeason", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TeamSeasonEntity> teamSeasons = new HashSet<>();
 }

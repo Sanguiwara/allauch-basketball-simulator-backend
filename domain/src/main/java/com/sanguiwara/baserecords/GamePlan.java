@@ -5,34 +5,44 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
 public class GamePlan {
 
+    public GamePlan(UUID id, Team teamHome, Team teamVisitor) {
+        this.id = id;
+        this.teamHome = teamHome;
+        this.teamVisitor = teamVisitor;
+    }
+
+
+
+    private  List<InGamePlayer> activePlayers;
 
     private final UUID id;
 
     private final Team teamHome;
     private final Team teamVisitor;
 
-    private  List<InGamePlayer> activePlayers;
 
-    private  Map<Player, Player> matchups;
-    private  Map<Position, InGamePlayer> positions;
-    private int totalShotNumber;
 
-    private double threePointAttemptShare; //[0;1]
-    private double midRangeAttemptShare;
-    private double driveAttemptShare;
+    private  Map<Player, Player> matchups = new HashMap<>();
+    private  Map<Position, InGamePlayer> positions = new HashMap<>();
 
+    private double threePointAttemptShare =  1.0/3.0;
+    private double midRangeAttemptShare = 1.0/3.0;
+    private double driveAttemptShare = 1.0/3.0;
+
+    //TODO A enlever de GamePlan
+    private int totalShotNumber = 75;
     private double blockScore;
     private double blockProbability;
-
     private double assistProbability;
 
     public void addPossessions(int steals){

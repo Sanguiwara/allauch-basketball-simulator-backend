@@ -4,6 +4,7 @@ import com.sanguiwara.baserecords.Position;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.*;
 
@@ -14,7 +15,8 @@ import java.util.*;
 public class GamePlanEntity {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @UuidGenerator
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -61,7 +63,27 @@ public class GamePlanEntity {
     @MapKeyColumn(name = "position")
     private Map<Position, InGamePlayerEntity> positions = new EnumMap<>(Position.class);
 
+    // ---- Shares & totals (doivent refléter GamePlan du domaine) ----
+    @Column(name = "three_pt_attempt_share", nullable = false)
+    private double threePointAttemptShare = 1.0 / 3.0;
 
+    @Column(name = "mid_range_attempt_share", nullable = false)
+    private double midRangeAttemptShare = 1.0 / 3.0;
+
+    @Column(name = "drive_attempt_share", nullable = false)
+    private double driveAttemptShare = 1.0 / 3.0;
+
+    @Column(name = "total_shot_number", nullable = false)
+    private int totalShotNumber = 0;
+
+    @Column(name = "block_score", nullable = false)
+    private double blockScore = 0.0;
+
+    @Column(name = "block_probability", nullable = false)
+    private double blockProbability = 0.0;
+
+    @Column(name = "assist_probability", nullable = false)
+    private double assistProbability = 0.0;
 }
 
 

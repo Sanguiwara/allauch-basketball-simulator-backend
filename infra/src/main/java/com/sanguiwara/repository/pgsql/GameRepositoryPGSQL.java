@@ -28,7 +28,9 @@ public class GameRepositoryPGSQL implements GameRepository {
 
     @Override
     public Game save(Game game) {
-        return null;
+        var entity = gameMapper.toEntity(game);
+        var saved = gameJpaRepository.save(entity);
+        return gameMapper.toDomain(saved);
     }
 
     @Override

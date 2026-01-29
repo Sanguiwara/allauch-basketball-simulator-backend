@@ -10,9 +10,9 @@ import org.mapstruct.ReportingPolicy;
 public interface LeagueSeasonMapper {
 
     // Teams mapping is complex (TeamForSeason). Ignore for now; only map league and year.
-    @Mapping(target = "teams", ignore = true)
+    @Mapping(target = "teamSeasons", ignore = true)
     LeagueSeasonEntity toEntity(LeagueSeason leagueSeason);
 
-    @Mapping(target = "teams", ignore = true)
+    @Mapping(target = "teamSeasons", ignore = true)
     LeagueSeason toDomain(LeagueSeasonEntity entity);
 }
