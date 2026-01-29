@@ -51,7 +51,7 @@ public class ReboundCalculator {
                 rebounder.addOffensiveRebound();
                 offensiveRebounds++;
                 if (log.isDebugEnabled() && rebounder.getPlayer() != null) {
-                    log.debug("Offensive rebound credited to: {}", rebounder.getPlayer().name());
+                    log.debug("Offensive rebound credited to: {}", rebounder.getPlayer().getName());
                 }
             }
         }
@@ -86,14 +86,14 @@ public class ReboundCalculator {
 
     private static double getPlayerReboundScore(InGamePlayer inGamePlayer) {
         Player player = inGamePlayer.getPlayer();
-        return REB_SIZE_COEFF * player.size()
-                + REB_WEIGHT_COEFF * player.weight()
-                + REB_AGGR_COEFF * player.agressivite()
-                + REB_AGGR_REB_COEFF * player.agressiviteRebond()
-                + REB_TIMING_COEFF * player.timingRebond()
-                + REB_PHYSIQUE_COEFF * player.physique()
-                + REB_IQ_COEFF * player.iq()
-                + REB_ENDURANCE_COEFF * player.endurance();
+        return REB_SIZE_COEFF * player.getSize()
+                + REB_WEIGHT_COEFF * player.getWeight()
+                + REB_AGGR_COEFF * player.getAgressivite()
+                + REB_AGGR_REB_COEFF * player.getAgressiviteRebond()
+                + REB_TIMING_COEFF * player.getTimingRebond()
+                + REB_PHYSIQUE_COEFF * player.getPhysique()
+                + REB_IQ_COEFF * player.getIq()
+                + REB_ENDURANCE_COEFF * player.getEndurance();
     }
 
     private InGamePlayer pickRebounder(List<InGamePlayer> potentialRebounders) {

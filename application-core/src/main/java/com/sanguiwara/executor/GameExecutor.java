@@ -93,7 +93,7 @@ private void printPlayerStats(String label, List<InGamePlayer> players) {
         double twoPct = twoPointAttempts == 0 ? 0.0 : (100.0 * twoPointMade / twoPointAttempts);
 
         System.out.printf("%-20s | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %5.1f%% | %-5d | %-5d%n",
-                player.name(),
+                player.getName(),
                 p.getPoints(),
                 p.getAssists(),
                 p.getBlocks(),

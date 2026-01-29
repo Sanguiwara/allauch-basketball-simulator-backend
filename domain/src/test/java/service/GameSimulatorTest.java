@@ -96,11 +96,11 @@ class GameSimulatorTest {
 
     private static Map<Position, InGamePlayer> createPositionMap(PlayerFactory factory, String prefix) {
         Map<Position, InGamePlayer> pos = new EnumMap<>(Position.class);
-        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( prefix + "_PG"), 30, 15, 15));
-        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( prefix + "_SG"), 15, 15, 15));
-        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(prefix + "_SF"), 15, 15, 15));
-        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( prefix + "_PF"), 15, 15, 15));
-        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( prefix + "_C"), 15, 15, 15));
+        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( prefix + "_PG")));
+        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( prefix + "_SG")));
+        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(prefix + "_SF")));
+        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( prefix + "_PF")));
+        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( prefix + "_C")));
         return pos;
     }
 
@@ -325,7 +325,7 @@ class GameSimulatorTest {
             double twoPct = twoPointAttempts == 0 ? 0.0 : (100.0 * twoPointMade / twoPointAttempts);
 
             System.out.printf("%-20s | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %-5d | %5.1f%% | %-5d | %-5d%n",
-                    player.name(),
+                    player.getName(),
                     p.getPoints(),
                     p.getAssists(),
                     p.getBlocks(),

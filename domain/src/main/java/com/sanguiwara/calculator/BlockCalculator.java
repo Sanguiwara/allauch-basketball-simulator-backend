@@ -36,12 +36,12 @@ public class BlockCalculator {
 
     private static double getPlayerBlockScore(InGamePlayer inGamePlayer) {
         Player player = inGamePlayer.getPlayer();
-        return SIZE_WEIGHT * player.size()
-                + AGRESSIVITE_WEIGHT * player.agressivite()
-                + PHYSIQUE_WEIGHT * player.physique()
-                + BBIQ_DEF_WEIGHT * player.basketballIqDef()
-                + TIMING_BLOCK_WEIGHT * player.timingBlock()
-                + ENDURANCE_WEIGHT * player.endurance();
+        return SIZE_WEIGHT * player.getSize()
+                + AGRESSIVITE_WEIGHT * player.getAgressivite()
+                + PHYSIQUE_WEIGHT * player.getPhysique()
+                + BBIQ_DEF_WEIGHT * player.getBasketballIqDef()
+                + TIMING_BLOCK_WEIGHT * player.getTimingBlock()
+                + ENDURANCE_WEIGHT * player.getEndurance();
     }
     public static double scoreToProbability(double score) {
         return MIN_BLOCK_PROBABILITY +  (score / MAX_SCORE) * (MAX_BLOCK_PROBABILITY - MIN_BLOCK_PROBABILITY);

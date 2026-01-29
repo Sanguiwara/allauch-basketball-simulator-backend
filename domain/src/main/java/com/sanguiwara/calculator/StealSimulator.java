@@ -66,7 +66,7 @@ public class StealSimulator {
                 assert stealer != null;
                 stealer.setSteals(stealer.getSteals() + 1);
                 steals++;
-                    log.debug("Steal credited to: {}", stealer.getPlayer().name());
+                    log.debug("Steal credited to: {}", stealer.getPlayer().getName());
 
 
             }
@@ -95,12 +95,12 @@ public class StealSimulator {
 
     private static double getPlayerStealScore(InGamePlayer inGamePlayer) {
         Player p = inGamePlayer.getPlayer();
-        return STL_SPEED_WEIGHT * p.speed()
-                + STL_DEF_EXT_WEIGHT * p.defExterieur()
-                + STL_STEAL_WEIGHT * p.steal()
-                + STL_BBIQ_DEF_WEIGHT * p.basketballIqDef()
-                + STL_ENDURANCE_WEIGHT * p.endurance()
-                + STL_PHYSIQUE_WEIGHT * p.physique();
+        return STL_SPEED_WEIGHT * p.getSpeed()
+                + STL_DEF_EXT_WEIGHT * p.getDefExterieur()
+                + STL_STEAL_WEIGHT * p.getSteal()
+                + STL_BBIQ_DEF_WEIGHT * p.getBasketballIqDef()
+                + STL_ENDURANCE_WEIGHT * p.getEndurance()
+                + STL_PHYSIQUE_WEIGHT * p.getPhysique();
     }
 
     private static double scoreToProbability(double score) {

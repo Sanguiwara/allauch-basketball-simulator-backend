@@ -50,7 +50,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         double totalWeight = 0.0;
         for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
             double usage01 = (inGamePlayer.getUsageShoot() - USAGE_MIN_THRESHOLD) / USAGE_NORMALIZATION_DIVISOR;
-            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_NORMALIZATION_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().getAgressivite() / AGGRESSIVENESS_NORMALIZATION_DIVISOR;
             double intensity = NORMALIZED_USAGE_COEFFICIENT * usage01 + NORMALIZED_AGGRESSIVENESS_COEFFICIENT * aggr01;
             totalWeight += intensity;
             inGamePlayer.setThreePointContribution(intensity);
@@ -72,7 +72,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) {
         double assistBonusPct = isAssistedShot ? ASSIST_BONUS_PCT : 0.0;
-        double basePct = (shooter.getPlayer().tir3Pts() / RATING_NORMALIZATION_DIVISOR) * BASE_THREE_POINT_PROBABILITY_COEFFICIENT;
+        double basePct = (shooter.getPlayer().getTir3Pts() / RATING_NORMALIZATION_DIVISOR) * BASE_THREE_POINT_PROBABILITY_COEFFICIENT;
         double advantagePct = (advantage / ADVANTAGE_NORMALIZATION_DIVISOR) * ADVANTAGE_THREE_POINT_COEFFICIENT;
         return basePct + advantagePct + assistBonusPct;
     }
@@ -80,17 +80,17 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public double evaluateMatchupAdvantage(Player attacker, Player defender) {
         double offScore =
-                SCORE_SPEED_WEIGHT_OFF * attacker.speed() +
-                        SCORE_SIZE_WEIGHT_OFF * attacker.size()
-                        + SCORE_ENDURANCE_WEIGHT_OFF * attacker.endurance() +
-                        SCORE_RATING_WEIGHT_OFF * attacker.tir3Pts() +
-                        SCORE_IQ_WEIGHT_OFF * attacker.basketballIqOff();
+                SCORE_SPEED_WEIGHT_OFF * attacker.getSpeed() +
+                        SCORE_SIZE_WEIGHT_OFF * attacker.getSize()
+                        + SCORE_ENDURANCE_WEIGHT_OFF * attacker.getEndurance() +
+                        SCORE_RATING_WEIGHT_OFF * attacker.getTir3Pts() +
+                        SCORE_IQ_WEIGHT_OFF * attacker.getBasketballIqOff();
         double defScore =
-                SCORE_SPEED_WEIGHT_DEF * defender.speed() +
-                        SCORE_SIZE_WEIGHT_DEF * defender.size() +
-                        SCORE_DEF_EXT_WEIGHT * defender.defExterieur()
-                        + SCORE_ENDURANCE_WEIGHT_DEF * defender.endurance() +
-                        SCORE_IQ_WEIGHT_DEF * defender.basketballIqDef();
+                SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
+                        SCORE_SIZE_WEIGHT_DEF * defender.getSize() +
+                        SCORE_DEF_EXT_WEIGHT * defender.getDefExterieur()
+                        + SCORE_ENDURANCE_WEIGHT_DEF * defender.getEndurance() +
+                        SCORE_IQ_WEIGHT_DEF * defender.getBasketballIqDef();
         double adv = offScore - defScore;
 
         return Math.max(ADVANTAGE_CLAMP_MIN, Math.min(ADVANTAGE_CLAMP_MAX, adv));
@@ -104,7 +104,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordThreePointShot(made);
-        return new ThreePointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new ThreePointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
 
