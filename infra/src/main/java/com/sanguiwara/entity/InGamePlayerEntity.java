@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -15,7 +16,8 @@ import java.util.UUID;
 public class InGamePlayerEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // Hibernate 6 / Spring Boot 3
+    @UuidGenerator
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
     // InGamePlayerEntity
@@ -34,6 +36,42 @@ public class InGamePlayerEntity {
     @Column(name = "assist_weight", nullable = false)
     private double assistWeight = 0.0;
 
+    @Column(name = "rebound_contrib", nullable = false)
+    private double reboundContribution = 0.0;
+
+    @Column(name = "rebound_weight", nullable = false)
+    private double reboundWeight = 0.0;
+
+    @Column(name = "three_pt_contrib", nullable = false)
+    private double threePointContribution = 0.0;
+
+    @Column(name = "three_pt_weight", nullable = false)
+    private double threePointWeight = 0.0;
+
+    @Column(name = "two_pt_contrib", nullable = false)
+    private double twoPointContribution = 0.0;
+
+    @Column(name = "two_pt_weight", nullable = false)
+    private double twoPointWeight = 0.0;
+
+    @Column(name = "drive_contrib", nullable = false)
+    private double driveContribution = 0.0;
+
+    @Column(name = "drive_weight", nullable = false)
+    private double driveWeight = 0.0;
+
+    @Column(name = "block_contrib", nullable = false)
+    private double blockContribution = 0.0;
+
+    @Column(name = "block_weight", nullable = false)
+    private double blockWeight = 0.0;
+
+    @Column(name = "steal_contrib", nullable = false)
+    private double stealContribution = 0.0;
+
+    @Column(name = "steal_weight", nullable = false)
+    private double stealWeight = 0.0;
+
     // Usage
     @Column(name = "usage_shoot", nullable = false)
     private int usageShoot;
@@ -50,6 +88,18 @@ public class InGamePlayerEntity {
 
     @Column(name = "points", nullable = false)
     private int points;
+
+    @Column(name = "off_reb", nullable = false)
+    private int offensiveRebounds;
+
+    @Column(name = "def_reb", nullable = false)
+    private int defensiveRebounds;
+
+    @Column(name = "steals", nullable = false)
+    private int steals;
+
+    @Column(name = "blocks", nullable = false)
+    private int blocks;
 
     @Column(name = "fga", nullable = false)
     private int fga;
@@ -71,4 +121,13 @@ public class InGamePlayerEntity {
 
     @Column(name = "is_starter", nullable = false)
     private boolean starter;
+
+    @Column(name = "drive_pa", nullable = false)
+    private int driveAttempts;
+
+    @Column(name = "drive_pm", nullable = false)
+    private int driveMade;
+
+    @Column(name = "minutes_played", nullable = false)
+    private int minutesPlayed = 20;
 }

@@ -21,8 +21,8 @@ public final class PlayerFactory {
     public Player generatePlayer(String name) {
 
         return new Player(
-                UUID.randomUUID(),
-                name,
+                null,
+                generateRandomName(),
                 r(1985, 2006), // birthDate (année) si tu gardes int
 
                 // Tirs / finition
@@ -69,4 +69,24 @@ public final class PlayerFactory {
                 r(30, 95)  // leadership
         );
     }
+
+    public String generateRandomName() {
+        String[] firstNames = {
+                "LeBron", "Kevin", "Stephen", "Luka", "Giannis",
+                "Jayson", "Joel", "Nikola", "Damian", "Devin",
+                "Anthony", "Kawhi", "Jimmy", "Donovan", "CJ"
+        };
+
+        String[] lastNames = {
+                "James", "Durant", "Curry", "Doncic", "Antetokounmpo",
+                "Tatum", "Embiid", "Jokic", "Lillard", "Booker",
+                "Davis", "Leonard", "Butler", "Mitchell", "McCollum"
+        };
+
+        String firstName = firstNames[rng.nextInt(firstNames.length)];
+        String lastName = lastNames[rng.nextInt(lastNames.length)];
+
+        return firstName + " " + lastName;
+    }
+
 }

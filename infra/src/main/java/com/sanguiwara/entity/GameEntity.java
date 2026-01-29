@@ -1,9 +1,11 @@
 package com.sanguiwara.entity;
 
+import com.sanguiwara.baserecords.GamePlan;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,18 +18,17 @@ import java.util.UUID;
 public class GameEntity {
 
     @Id
-    @Column(name = "id", nullable = false, updatable = false, columnDefinition = "uuid")
+    @UuidGenerator
+    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "execute_at", nullable = false)
-    private Instant executeAt;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "home_team_id", nullable = false)
-    private TeamEntity homeTeam;
+    private GamePlanEntity homeGamePlan;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "away_team_id", nullable = false)
-    private TeamEntity awayTeam;
+    private GamePlanEntity awayGamePlan;
 
 }

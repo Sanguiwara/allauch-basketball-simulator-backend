@@ -85,7 +85,7 @@ class PlaymakingCalculatorTest {
         // Offensive player stronger than defender -> positive advantage
         Player strongOff = playerWithRatings(90);
         Player weakDef = playerWithRatings(30);
-        InGamePlayer igp = new InGamePlayer(strongOff, 20, 20, 20);
+        InGamePlayer igp = new InGamePlayer(strongOff);
 
         double adv = calc.getIndividualPlayMakingContribution(igp, weakDef);
         log.info("Advantage strongOff vs weakDef: {} ",  igp.getPlaymakingContribution());
@@ -93,7 +93,7 @@ class PlaymakingCalculatorTest {
         // Inverse: very strong defender, weak attacker -> negative but clamped >= -5
         Player weakOff = playerWithRatings(20);
         Player strongDef = playerWithRatings(95);
-        InGamePlayer igp2 = new InGamePlayer(weakOff, 20, 20, 20);
+        InGamePlayer igp2 = new InGamePlayer(weakOff);
         double adv2 = calc.getIndividualPlayMakingContribution(igp2, strongDef);
         log.info("Advantage weakOff vs strongDef: {}", igp2.getPlaymakingContribution());
         assertTrue(adv >= adv2);
@@ -104,8 +104,8 @@ class PlaymakingCalculatorTest {
         PlaymakingCalculator calc = new PlaymakingCalculator();
 
         // Build two players vs two defenders with different strengths to avoid zero division
-        InGamePlayer off1 = new InGamePlayer(playerWithRatings(85), 20, 20, 20);
-        InGamePlayer off2 = new InGamePlayer(playerWithRatings(75), 20, 20, 20);
+        InGamePlayer off1 = new InGamePlayer(playerWithRatings(85));
+        InGamePlayer off2 = new InGamePlayer(playerWithRatings(75));
         List<InGamePlayer> active = new ArrayList<>(List.of(off1, off2));
 
         Player def1 = playerWithRatings(50);
@@ -115,7 +115,7 @@ class PlaymakingCalculatorTest {
         GamePlan away = new GamePlan(null, null, null);
 
         home.setActivePlayers(active);
-        away.setActivePlayers(List.of(new InGamePlayer(def1, 0, 0, 0), new InGamePlayer(def2, 0, 0, 0)));
+        away.setActivePlayers(List.of(new InGamePlayer(def1), new InGamePlayer(def2)));
 
         Map<Player, Player> matchups = new HashMap<>();
         matchups.put(off1.getPlayer(), def1);

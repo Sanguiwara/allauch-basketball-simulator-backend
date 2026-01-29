@@ -8,6 +8,7 @@ import com.sanguiwara.repository.jpa.GamePlanJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
     }
 
     @Override
-    public GamePlan save(GamePlan gamePlan) {
+    public GamePlan update(GamePlan gamePlan) {
         var gamePlanEntity = gamePlanJpaRepository.findById(gamePlan.getId())
                 .orElseThrow();
 
@@ -34,7 +35,10 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
         gamePlanMapper.updateEntity(gamePlanEntity, gamePlan);
 
         // 2) replace activePlayers "à la main"
-        gamePlanEntity.getActivePlayers().clear();
+        if(gamePlanEntity.getActivePlayers()!=null)
+            gamePlanEntity.getActivePlayers().clear();
+        else
+            gamePlanEntity.setActivePlayers(new ArrayList<>());
 
         if (gamePlan.getActivePlayers() != null) {
             for (var activePlayer : gamePlan.getActivePlayers()) {
@@ -46,6 +50,12 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
         var saved = gamePlanJpaRepository.save(gamePlanEntity);
         return gamePlanMapper.toDomain(saved);
+    }
+
+    @Override
+    public GamePlan save(GamePlan gamePlan) {
+        var entity = gamePlanMapper.toEntity(gamePlan); // ou toEntity simple
+        return gamePlanMapper.toDomain(gamePlanJpaRepository.save(entity));
     }
 
     @Override

@@ -2,28 +2,26 @@ package com.sanguiwara.baserecords;
 
 import com.sanguiwara.result.GameResult;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-@Setter
+@RequiredArgsConstructor
 public class Game {
 
+    private final UUID id;
     private final GamePlan homeGamePlan;
     private final GamePlan awayGamePlan;
-    private final UUID id;
-    private final Instant executeAt;
+    private final LeagueSeason leagueSeason;
+
+    @Setter
     private GameResult gameResult;
 
 
-    public Game(UUID id, Instant executeAt, GamePlan homeGamePlan, GamePlan awayGamePlan) {
-        this.id = id;
-        this.homeGamePlan = homeGamePlan;
-        this.awayGamePlan = awayGamePlan;
-        this.executeAt = executeAt;
-    }
+
 
 
 }

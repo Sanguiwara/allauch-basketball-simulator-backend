@@ -14,7 +14,7 @@ public class GamePlanFactory {
     public GamePlan generateGamePlan(Team t1, Team t2) {
 
 
-        return new GamePlan(UUID.randomUUID(), t1, t2);
+        return new GamePlan(null, t1, t2);
 
     }
 }

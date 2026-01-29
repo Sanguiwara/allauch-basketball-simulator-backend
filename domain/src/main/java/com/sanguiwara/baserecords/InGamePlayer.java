@@ -9,7 +9,13 @@ import lombok.Setter;
 @Setter
 public class InGamePlayer {
 
+
     private final Player player;
+
+    private int usageShoot = 10;
+    private int usageDrive = 10 ;
+    private int usagePost = 10;
+
 
     // --- Inputs calculés pour ce match ---
     private double playmakingContribution;
@@ -52,9 +58,6 @@ public class InGamePlayer {
     private int driveAttempts;
     private int driveMade;
 
-    private final int usageShoot;
-    private final int usageDrive;
-    private final int usagePost;
 
 
     private int minutesPlayed = 20;
@@ -121,4 +124,6 @@ public class InGamePlayer {
             this.points += 2;
         }
     }
+
+
 }

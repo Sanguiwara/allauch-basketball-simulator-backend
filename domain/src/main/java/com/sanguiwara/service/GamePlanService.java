@@ -9,7 +9,7 @@ public interface GamePlanService {
     Optional<GamePlan> getGamePlan(UUID id);
 
 
-    GamePlan save(GamePlan gamePlan);
+    GamePlan update(GamePlan gamePlan);
 
 
     void delete(UUID id);

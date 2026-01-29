@@ -25,8 +25,8 @@ public class GamePlanServiceImpl implements GamePlanService {
     }
 
 
-    @Override public GamePlan save(GamePlan gamePlan) {
-        return gamePlanRepository.save(gamePlan);
+    @Override public GamePlan update(GamePlan gamePlan) {
+        return gamePlanRepository.update(gamePlan);
     }
 
 
@@ -40,7 +40,7 @@ public class GamePlanServiceImpl implements GamePlanService {
         Team away = teamService.generateTeam(AgeCategory.SENIOR, Gender.MALE);
 
         GamePlan gamePlan = gamePlanFactory.generateGamePlan(home, away);
-        save(gamePlan);
+        update(gamePlan);
         return gamePlan;
     }
 

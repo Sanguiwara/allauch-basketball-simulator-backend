@@ -83,9 +83,9 @@ class ShotSimulatorTest {
     void pickAssister_shouldRespectAssistProbability_andWeights() {
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 1.0));
 
-        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"), 20, 10, 10);
-        InGamePlayer p1 = new InGamePlayer(p("P1"), 10, 10, 10);
-        InGamePlayer p2 = new InGamePlayer(p("P2"), 10, 10, 10);
+        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"));
+        InGamePlayer p1 = new InGamePlayer(p("P1"));
+        InGamePlayer p2 = new InGamePlayer(p("P2"));
         p1.setAssistWeight(1.0);
         p2.setAssistWeight(3.0);
         List<InGamePlayer> all = List.of( p1, p2);
@@ -118,8 +118,8 @@ class ShotSimulatorTest {
     void getTotalShotContribution_aggregatesAcrossPlayers() {
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(5, 1.0));
 
-        InGamePlayer off1 = new InGamePlayer(p("O1"), 20, 10, 10);
-        InGamePlayer off2 = new InGamePlayer(p("O2"), 20, 10, 10);
+        InGamePlayer off1 = new InGamePlayer(p("O1"));
+        InGamePlayer off2 = new InGamePlayer(p("O2"));
         off1.setAssistWeight(0.5);
         off2.setAssistWeight(0.5);
 
