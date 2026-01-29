@@ -54,7 +54,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         double totalWeight = 0.0;
         for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
             double usage01 = (inGamePlayer.getUsagePost() - USAGE_BASE_OFFSET) / USAGE_DIVISOR;
-            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().getAgressivite() / AGGRESSIVENESS_DIVISOR;
             double intensity = USAGE_WEIGHT * usage01 + AGGR_WEIGHT * aggr01;
             totalWeight += intensity;
             inGamePlayer.setTwoPointContribution(intensity);
@@ -77,8 +77,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
 
         double assistBonusPct = isAssistedShot ? ASSIST_BONUS_PCT : 0.0;
 
-        double base = BASE_SHOT_PCT + (shooter.getPlayer().tir2Pts() / 100.0) * TWO_POINT_SHOT_COEFF
-                + (shooter.getPlayer().size() / 100.0) * SIZE_PCT_COEFF;
+        double base = BASE_SHOT_PCT + (shooter.getPlayer().getTir2Pts() / 100.0) * TWO_POINT_SHOT_COEFF
+                + (shooter.getPlayer().getSize() / 100.0) * SIZE_PCT_COEFF;
 
         double scaledMatchupAdvantageImpact = (matchupAdvantage / MAX_MATCHUP_ADVANTAGE) * MATCHUP_COEFFICIENT;
 
@@ -89,20 +89,20 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     @Override
     public double evaluateMatchupAdvantage(Player attacker, Player defender) {
         double offScore =
-                OFF_SPEED_COEFF * attacker.speed()
-                        + OFF_SIZE_COEFF * attacker.size()
-                        + OFF_ENDURANCE_COEFF * attacker.endurance()
-                        + OFF_BALLHANDLING_COEFF * attacker.ballhandling()
-                        + OFF_FINISH_AT_RIM_COEFF * attacker.finitionAuCercle()
-                        + OFF_IQ_COEFF * attacker.basketballIqOff();
+                OFF_SPEED_COEFF * attacker.getSpeed()
+                        + OFF_SIZE_COEFF * attacker.getSize()
+                        + OFF_ENDURANCE_COEFF * attacker.getEndurance()
+                        + OFF_BALLHANDLING_COEFF * attacker.getBallhandling()
+                        + OFF_FINISH_AT_RIM_COEFF * attacker.getFinitionAuCercle()
+                        + OFF_IQ_COEFF * attacker.getBasketballIqOff();
 
         double defScore =
-                DEF_SPEED_COEFF * defender.speed()
-                        + DEF_SIZE_COEFF * defender.size()
-                        + DEF_ENDURANCE_COEFF * defender.endurance()
-                        + DEF_IQ_COEFF * defender.basketballIqDef()
-                        + DEF_STEAL_COEFF * defender.steal()
-                        + DEF_INTERIOR_POST_COEFF * defender.defPoste();
+                DEF_SPEED_COEFF * defender.getSpeed()
+                        + DEF_SIZE_COEFF * defender.getSize()
+                        + DEF_ENDURANCE_COEFF * defender.getEndurance()
+                        + DEF_IQ_COEFF * defender.getBasketballIqDef()
+                        + DEF_STEAL_COEFF * defender.getSteal()
+                        + DEF_INTERIOR_POST_COEFF * defender.getDefPoste();
         return offScore - defScore;
         //TODO Ajouter un clamp?
     }
@@ -115,7 +115,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     @Override
     public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordTwoPointShot(made);
-        return new TwoPointShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new TwoPointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
     @Override

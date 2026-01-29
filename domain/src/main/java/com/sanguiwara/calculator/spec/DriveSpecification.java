@@ -57,7 +57,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
         double totalWeight = 0.0;
         for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
             double usage01 = (inGamePlayer.getUsageShoot() - USAGE_THRESHOLD) / USAGE_DIVISOR;
-            double aggr01 = inGamePlayer.getPlayer().agressivite() / AGGRESSIVENESS_DIVISOR;
+            double aggr01 = inGamePlayer.getPlayer().getAgressivite() / AGGRESSIVENESS_DIVISOR;
             double intensity = INTENSITY_USAGE_WEIGHT * usage01 + INTENSITY_AGGR_WEIGHT * aggr01;
             totalWeight += intensity;
             inGamePlayer.setDriveContribution(intensity);
@@ -80,8 +80,8 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
         Player attacker = off.getPlayer();
         double assistBonusPct = isAssistedShot ? ASSIST_BONUS_PCT : 0.0;
 
-        double base = BASE_DRIVE_SUCCESS + (attacker.finitionAuCercle() / 100.0) * FINITION_CERCLE_WEIGHT
-                + (attacker.floater() / 100.0) * FLOATER_WEIGHT;
+        double base = BASE_DRIVE_SUCCESS + (attacker.getFinitionAuCercle() / 100.0) * FINITION_CERCLE_WEIGHT
+                + (attacker.getFloater() / 100.0) * FLOATER_WEIGHT;
 
         double advPct = (advantage / ADVANTAGE_DIVISOR) * ADVANTAGE_IMPACT_COEFFICIENT;
 
@@ -93,22 +93,22 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     @Override
     public double evaluateMatchupAdvantage(Player attacker, Player defender) {
         double offScore =
-                OFF_SPEED_WEIGHT * attacker.speed()
-                        + OFF_SIZE_WEIGHT * attacker.size()
-                        + OFF_ENDURANCE_WEIGHT * attacker.endurance()
-                        + OFF_BALLHANDLING_WEIGHT * attacker.ballhandling()
-                        + OFF_FINITION_WEIGHT * attacker.finitionAuCercle()
-                        + OFF_FLOATER_WEIGHT * attacker.floater()
-                        + OFF_IQ_WEIGHT * attacker.basketballIqOff();
+                OFF_SPEED_WEIGHT * attacker.getSpeed()
+                        + OFF_SIZE_WEIGHT * attacker.getSize()
+                        + OFF_ENDURANCE_WEIGHT * attacker.getEndurance()
+                        + OFF_BALLHANDLING_WEIGHT * attacker.getBallhandling()
+                        + OFF_FINITION_WEIGHT * attacker.getFinitionAuCercle()
+                        + OFF_FLOATER_WEIGHT * attacker.getFloater()
+                        + OFF_IQ_WEIGHT * attacker.getBasketballIqOff();
 
         double defScore =
-                DEF_SPEED_WEIGHT * defender.speed()
-                        + DEF_SIZE_WEIGHT * defender.size()
-                        + DEF_EXTERIEUR_WEIGHT * defender.defExterieur()
-                        + DEF_ENDURANCE_WEIGHT * defender.endurance()
-                        + DEF_IQ_WEIGHT * defender.basketballIqDef()
-                        + DEF_STEAL_WEIGHT * defender.steal()
-                        + DEF_POSTE_WEIGHT * defender.defPoste();
+                DEF_SPEED_WEIGHT * defender.getSpeed()
+                        + DEF_SIZE_WEIGHT * defender.getSize()
+                        + DEF_EXTERIEUR_WEIGHT * defender.getDefExterieur()
+                        + DEF_ENDURANCE_WEIGHT * defender.getEndurance()
+                        + DEF_IQ_WEIGHT * defender.getBasketballIqDef()
+                        + DEF_STEAL_WEIGHT * defender.getSteal()
+                        + DEF_POSTE_WEIGHT * defender.getDefPoste();
 
         return offScore - defScore;
         //TODO Clamp?
@@ -122,7 +122,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     @Override
     public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         inGamePlayer.recordDrive(made);
-        return new DriveEvent(inGamePlayer.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new DriveEvent(inGamePlayer.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
     }
 
     @Override

@@ -62,7 +62,7 @@ class ShotSimulatorTest {
         @Override public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) { return pct; }
         @Override public double evaluateMatchupAdvantage(Player attacker, Player defender) { return 0.0; }
         @Override public TestShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
-            return new TestShotEvent(shooter.getPlayer().id(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+            return new TestShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
         }
         @Override public TestShotResult createResult(int attempts, int made, List<TestShotEvent> events) { return new TestShotResult(attempts, made, events); }
         @Override public TestShotResult empty() { return new TestShotResult(0,0, List.of()); }
@@ -97,7 +97,7 @@ class ShotSimulatorTest {
 
         // With 1 probability -> always assisted and not the shooter
         InGamePlayer a = sim.pickAssister( all, 1.0);
-        log.info("Assister with 1.0 prob (one pick): {}", a != null ? a.getPlayer().name() : null);
+        log.info("Assister with 1.0 prob (one pick): {}", a != null ? a.getPlayer().getName() : null);
         assertNotNull(a);
         assertNotEquals(shooter, a);
 

@@ -71,9 +71,6 @@ public class InGamePlayer {
 
 
 
-    // -------------------------
-    // Boxscore helpers
-    // -------------------------
     public void addAssist() {
         this.assists++;
     }

@@ -54,16 +54,16 @@ class ReboundCalculatorTest {
             int endurance
     ) {
         Player p = mock(Player.class);
-        when(p.name()).thenReturn(name);
+        when(p.getName()).thenReturn(name);
 
-        when(p.size()).thenReturn(size);
-        when(p.weight()).thenReturn(weight);
-        when(p.agressivite()).thenReturn(agressivite);
-        when(p.agressiviteRebond()).thenReturn(agressiviteRebond);
-        when(p.timingRebond()).thenReturn(timingRebond);
-        when(p.physique()).thenReturn(physique);
-        when(p.iq()).thenReturn(iq);
-        when(p.endurance()).thenReturn(endurance);
+        when(p.getSize()).thenReturn(size);
+        when(p.getWeight()).thenReturn(weight);
+        when(p.getAgressivite()).thenReturn(agressivite);
+        when(p.getAgressiviteRebond()).thenReturn(agressiviteRebond);
+        when(p.getTimingRebond()).thenReturn(timingRebond);
+        when(p.getPhysique()).thenReturn(physique);
+        when(p.getIq()).thenReturn(iq);
+        when(p.getEndurance()).thenReturn(endurance);
 
         return p;
     }

@@ -15,7 +15,7 @@ public class PlayerIdMapper {
     }
 
     public UUID playerToUuid(Player p) {
-        return p == null ? null : p.id();
+        return p == null ? null : p.getId();
     }
 
     public Player uuidToPlayer(UUID id) {

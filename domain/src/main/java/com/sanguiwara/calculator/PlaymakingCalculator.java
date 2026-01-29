@@ -78,24 +78,24 @@ public class PlaymakingCalculator {
         Player off = inGameOff.getPlayer();
 
         double offScore =
-                OFF_SPEED_WEIGHT * off.speed() +
-                        OFF_SIZE_WEIGHT * off.size()
-                        + OFF_ENDURANCE_WEIGHT * off.endurance() +
-                        OFF_PASSING_WEIGHT * off.passingSkills() +
-                        OFF_IQ_WEIGHT * off.basketballIqOff() +
-                        OFF_HANDLING_WEIGHT * off.ballhandling() +
-                        OFF_3PT_WEIGHT * off.tir3Pts() +
-                        OFF_2PT_WEIGHT * off.tir2Pts()
-                        + OFF_FINISH_WEIGHT * off.finitionAuCercle()
-                        + OFF_FLOATER_WEIGHT * off.floater();
+                OFF_SPEED_WEIGHT * off.getSpeed() +
+                        OFF_SIZE_WEIGHT * off.getSize()
+                        + OFF_ENDURANCE_WEIGHT * off.getEndurance() +
+                        OFF_PASSING_WEIGHT * off.getPassingSkills() +
+                        OFF_IQ_WEIGHT * off.getBasketballIqOff() +
+                        OFF_HANDLING_WEIGHT * off.getBallhandling() +
+                        OFF_3PT_WEIGHT * off.getTir3Pts() +
+                        OFF_2PT_WEIGHT * off.getTir2Pts()
+                        + OFF_FINISH_WEIGHT * off.getFinitionAuCercle()
+                        + OFF_FLOATER_WEIGHT * off.getFloater();
 
         double defScore =
-                DEF_SPEED_WEIGHT * def.speed() +
-                        DEF_SIZE_WEIGHT * off.size() +
-                        DEF_EXTERIOR_WEIGHT * def.defExterieur()
-                        + DEF_ENDURANCE_WEIGHT * def.endurance()
-                        + DEF_IQ_WEIGHT * def.basketballIqDef()
-                        + DEF_STEAL_WEIGHT * def.steal();
+                DEF_SPEED_WEIGHT * def.getSpeed() +
+                        DEF_SIZE_WEIGHT * off.getSize() +
+                        DEF_EXTERIOR_WEIGHT * def.getDefExterieur()
+                        + DEF_ENDURANCE_WEIGHT * def.getEndurance()
+                        + DEF_IQ_WEIGHT * def.getBasketballIqDef()
+                        + DEF_STEAL_WEIGHT * def.getSteal();
 
 
         double adv = offScore - defScore;

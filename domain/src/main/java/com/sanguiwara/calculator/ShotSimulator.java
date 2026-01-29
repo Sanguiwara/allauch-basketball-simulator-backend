@@ -81,7 +81,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
                         shooter,
                         i + 1,
                         isAssistedShot,
-                        isAssistedShot ? assister.getPlayer().id() : null,
+                        isAssistedShot ? assister.getPlayer().getId() : null,
                         shotPct,
                         made,
                         matchupAdvantage,
