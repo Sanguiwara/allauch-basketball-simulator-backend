@@ -8,6 +8,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +25,25 @@ public class GameRepositoryPGSQL implements GameRepository {
     public  @NonNull Optional<Game> findById(UUID id) {
         return gameJpaRepository.findById(id).map(gameMapper::toDomain);
 
+    }
+
+    @Override
+    public List<Game> findAllGamesForAteam(UUID teamId) {
+//        return findAll().stream().filter(game-> game.getHomeGamePlan().getOwnerTeam().getId().equals(teamId) ||
+//                game.getAwayGamePlan().getOwnerTeam().getId().equals(teamId)).toList();
+        return gameJpaRepository.findAllByParticipantTeamId(teamId).stream()
+                .map(gameMapper::toDomain)
+                .toList();
+    }
+
+
+
+
+    @Override
+    public List<Game> findAll() {
+        return gameJpaRepository.findAll().stream()
+                .map(gameMapper::toDomain)
+                .toList();
     }
 
     @Override

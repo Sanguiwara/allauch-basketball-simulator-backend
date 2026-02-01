@@ -1,6 +1,5 @@
 package com.sanguiwara.entity;
 
-import com.sanguiwara.baserecords.GamePlan;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +29,9 @@ public class GameEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "away_team_id", nullable = false)
     private GamePlanEntity awayGamePlan;
+
+    @Column(name = "execute_at", nullable = false)
+    private Instant executeAt;
+
 
 }

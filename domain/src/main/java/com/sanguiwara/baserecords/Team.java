@@ -17,6 +17,7 @@ public class Team {
     private  List<Player> players;
     private final AgeCategory category;
     private final Gender gender;
+    private final String name;
 
 
 

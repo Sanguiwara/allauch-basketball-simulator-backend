@@ -47,12 +47,12 @@ public class PlaymakingCalculator {
         return clamp((playmakingContribution / ASSIST_CONTRIBUTION_DIVISOR) * ASSIST_PROBABILITY_MULTIPLIER, MIN_ASSIST_PROBABILITY, MAX_ASSIST_PROBABILITY);
     }
 
-    public double setAssistProbability(GamePlan home, GamePlan visitor) {
+    public double setAssistProbability(GamePlan offenseTeam, GamePlan defenseTeam) {
 
 
-        double totalPlayMakingContribution = home.getActivePlayers().stream()
+        double totalPlayMakingContribution = offenseTeam.getActivePlayers().stream()
                 .mapToDouble(homePlayer -> {
-                    Player visitorPlayer = visitor.getMatchups().get(homePlayer.getPlayer());
+                    Player visitorPlayer = defenseTeam.getMatchups().get(homePlayer.getPlayer());
                     if (visitorPlayer != null) {
                         return getIndividualPlayMakingContribution(homePlayer, visitorPlayer);
                     } else {
@@ -63,7 +63,7 @@ public class PlaymakingCalculator {
                 .sum();
 
         double finalTotalPlayMakingContribution = totalPlayMakingContribution;
-        home.getActivePlayers().forEach(activePlayer -> {
+        offenseTeam.getActivePlayers().forEach(activePlayer -> {
 
             double assistWeight = Math.clamp(activePlayer.getPlaymakingContribution() / finalTotalPlayMakingContribution, 0.0, 1.0);
             activePlayer.setAssistWeight(assistWeight);

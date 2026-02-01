@@ -21,11 +21,11 @@ public class GamePlanEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "team_home_id", nullable = false)
-    private TeamEntity teamHome;
+    private TeamEntity ownerTeam;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "team_visitor_id", nullable = false)
-    private TeamEntity teamVisitor;
+    private TeamEntity opponentTeam;
 
     /**
      * Les joueurs actifs du match (roster in-game).

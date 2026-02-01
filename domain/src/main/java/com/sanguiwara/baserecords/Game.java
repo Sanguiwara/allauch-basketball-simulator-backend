@@ -16,6 +16,7 @@ public class Game {
     private final GamePlan homeGamePlan;
     private final GamePlan awayGamePlan;
     private final LeagueSeason leagueSeason;
+    private final Instant executeAt;
 
     @Setter
     private GameResult gameResult;

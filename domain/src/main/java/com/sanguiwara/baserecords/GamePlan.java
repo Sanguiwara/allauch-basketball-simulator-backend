@@ -2,23 +2,21 @@ package com.sanguiwara.baserecords;
 
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class GamePlan {
 
-    public GamePlan(UUID id, Team teamHome, Team teamVisitor) {
+    public GamePlan(UUID id, Team ownerTeam, Team opponentTeam) {
         this.id = id;
-        this.teamHome = teamHome;
-        this.teamVisitor = teamVisitor;
+        this.ownerTeam = ownerTeam;
+        this.opponentTeam = opponentTeam;
     }
 
 
@@ -27,8 +25,8 @@ public class GamePlan {
 
     private final UUID id;
 
-    private final Team teamHome;
-    private final Team teamVisitor;
+    private final Team ownerTeam;
+    private final Team opponentTeam;
 
 
 
@@ -39,7 +37,6 @@ public class GamePlan {
     private double midRangeAttemptShare = 1.0/3.0;
     private double driveAttemptShare = 1.0/3.0;
 
-    //TODO A enlever de GamePlan
     private int totalShotNumber = 75;
     private double blockScore;
     private double blockProbability;

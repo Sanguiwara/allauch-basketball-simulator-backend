@@ -8,6 +8,7 @@ import com.sanguiwara.factory.TeamFactory;
 import com.sanguiwara.repository.*;
 import com.sanguiwara.timeevent.EventManager;
 import com.sanguiwara.timeevent.GameTimeEvent;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +51,7 @@ public class SeasonInitializer {
         List<TeamSeason> teamSeasonList = new ArrayList<>();
         for (int i = 0; i < NB_CLUBS; i++) {
             Club club = new Club("Club " + (i + 1));
-         //TODO Création des clubs a deplacer
+            //TODO Création des clubs a deplacer
 
             //GENERATE TEAMS FOR EACH AGE CATEGORY
 
@@ -66,7 +67,7 @@ public class SeasonInitializer {
             club.getTeams().add(team);
             leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
-            TeamSeason teamSeason = new TeamSeason(null,team, leagueSeason.getId(), seasonYear);
+            TeamSeason teamSeason = new TeamSeason(null, team, leagueSeason.getId(), seasonYear);
             teamSeasonList.add(teamSeason);
             teamForSeasonRepository.save(teamSeason);
 
@@ -75,50 +76,125 @@ public class SeasonInitializer {
         leagueSeason.getTeamSeasons().addAll(teamSeasonList);
         leagueSeasonRepository.save(leagueSeason);
 
-        for (TeamSeason homeTeam : leagueSeason.getTeamSeasons()) {
-            Instant gameDate = startDate;
-
-            for(TeamSeason visitorTeam : leagueSeason.getTeamSeasons()){
-                if(homeTeam.equals(visitorTeam)){
-                    continue;
-                }
-                GamePlan homeGamePlan = gamePlanFactory.generateGamePlan(homeTeam.team(), visitorTeam.team());
-                GamePlan visitorGamePlan = gamePlanFactory.generateGamePlan(visitorTeam.team(), homeTeam.team());
-                homeGamePlan = gamePlanRepository.save(homeGamePlan);
-                visitorGamePlan = gamePlanRepository.save(visitorGamePlan);
-
-                List<InGamePlayer> activePlayers = homeGamePlan.getTeamHome().getPlayers().stream()
-                        .limit(10)
-                        .map(InGamePlayer::new)
-                        .toList();
-                homeGamePlan.setActivePlayers(activePlayers);
-                gamePlanRepository.update(homeGamePlan);
-
-
-                List<InGamePlayer> visitorActivePlayers = visitorGamePlan.getTeamHome().getPlayers().stream()
-                        .limit(10)
-                        .map(InGamePlayer::new)
-                        .toList();
-
-                visitorGamePlan.setActivePlayers(visitorActivePlayers);
-                gamePlanRepository.update(visitorGamePlan);
-
-
-                Game game = new Game(null, homeGamePlan, visitorGamePlan, leagueSeason);
-                game = gameRepository.save(game);
-                gameDate = gameDate.plus(1, ChronoUnit.DAYS);
-                GameTimeEvent gameTimeEvent = new GameTimeEvent(null, gameDate,game.getId(), gameExecutor);
-                gameTimeEvent = gameTimeEventRepository.save(gameTimeEvent);
-
-
-                eventManager.schedule(gameTimeEvent);
-
-
-            }
-
-
-
-        }
+        createGamesForSeason(startDate, leagueSeason);
 
     }
+
+
+    private void createGamesForSeason(Instant startDate, LeagueSeason leagueSeason) {
+        List<TeamSeason> teams = leagueSeason.getTeamSeasons();
+        int n = teams.size();
+
+        if (n < 2) return;
+
+        if (n % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "Nombre d'équipes impair: impossible que toutes les équipes jouent tous les jours."
+            );
+        }
+
+        // Méthode du cercle (round-robin)
+        TeamSeason fixed = teams.get(0);
+        List<TeamSeason> rotating = new ArrayList<>(teams.subList(1, n));
+
+        Instant day = startDate;
+        int rounds = n - 1;
+
+        // ALLER
+        for (int r = 0; r < rounds; r++) {
+            createRoundGames(fixed, rotating, leagueSeason, day, false);
+            day = day.plus(1, ChronoUnit.DAYS);
+            rotate(rotating);
+        }
+
+        // RETOUR (home/away inversés) — on repart de la rotation initiale
+        rotating = new ArrayList<>(teams.subList(1, n));
+        for (int r = 0; r < rounds; r++) {
+            createRoundGames(fixed, rotating, leagueSeason, day, true);
+            day = day.plus(1, ChronoUnit.DAYS);
+            rotate(rotating);
+        }
+    }
+
+    /**
+     * Crée les matchs d'une "journée" :
+     * - n/2 matchs
+     * - chaque équipe apparaît exactement une fois
+     * - reverse=true => home/away inversés pour le retour
+     *
+     * On CONSERVE ton comportement GamePlan.save() puis update() après setActivePlayers.
+     */
+    private void createRoundGames(
+            TeamSeason fixed,
+            List<TeamSeason> rotating,
+            LeagueSeason leagueSeason,
+            Instant day,
+            boolean reverse
+    ) {
+        int n = rotating.size() + 1;
+        int half = n / 2;
+
+        List<TeamSeason> roundTeams = new ArrayList<>(n);
+        roundTeams.add(fixed);
+        roundTeams.addAll(rotating);
+
+        for (int i = 0; i < half; i++) {
+            TeamSeason t1 = roundTeams.get(i);
+            TeamSeason t2 = roundTeams.get(n - 1 - i);
+
+            TeamSeason homeTeam = reverse ? t2 : t1;
+            TeamSeason visitorTeam = reverse ? t1 : t2;
+
+            Result result = getResult(homeTeam, visitorTeam);
+            // =========================
+
+            Game game = new Game(null, result.homeGamePlan(), result.visitorGamePlan(), leagueSeason, day);
+            game = gameRepository.save(game);
+
+            GameTimeEvent gameTimeEvent = new GameTimeEvent(null, day, game.getId(), gameExecutor);
+            gameTimeEvent = gameTimeEventRepository.save(gameTimeEvent);
+
+            eventManager.schedule(gameTimeEvent);
+        }
+    }
+
+    private @NonNull Result getResult(TeamSeason homeTeam, TeamSeason visitorTeam) {
+        // === Ton flow inchangé ===
+        GamePlan homeGamePlan = gamePlanFactory.generateGamePlan(homeTeam.team(), visitorTeam.team());
+        GamePlan visitorGamePlan = gamePlanFactory.generateGamePlan(visitorTeam.team(), homeTeam.team());
+
+        homeGamePlan = gamePlanRepository.save(homeGamePlan);
+        visitorGamePlan = gamePlanRepository.save(visitorGamePlan);
+
+        List<InGamePlayer> activePlayers = homeGamePlan.getOwnerTeam().getPlayers().stream()
+                .limit(10)
+                .map(InGamePlayer::new)
+                .toList();
+        homeGamePlan.setActivePlayers(activePlayers);
+        gamePlanRepository.update(homeGamePlan);
+
+        List<InGamePlayer> visitorActivePlayers = visitorGamePlan.getOwnerTeam().getPlayers().stream()
+                .limit(10)
+                .map(InGamePlayer::new)
+                .toList();
+        visitorGamePlan.setActivePlayers(visitorActivePlayers);
+        gamePlanRepository.update(visitorGamePlan);
+        return new Result(homeGamePlan, visitorGamePlan);
+    }
+
+    private record Result(GamePlan homeGamePlan, GamePlan visitorGamePlan) {
+    }
+
+    /**
+     * Rotation "circle method"
+     * rotating=[a,b,c,d,e] => [e,a,b,c,d]
+     */
+    private void rotate(List<TeamSeason> rotating) {
+        if (rotating.isEmpty()) return;
+        TeamSeason last = rotating.removeLast();
+        rotating.addFirst(last);
+    }
+
+
 }
+

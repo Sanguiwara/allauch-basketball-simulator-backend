@@ -63,7 +63,7 @@ class SeasonInitializerTest {
         when(playerRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(teamRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         // void method -> use doAnswer
-        doAnswer(inv -> null).when(teamSeasonRepository).save(any());
+        doAnswer(_ -> null).when(teamSeasonRepository).save(any());
         when(gamePlanRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(gamePlanRepository.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(gameRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -76,7 +76,7 @@ class SeasonInitializerTest {
         when(teamFactory.generateTeam(any(AgeCategory.class), any(Gender.class), anyList())).thenAnswer(inv -> {
             @SuppressWarnings("unchecked")
             List<Player> players = (List<Player>) inv.getArgument(2);
-            Team team = new Team(UUID.randomUUID(), (AgeCategory) inv.getArgument(0), (Gender) inv.getArgument(1));
+            Team team = new Team(UUID.randomUUID(), inv.getArgument(0), (Gender) inv.getArgument(1), "");
             team.setPlayers(players);
             return team;
         });
