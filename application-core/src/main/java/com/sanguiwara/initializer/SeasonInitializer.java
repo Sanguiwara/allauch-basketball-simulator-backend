@@ -2,6 +2,7 @@ package com.sanguiwara.initializer;
 
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.executor.GameExecutor;
+import com.sanguiwara.factory.ClubNameFactory;
 import com.sanguiwara.factory.GamePlanFactory;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.factory.TeamFactory;
@@ -36,6 +37,7 @@ public class SeasonInitializer {
     private final GamePlanRepository gamePlanRepository;
     private final LeagueRepository leagueRepository;
     private final GameRepository gameRepository;
+    private final ClubRepository clubRepository;
     private final GameExecutor gameExecutor;
     private final EventManager eventManager;
     private final GameTimeEventRepository gameTimeEventRepository;
@@ -50,20 +52,25 @@ public class SeasonInitializer {
 
         List<TeamSeason> teamSeasonList = new ArrayList<>();
         for (int i = 0; i < NB_CLUBS; i++) {
-            Club club = new Club("Club " + (i + 1));
-            //TODO Création des clubs a deplacer
+            String randomFrenchBasketClubName = ClubNameFactory.generateRandomFrenchBasketClubName();
+            Club club = new Club(randomFrenchBasketClubName);
+            club = clubRepository.save(club);
 
             //GENERATE TEAMS FOR EACH AGE CATEGORY
 
+            Team team = teamFactory.generateTeam(AgeCategory.SENIOR, Gender.MALE, new ArrayList<>(),randomFrenchBasketClubName );
+            team.setClubID(club.getId());
+            team = teamRepository.save(team);
 
             List<Player> players = new ArrayList<>();
             for (int k = 0; k < NB_PLAYERS_PER_TEAM; k++) {
                 Player player = playerFactory.generatePlayer("");
+                player.setClubID(club.getId());
+                player.getTeamsID().add(team.getId());
                 player = playerRepository.save(player);
                 players.add(player);
+
             }
-            Team team = teamFactory.generateTeam(AgeCategory.SENIOR, Gender.MALE, players);
-            team = teamRepository.save(team);
             club.getTeams().add(team);
             leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
@@ -94,7 +101,7 @@ public class SeasonInitializer {
         }
 
         // Méthode du cercle (round-robin)
-        TeamSeason fixed = teams.get(0);
+        TeamSeason fixed = teams.getFirst();
         List<TeamSeason> rotating = new ArrayList<>(teams.subList(1, n));
 
         Instant day = startDate;
@@ -121,7 +128,6 @@ public class SeasonInitializer {
      * - n/2 matchs
      * - chaque équipe apparaît exactement une fois
      * - reverse=true => home/away inversés pour le retour
-     *
      * On CONSERVE ton comportement GamePlan.save() puis update() après setActivePlayers.
      */
     private void createRoundGames(

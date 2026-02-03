@@ -18,6 +18,7 @@ public class Team {
     private final AgeCategory category;
     private final Gender gender;
     private final String name;
+    private UUID clubID;
 
 
 

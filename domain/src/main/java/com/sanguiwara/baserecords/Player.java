@@ -2,14 +2,23 @@ package com.sanguiwara.baserecords;
 
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
+@RequiredArgsConstructor
 public class Player {
 
-    // Accessors with record-style names to preserve API
+    @Setter
+    private Set<UUID> teamsID = new HashSet<>();
+    @Setter
+    private UUID clubID;
+
     private final UUID id;
     private final String name;
     private final int birthDate;
@@ -55,86 +64,7 @@ public class Player {
     private final int softSkills;
     private final int leadership;
 
-    public Player(
-            UUID id,
-            String name,
-            int birthDate,
 
-            // Tirs / finition
-            int tir3Pts,
-            int tir2Pts,
-            int lancerFranc,
-            int floater,
-            int finitionAuCercle,
-            int speed,
-            int ballhandling,
-            int size,
-            int weight,
-            int agressivite,
-
-            // Défense / rebond
-            int defExterieur,
-            int defPoste,
-            int protectionCercle,
-            int timingRebond,
-            int agressiviteRebond,
-            int steal,
-            int timingBlock,
-
-            // Physique / mental / skills
-            int physique,
-            int basketballIqOff,
-            int basketballIqDef,
-            int passingSkills,
-            int iq,
-            int endurance,
-
-            int solidite,
-
-            // Potentiel
-            int potentielSkill,
-            int potentielPhysique,
-
-            // Attitude / comportement
-            int coachability,
-            int ego,
-            int softSkills,
-            int leadership
-    ) {
-        this.id = id;
-        this.name = name;
-        this.birthDate = birthDate;
-        this.tir3Pts = tir3Pts;
-        this.tir2Pts = tir2Pts;
-        this.lancerFranc = lancerFranc;
-        this.floater = floater;
-        this.finitionAuCercle = finitionAuCercle;
-        this.speed = speed;
-        this.ballhandling = ballhandling;
-        this.size = size;
-        this.weight = weight;
-        this.agressivite = agressivite;
-        this.defExterieur = defExterieur;
-        this.defPoste = defPoste;
-        this.protectionCercle = protectionCercle;
-        this.timingRebond = timingRebond;
-        this.agressiviteRebond = agressiviteRebond;
-        this.steal = steal;
-        this.timingBlock = timingBlock;
-        this.physique = physique;
-        this.basketballIqOff = basketballIqOff;
-        this.basketballIqDef = basketballIqDef;
-        this.passingSkills = passingSkills;
-        this.iq = iq;
-        this.endurance = endurance;
-        this.solidite = solidite;
-        this.potentielSkill = potentielSkill;
-        this.potentielPhysique = potentielPhysique;
-        this.coachability = coachability;
-        this.ego = ego;
-        this.softSkills = softSkills;
-        this.leadership = leadership;
-    }
 
 
 

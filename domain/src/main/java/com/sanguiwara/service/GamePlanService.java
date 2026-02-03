@@ -15,5 +15,4 @@ public interface GamePlanService {
     void delete(UUID id);
 
 
-    GamePlan generateGamePlan();
 }
