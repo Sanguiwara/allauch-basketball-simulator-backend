@@ -42,4 +42,9 @@ public class TeamEntity {
             inverseJoinColumns = @JoinColumn(name = "player_id")
     )
     private Set<PlayerEntity> players = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id")
+    private ClubEntity club;
+
 }

@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -22,6 +25,18 @@ public class PlayerEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @ManyToMany
+    @JoinTable(
+            name = "team_players",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
+    private Set<TeamEntity> teams = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id")
+    private ClubEntity club;
 
     // Format: YYYYMMDD (ex: 19981225)
     @Column(name = "birth_date", nullable = false)
@@ -77,6 +92,9 @@ public class PlayerEntity {
     @Column(name = "steal", nullable = false)
     private int steal;
 
+    @Column(name = "timing_block", nullable = false)
+    private int timingBlock;
+
     // Physique / mental / skills
     @Column(name = "physique", nullable = false)
     private int physique;
@@ -118,4 +136,16 @@ public class PlayerEntity {
 
     @Column(name = "leadership", nullable = false)
     private int leadership;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayerEntity other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
