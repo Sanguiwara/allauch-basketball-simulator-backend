@@ -1,0 +1,16 @@
+@baseUrl = {{baseUrl}}
+
+### Associate current token user to a club (requires Bearer token)
+POST {{baseUrl}}/users/associate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Missing token -> should be 401
+POST {{baseUrl}}/users/associate
+Content-Type: application/json
+Accept: application/json
+
+{}

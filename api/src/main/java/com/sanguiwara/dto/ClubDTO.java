@@ -7,6 +7,6 @@ public record ClubDTO(
         UUID id,
         String name,
         List<TeamDTO> teams,
-        List<PlayerDTO> players
+        Long userId
 ) {
 }

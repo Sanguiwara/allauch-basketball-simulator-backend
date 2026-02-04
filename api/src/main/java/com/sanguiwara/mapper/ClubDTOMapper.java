@@ -9,12 +9,4 @@ public interface ClubDTOMapper {
 
     ClubDTO toDto(Club club);
 
-    default Club toDomain(ClubDTO clubDTO) {
-        if (clubDTO == null) {
-            return null;
-        }
-        Club club = new Club(clubDTO.name());
-        club.setId(clubDTO.id());
-        return club;
-    }
 }

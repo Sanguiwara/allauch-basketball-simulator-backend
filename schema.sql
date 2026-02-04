@@ -8,10 +8,24 @@ CREATE TYPE gender AS ENUM ('MALE', 'FEMALE');
 CREATE TYPE position_enum AS ENUM ('PG', 'SG', 'SF', 'PF', 'C');
 
 -- 5) Tables
+CREATE TABLE app_user (
+  id BIGSERIAL PRIMARY KEY,
+  sub VARCHAR(255) NOT NULL UNIQUE,
+  email VARCHAR(255),
+  name VARCHAR(255)
+);
+
 CREATE TABLE clubs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL
 );
+
+ALTER TABLE clubs
+ADD COLUMN user_id BIGINT UNIQUE;
+
+ALTER TABLE clubs
+ADD CONSTRAINT fk_clubs_user
+FOREIGN KEY (user_id) REFERENCES app_user(id);
 
 CREATE TABLE teams (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
