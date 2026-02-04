@@ -11,7 +11,11 @@ public interface ClubRepository {
     @NonNull
     Optional<Club> findById(UUID id);
 
+    List<UUID> findAllIdsWithoutUser();
+
     List<Club> findAll();
+
+    Club attachUser(UUID clubId, Long userId);
 
     Club save(Club club);
 

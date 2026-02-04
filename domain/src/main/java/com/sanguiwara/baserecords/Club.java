@@ -17,4 +17,5 @@ public class Club {
     private UUID id;
     private final String name;
     private List<Player> players = new  ArrayList<>();
+    private Long userId;
 }

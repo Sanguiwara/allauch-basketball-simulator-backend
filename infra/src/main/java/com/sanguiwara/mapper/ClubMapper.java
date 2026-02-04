@@ -16,6 +16,7 @@ public interface ClubMapper {
     ClubEntity toEntity(Club club);
 
     @Mapping(target = "teams", source = "teams")
-    @Mapping(target = "players", source = "players")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "players", ignore = true)
     Club toDomain(ClubEntity entity);
 }
