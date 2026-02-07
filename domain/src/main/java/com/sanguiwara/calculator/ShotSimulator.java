@@ -2,21 +2,46 @@ package com.sanguiwara.calculator;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
-import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.calculator.spec.ShotSpec;
+import com.sanguiwara.defense.DefenseSchemeResolver;
+import com.sanguiwara.defense.DefensiveScheme;
 import com.sanguiwara.gameevent.ShotEvent;
 import com.sanguiwara.result.ShotResult;
-import com.sanguiwara.calculator.spec.ShotSpec;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 @RequiredArgsConstructor
 public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
     private final Random random;
-    private final ShotSpec<E,R> spec;
+    private final ShotSpec<E, R> spec;
+    private final DefenseSchemeResolver defensiveSchemeResolver;
+
+
+    public R getTotalShotContribution(
+            GamePlan offenseTeamGamePlan,
+            GamePlan defenseTeamGamePlan,
+            double assistProbability,
+            double blockProbability
+    ) {
+        spec.distributeShotAttempts(offenseTeamGamePlan);
+        List<InGamePlayer> offenseTeamActivePlayers = offenseTeamGamePlan.getActivePlayers();
+        return offenseTeamActivePlayers.stream().map(offensivePlayer -> {
+            DefensiveScheme defensiveScheme = defensiveSchemeResolver.resolve(defenseTeamGamePlan.getDefenseType());
+            double advantageForAPlayer = defensiveScheme.calculateAdvantageForAPlayer(offensivePlayer.getPlayer(), defenseTeamGamePlan, spec);
+            return simulateShots(
+                    defenseTeamGamePlan,
+                    offensivePlayer,
+                    offenseTeamActivePlayers,
+                    assistProbability,
+                    advantageForAPlayer,
+                    blockProbability);
+        }).reduce(spec.empty(), spec::combine);
+
+
+    }
 
 
     private R simulateShots(
@@ -94,45 +119,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
     }
 
 
-    public R getTotalShotContribution(
-            GamePlan offenseTeamGamePlan,
-            GamePlan defenseTeamGamePlan,
-            double assistProbability,
-            double blockProbability
-    ) {
-        spec.distributeShotAttempts(offenseTeamGamePlan);
-        List<InGamePlayer> offenseTeamActivePlayers = offenseTeamGamePlan.getActivePlayers();
-        Map<Player, Player> matchups = defenseTeamGamePlan.getMatchups();
-
-
-        return offenseTeamActivePlayers.stream()
-                .map(offensivePlayer -> {
-                    Player defender = matchups.get(offensivePlayer.getPlayer());
-                    if (defender != null) {
-                        double matchupAdvantage = spec.evaluateMatchupAdvantage(offensivePlayer.getPlayer(), defender);
-                        return simulateShots(
-                                defenseTeamGamePlan,
-                                offensivePlayer,
-                                offenseTeamActivePlayers,
-                                assistProbability,
-                                matchupAdvantage,
-                                blockProbability);
-                    } else {
-
-                        return simulateShots(
-                                defenseTeamGamePlan,
-                                offensivePlayer,
-                                offenseTeamActivePlayers,
-                                assistProbability,
-                                0.0,
-                                blockProbability);
-                    }
-                })
-                .reduce(spec.empty(), spec::combine);
-    }
-
-
-    public InGamePlayer pickAssister( List<InGamePlayer> potentialPassers, double assistedShotPercentage) {
+    public InGamePlayer pickAssister(List<InGamePlayer> potentialPassers, double assistedShotPercentage) {
         boolean assisted = random.nextDouble() < assistedShotPercentage;
         InGamePlayer assister = null;
         if (assisted) {
@@ -156,17 +143,16 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
     }
 
 
-
-    private InGamePlayer pickBlocker( List<InGamePlayer> potentialBlockers) {
+    private InGamePlayer pickBlocker(List<InGamePlayer> potentialBlockers) {
         double total = 0.0;
         for (InGamePlayer p : potentialBlockers) {
-            total +=  p.getBlockWeight();
+            total += p.getBlockWeight();
         }
         InGamePlayer playerToReturn = null;
 
         double r = random.nextDouble() * total;
         for (InGamePlayer p : potentialBlockers) {
-            r -=  p.getBlockWeight();
+            r -= p.getBlockWeight();
             if (r <= 0.0) {
                 playerToReturn = p;
                 break;
@@ -175,10 +161,6 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
         return playerToReturn;
 
     }
-
-
-
-
 
 
 }

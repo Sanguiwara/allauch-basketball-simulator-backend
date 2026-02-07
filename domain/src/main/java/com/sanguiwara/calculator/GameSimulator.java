@@ -16,7 +16,7 @@ public class GameSimulator {
     private final ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator;
     private final ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator;
     private final ShotSimulator<DriveEvent, DriveResult> driveSimulator;
-    private final PlaymakingCalculator playmakingCalculator;
+    private final AssistCalculator assistCalculator;
     private final ReboundCalculator reboundCalculator;
     private final BlockCalculator blockCalculator;
     private final StealSimulator stealSimulator;
@@ -24,8 +24,8 @@ public class GameSimulator {
 
     public GameResult calculateGame(GamePlan home, GamePlan visitor){
 
-        double homeAssistProbability = playmakingCalculator.setAssistProbability(home, visitor);
-        double visitorAssistProbability = playmakingCalculator.setAssistProbability(visitor, home);
+        double homeAssistProbability = assistCalculator.setAssistProbability(home, visitor);
+        double visitorAssistProbability = assistCalculator.setAssistProbability(visitor, home);
 
         computePossessions(home,visitor, homeAssistProbability, visitorAssistProbability);
         BoxScore homeBoxScore = calculateScoreForTeam(home,visitor,homeAssistProbability);

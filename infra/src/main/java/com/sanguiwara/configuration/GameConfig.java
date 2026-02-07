@@ -4,6 +4,7 @@ import com.sanguiwara.calculator.*;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import com.sanguiwara.calculator.spec.TwoPointSpecification;
+import com.sanguiwara.defense.*;
 import com.sanguiwara.factory.GamePlanFactory;
 import com.sanguiwara.factory.PlayerFactory;
 import com.sanguiwara.factory.TeamFactory;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
 import java.util.Random;
 
 @Configuration
@@ -37,6 +39,17 @@ public class GameConfig {
     public GamePlanFactory gamePlanFactory() { return new GamePlanFactory();}
 
     @Bean
+    public DefenseSchemeResolver defenseSchemeResolver() {
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(),
+                new Zone23Scheme(),
+                new Zone212Scheme(),
+                new Zone32Scheme()
+        );
+
+        return new DefenseSchemeResolver(schemes);}
+
+    @Bean
     public ThreePointSpecification threePointSpecification(Random random) {
         return new ThreePointSpecification(random);
     }
@@ -52,7 +65,7 @@ public class GameConfig {
     }
 
     @Bean
-    public PlaymakingCalculator playmakingCalculator() { return new PlaymakingCalculator();}
+    public AssistCalculator playmakingCalculator() { return  new AssistCalculator(defenseSchemeResolver());}
 
     @Bean
     public StealSimulator stealSimulator(Random random) { return new StealSimulator(random);}
@@ -61,21 +74,21 @@ public class GameConfig {
     public ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator(
             Random random,
             ThreePointSpecification spec) {
-        return new ShotSimulator<>( random, spec);
+        return new ShotSimulator<>( random, spec, defenseSchemeResolver());
     }
 
     @Bean
     public ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator(
             Random random,
             TwoPointSpecification spec) {
-        return new ShotSimulator<>( random, spec);
+        return new ShotSimulator<>( random, spec, defenseSchemeResolver());
     }
 
     @Bean
     public ShotSimulator<DriveEvent, DriveResult> driveSimulator(
             Random random,
             DriveSpecification spec) {
-        return new ShotSimulator<>(random,  spec);
+        return new ShotSimulator<>(random,  spec, defenseSchemeResolver());
     }
     @Bean
     public ReboundCalculator reboundCalculator(Random random) { return new ReboundCalculator(random);}
@@ -87,12 +100,12 @@ public class GameConfig {
     public GameSimulator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
                                         ShotSimulator<DriveEvent, DriveResult> driveSimulator,
                                         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator,
-                                        PlaymakingCalculator playmakingCalculator,
+                                        AssistCalculator assistCalculator,
                                         ReboundCalculator reboundCalculator,
                                         BlockCalculator blockCalculator,
                                         StealSimulator stealSimulator
     ) {
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator, stealSimulator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, assistCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
 
