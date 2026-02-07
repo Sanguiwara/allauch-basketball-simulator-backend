@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.result.DriveResult;
+import com.sanguiwara.type.ShotType;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -51,9 +52,8 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     private final Random random;
 
 
-
     @Override
-    public void distributeShotAttempts(GamePlan team){
+    public void distributeShotAttempts(GamePlan team) {
         double totalWeight = 0.0;
         for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
             double usage01 = (inGamePlayer.getUsageShoot() - USAGE_THRESHOLD) / USAGE_DIVISOR;
@@ -68,11 +68,11 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
                     weight);
         }
 
-        for(int i =0; i< team.getDriveAttempts(); i++){
+        for (int i = 0; i < team.getDriveAttempts(); i++) {
             InGamePlayer shooter = pickShooter(team.getActivePlayers());
             shooter.addDrive();
         }
-
+        //TODO A refactor
     }
 
     @Override
@@ -87,32 +87,35 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
 
         return clamp(base + advPct + assistBonusPct);
 
+    }
 
+
+    @Override
+    public double getDefensiveScoreForAShot(Player defender) {
+        return DEF_SPEED_WEIGHT * defender.getSpeed()
+                + DEF_SIZE_WEIGHT * defender.getSize()
+                + DEF_EXTERIEUR_WEIGHT * defender.getDefExterieur()
+                + DEF_ENDURANCE_WEIGHT * defender.getEndurance()
+                + DEF_IQ_WEIGHT * defender.getBasketballIqDef()
+                + DEF_STEAL_WEIGHT * defender.getSteal()
+                + DEF_POSTE_WEIGHT * defender.getDefPoste();
+    }
+
+    public double getPlayerScoreForAShot(Player attacker) {
+        return OFF_SPEED_WEIGHT * attacker.getSpeed()
+                + OFF_SIZE_WEIGHT * attacker.getSize()
+                + OFF_ENDURANCE_WEIGHT * attacker.getEndurance()
+                + OFF_BALLHANDLING_WEIGHT * attacker.getBallhandling()
+                + OFF_FINITION_WEIGHT * attacker.getFinitionAuCercle()
+                + OFF_FLOATER_WEIGHT * attacker.getFloater()
+                + OFF_IQ_WEIGHT * attacker.getBasketballIqOff();
     }
 
     @Override
-    public double evaluateMatchupAdvantage(Player attacker, Player defender) {
-        double offScore =
-                OFF_SPEED_WEIGHT * attacker.getSpeed()
-                        + OFF_SIZE_WEIGHT * attacker.getSize()
-                        + OFF_ENDURANCE_WEIGHT * attacker.getEndurance()
-                        + OFF_BALLHANDLING_WEIGHT * attacker.getBallhandling()
-                        + OFF_FINITION_WEIGHT * attacker.getFinitionAuCercle()
-                        + OFF_FLOATER_WEIGHT * attacker.getFloater()
-                        + OFF_IQ_WEIGHT * attacker.getBasketballIqOff();
-
-        double defScore =
-                DEF_SPEED_WEIGHT * defender.getSpeed()
-                        + DEF_SIZE_WEIGHT * defender.getSize()
-                        + DEF_EXTERIEUR_WEIGHT * defender.getDefExterieur()
-                        + DEF_ENDURANCE_WEIGHT * defender.getEndurance()
-                        + DEF_IQ_WEIGHT * defender.getBasketballIqDef()
-                        + DEF_STEAL_WEIGHT * defender.getSteal()
-                        + DEF_POSTE_WEIGHT * defender.getDefPoste();
-
-        return offScore - defScore;
-        //TODO Clamp?
+    public ShotType getShotType() {
+        return ShotType.DRIVE;
     }
+
 
     @Override
     public int getAttempts(InGamePlayer shooter) {
@@ -122,7 +125,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     @Override
     public DriveEvent create(InGamePlayer inGamePlayer, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         inGamePlayer.recordDrive(made);
-        return new DriveEvent(inGamePlayer.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new DriveEvent(inGamePlayer.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked, ShotType.DRIVE);
     }
 
     @Override
@@ -147,12 +150,11 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     }
 
 
-
     private static double clamp(double v) {
         return Math.max(DriveSpecification.MIN_SUCCESS_PCT, Math.min(DriveSpecification.MAX_SUCCESS_PCT, v));
     }
 
-    public InGamePlayer pickShooter( List<InGamePlayer> potentialShooters) {
+    public InGamePlayer pickShooter(List<InGamePlayer> potentialShooters) {
         double total = 0.0;
         for (InGamePlayer p : potentialShooters) {
             total += p.getDriveWeight();
@@ -161,7 +163,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
 
         double r = random.nextDouble() * total;
         for (InGamePlayer p : potentialShooters) {
-            r -=  p.getDriveWeight();
+            r -= p.getDriveWeight();
             if (r <= 0.0) {
                 playerToReturn = p;
                 return playerToReturn;

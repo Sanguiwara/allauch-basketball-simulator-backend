@@ -1,5 +1,7 @@
 package com.sanguiwara.gameevent;
 
+import com.sanguiwara.type.ShotType;
+
 import java.util.UUID;
 
 public interface ShotEvent {
@@ -11,4 +13,5 @@ public interface ShotEvent {
     boolean made();
     double advantageMatchup();
     boolean blocked();
+    ShotType shotType();
 }

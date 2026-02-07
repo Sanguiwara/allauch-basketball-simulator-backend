@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.TwoPointShootingResult;
+import com.sanguiwara.type.ShotType;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -49,8 +50,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     private final Random random;
 
 
-   @Override
-    public void distributeShotAttempts(GamePlan team){
+    @Override
+    public void distributeShotAttempts(GamePlan team) {
         double totalWeight = 0.0;
         for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
             double usage01 = (inGamePlayer.getUsagePost() - USAGE_BASE_OFFSET) / USAGE_DIVISOR;
@@ -65,7 +66,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
                     twoPointWeight);
         }
 
-        for(int i =0; i< team.getMidRangeAttempts(); i++){
+        for (int i = 0; i < team.getMidRangeAttempts(); i++) {
             InGamePlayer shooter = pickShooter(team.getActivePlayers());
             shooter.addTwoPointShot();
         }
@@ -76,35 +77,36 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     public double computePct(InGamePlayer shooter, double matchupAdvantage, boolean isAssistedShot) {
 
         double assistBonusPct = isAssistedShot ? ASSIST_BONUS_PCT : 0.0;
-
         double base = BASE_SHOT_PCT + (shooter.getPlayer().getTir2Pts() / 100.0) * TWO_POINT_SHOT_COEFF
                 + (shooter.getPlayer().getSize() / 100.0) * SIZE_PCT_COEFF;
-
         double scaledMatchupAdvantageImpact = (matchupAdvantage / MAX_MATCHUP_ADVANTAGE) * MATCHUP_COEFFICIENT;
+        return Math.clamp(base + scaledMatchupAdvantageImpact + assistBonusPct, MIN_SHOT_PCT, MAX_SHOT_PCT);
+
+    }
 
 
-        return clamp(base + scaledMatchupAdvantageImpact + assistBonusPct);
+    public double getDefensiveScoreForAShot(Player defender) {
+        return DEF_SPEED_COEFF * defender.getSpeed()
+                + DEF_SIZE_COEFF * defender.getSize()
+                + DEF_ENDURANCE_COEFF * defender.getEndurance()
+                + DEF_IQ_COEFF * defender.getBasketballIqDef()
+                + DEF_STEAL_COEFF * defender.getSteal()
+                + DEF_INTERIOR_POST_COEFF * defender.getDefPoste();
     }
 
     @Override
-    public double evaluateMatchupAdvantage(Player attacker, Player defender) {
-        double offScore =
-                OFF_SPEED_COEFF * attacker.getSpeed()
-                        + OFF_SIZE_COEFF * attacker.getSize()
-                        + OFF_ENDURANCE_COEFF * attacker.getEndurance()
-                        + OFF_BALLHANDLING_COEFF * attacker.getBallhandling()
-                        + OFF_FINISH_AT_RIM_COEFF * attacker.getFinitionAuCercle()
-                        + OFF_IQ_COEFF * attacker.getBasketballIqOff();
+    public double getPlayerScoreForAShot(Player attacker) {
+        return OFF_SPEED_COEFF * attacker.getSpeed()
+                + OFF_SIZE_COEFF * attacker.getSize()
+                + OFF_ENDURANCE_COEFF * attacker.getEndurance()
+                + OFF_BALLHANDLING_COEFF * attacker.getBallhandling()
+                + OFF_FINISH_AT_RIM_COEFF * attacker.getFinitionAuCercle()
+                + OFF_IQ_COEFF * attacker.getBasketballIqOff();
+    }
 
-        double defScore =
-                DEF_SPEED_COEFF * defender.getSpeed()
-                        + DEF_SIZE_COEFF * defender.getSize()
-                        + DEF_ENDURANCE_COEFF * defender.getEndurance()
-                        + DEF_IQ_COEFF * defender.getBasketballIqDef()
-                        + DEF_STEAL_COEFF * defender.getSteal()
-                        + DEF_INTERIOR_POST_COEFF * defender.getDefPoste();
-        return offScore - defScore;
-        //TODO Ajouter un clamp?
+    @Override
+    public ShotType getShotType() {
+        return ShotType.TWO_POINT;
     }
 
     @Override
@@ -115,7 +117,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     @Override
     public TwoPointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordTwoPointShot(made);
-        return new TwoPointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new TwoPointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked, ShotType.TWO_POINT);
     }
 
     @Override
@@ -130,7 +132,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
 
     @Override
     public TwoPointShootingResult combine(TwoPointShootingResult a, TwoPointShootingResult b) {
-        return TwoPointShootingResult.combine(a,b);
+        return TwoPointShootingResult.combine(a, b);
     }
 
     @Override
@@ -138,11 +140,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         return 0.6;
     }
 
-    private static double clamp(double v) {
-        return Math.max(TwoPointSpecification.MIN_SHOT_PCT, Math.min(TwoPointSpecification.MAX_SHOT_PCT, v));
-    }
 
-    public InGamePlayer pickShooter( List<InGamePlayer> potentialShooters) {
+    public InGamePlayer pickShooter(List<InGamePlayer> potentialShooters) {
         double total = 0.0;
         for (InGamePlayer p : potentialShooters) {
             total += p.getTwoPointWeight();
@@ -151,7 +150,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
 
         double r = random.nextDouble() * total;
         for (InGamePlayer p : potentialShooters) {
-            r -=  p.getTwoPointWeight();
+            r -= p.getTwoPointWeight();
             if (r <= 0.0) {
                 playerToReturn = p;
                 return playerToReturn;
@@ -160,7 +159,6 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         return playerToReturn;
 
     }
-
 
 
 }

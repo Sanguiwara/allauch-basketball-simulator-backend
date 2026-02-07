@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Random;
 
-import static com.sanguiwara.calculator.PlaymakingCalculator.MAX_ASSIST_PROBABILITY;
-import static com.sanguiwara.calculator.PlaymakingCalculator.MIN_ASSIST_PROBABILITY;
+import static com.sanguiwara.calculator.AssistCalculator.MAX_ASSIST_PROBABILITY;
+import static com.sanguiwara.calculator.AssistCalculator.MIN_ASSIST_PROBABILITY;
 
 @Slf4j
 @RequiredArgsConstructor

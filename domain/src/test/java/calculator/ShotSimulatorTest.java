@@ -5,8 +5,10 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ShotSpec;
+import com.sanguiwara.defense.*;
 import com.sanguiwara.gameevent.ShotEvent;
 import com.sanguiwara.result.ShotResult;
+import com.sanguiwara.type.ShotType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,12 @@ class ShotSimulatorTest {
     }
 
     // Minimal event/result types for testing generic ShotSimulator
-    private record TestShotEvent(UUID shooterId, int index, boolean assisted, UUID assisterId, double successPct, boolean made, double advantageMatchup, boolean blocked) implements ShotEvent {}
+    private record TestShotEvent(UUID shooterId, int index, boolean assisted, UUID assisterId, double successPct, boolean made, double advantageMatchup, boolean blocked) implements ShotEvent {
+        @Override
+        public ShotType shotType() {
+            return ShotType.TWO_POINT;
+        }
+    }
     private record TestShotResult(int attempts, int made, List<TestShotEvent> events) implements ShotResult<TestShotEvent> {}
 
     private static Player p(String name) {
@@ -60,7 +67,6 @@ class ShotSimulatorTest {
         }
 
         @Override public double computePct(InGamePlayer shooter, double advantage, boolean isAssistedShot) { return pct; }
-        @Override public double evaluateMatchupAdvantage(Player attacker, Player defender) { return 0.0; }
         @Override public TestShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
             return new TestShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
         }
@@ -74,6 +80,21 @@ class ShotSimulatorTest {
         }
 
         @Override
+        public double getPlayerScoreForAShot(Player attacker) {
+            return 0;
+        }
+
+        @Override
+        public double getDefensiveScoreForAShot(Player defender) {
+            return 0;
+        }
+
+        @Override
+        public ShotType getShotType() {
+            return null;
+        }
+
+        @Override
         public double getBlockProbabilityCoefficient() {
             return 1;
         }
@@ -81,7 +102,15 @@ class ShotSimulatorTest {
 
     @Test
     void pickAssister_shouldRespectAssistProbability_andWeights() {
-        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 1.0));
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(),
+                new Zone23Scheme(),
+                new Zone212Scheme(),
+                new Zone32Scheme()
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+
+        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 1.0),defenseSchemeResolver);
 
         InGamePlayer shooter = new InGamePlayer(p("SHOOTER"));
         InGamePlayer p1 = new InGamePlayer(p("P1"));
@@ -116,7 +145,14 @@ class ShotSimulatorTest {
 
     @Test
     void getTotalShotContribution_aggregatesAcrossPlayers() {
-        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(5, 1.0));
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(),
+                new Zone23Scheme(),
+                new Zone212Scheme(),
+                new Zone32Scheme()
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(5, 1.0), defenseSchemeResolver);
 
         InGamePlayer off1 = new InGamePlayer(p("O1"));
         InGamePlayer off2 = new InGamePlayer(p("O2"));

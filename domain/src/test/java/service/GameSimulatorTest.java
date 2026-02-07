@@ -1,11 +1,9 @@
 package service;
 
+import com.sanguiwara.baserecords.*;
 import com.sanguiwara.calculator.*;
+import com.sanguiwara.defense.*;
 import com.sanguiwara.factory.PlayerFactory;
-import com.sanguiwara.baserecords.GamePlan;
-import com.sanguiwara.baserecords.InGamePlayer;
-import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.baserecords.Position;
 import com.sanguiwara.result.*;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
@@ -37,18 +35,25 @@ class GameSimulatorTest {
     private record GamePlans(GamePlan home, GamePlan away) {}
 
     private static GameSimulator getGameCalculator() {
-        PlaymakingCalculator playmakingCalculator = new PlaymakingCalculator();
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(),
+                new Zone23Scheme(),
+                new Zone212Scheme(),
+                new Zone32Scheme()
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+        AssistCalculator assistCalculator = new AssistCalculator(defenseSchemeResolver);
         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
-                new ShotSimulator<>( random, new ThreePointSpecification(random));
+                new ShotSimulator<>( random, new ThreePointSpecification(random), defenseSchemeResolver);
         ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator =
-                new ShotSimulator<>( random, new TwoPointSpecification(random));
+                new ShotSimulator<>( random, new TwoPointSpecification(random), defenseSchemeResolver);
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
-                new ShotSimulator<>( random, new DriveSpecification(random));
+                new ShotSimulator<>( random, new DriveSpecification(random), defenseSchemeResolver);
         ReboundCalculator reboundCalculator = new ReboundCalculator(random);
         BlockCalculator blockCalculator = new BlockCalculator();
         StealSimulator stealSimulator = new StealSimulator(random);
 
-        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, playmakingCalculator, reboundCalculator, blockCalculator, stealSimulator);
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, assistCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
     private static GamePlans makePlans(PlayerFactory factory) {
@@ -72,6 +77,8 @@ class GameSimulatorTest {
             if (hP != null && aP != null) {
                 homeMatchups.put(aP.getPlayer(), hP.getPlayer());
                 awayMatchups.put(hP.getPlayer(), aP.getPlayer());
+                hP.setMinutesPlayed(40);
+                aP.setMinutesPlayed(40);
             }
         }
 
@@ -90,7 +97,8 @@ class GameSimulatorTest {
         homePlan.setThreePointAttemptShare(0.33);
         awayPlan.setThreePointAttemptShare(0.33);
 
-//TODO A changer pour utiliser la GamePlanFactory, pour les matchups, a voir
+        homePlan.setDefenseType(DefenseType.ZONE_2_1_2);
+        awayPlan.setDefenseType(DefenseType.ZONE_2_1_2);
         return new GamePlans(homePlan, awayPlan);
     }
 

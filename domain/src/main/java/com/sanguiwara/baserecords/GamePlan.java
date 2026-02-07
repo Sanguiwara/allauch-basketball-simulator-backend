@@ -28,6 +28,7 @@ public class GamePlan {
     private final Team ownerTeam;
     private final Team opponentTeam;
 
+    private DefenseType defenseType = DefenseType.MAN_TO_MAN;
 
 
     private  Map<Player, Player> matchups = new HashMap<>();

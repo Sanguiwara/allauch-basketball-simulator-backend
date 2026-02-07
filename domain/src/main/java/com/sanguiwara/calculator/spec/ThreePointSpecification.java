@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.result.ThreePointShootingResult;
+import com.sanguiwara.type.ShotType;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -38,9 +39,6 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     private static final double SCORE_DEF_EXT_WEIGHT = 0.55;
     private static final double SCORE_ENDURANCE_WEIGHT_DEF = 0.05;
     private static final double SCORE_IQ_WEIGHT_DEF = 0.10;
-
-    private static final double ADVANTAGE_CLAMP_MIN = -50.0;
-    private static final double ADVANTAGE_CLAMP_MAX = 50.0;
     private static final double ASSIST_BONUS_PCT = 0.15;
     private final Random random;
 
@@ -65,6 +63,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
             InGamePlayer shooter = pickShooter(team.getActivePlayers());
             shooter.addThreePointShot();
         }
+        //TODO Bug possible: Si un joueur joue 1 minutes il peut quand même avoir un gros usage+ aggressiveness et avoir trop de tirs
 
     }
 
@@ -78,22 +77,27 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     }
 
     @Override
-    public double evaluateMatchupAdvantage(Player attacker, Player defender) {
-        double offScore =
-                SCORE_SPEED_WEIGHT_OFF * attacker.getSpeed() +
-                        SCORE_SIZE_WEIGHT_OFF * attacker.getSize()
-                        + SCORE_ENDURANCE_WEIGHT_OFF * attacker.getEndurance() +
-                        SCORE_RATING_WEIGHT_OFF * attacker.getTir3Pts() +
-                        SCORE_IQ_WEIGHT_OFF * attacker.getBasketballIqOff();
-        double defScore =
-                SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
-                        SCORE_SIZE_WEIGHT_DEF * defender.getSize() +
-                        SCORE_DEF_EXT_WEIGHT * defender.getDefExterieur()
-                        + SCORE_ENDURANCE_WEIGHT_DEF * defender.getEndurance() +
-                        SCORE_IQ_WEIGHT_DEF * defender.getBasketballIqDef();
-        double adv = offScore - defScore;
+    public double getDefensiveScoreForAShot(Player defender) {
+        return SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
+                SCORE_SIZE_WEIGHT_DEF * defender.getSize() +
+                SCORE_DEF_EXT_WEIGHT * defender.getDefExterieur()
+                + SCORE_ENDURANCE_WEIGHT_DEF * defender.getEndurance() +
+                SCORE_IQ_WEIGHT_DEF * defender.getBasketballIqDef();
+    }
 
-        return Math.max(ADVANTAGE_CLAMP_MIN, Math.min(ADVANTAGE_CLAMP_MAX, adv));
+
+    @Override
+    public double getPlayerScoreForAShot(Player attacker) {
+        return SCORE_SPEED_WEIGHT_OFF * attacker.getSpeed() +
+                SCORE_SIZE_WEIGHT_OFF * attacker.getSize()
+                + SCORE_ENDURANCE_WEIGHT_OFF * attacker.getEndurance() +
+                SCORE_RATING_WEIGHT_OFF * attacker.getTir3Pts() +
+                SCORE_IQ_WEIGHT_OFF * attacker.getBasketballIqOff();
+    }
+
+    @Override
+    public ShotType getShotType() {
+        return ShotType.THREE_POINT;
     }
 
     @Override
@@ -104,7 +108,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public ThreePointShotEvent create(InGamePlayer shooter, int shotNumber, boolean assisted, UUID assisterId, double pct, boolean made, double advantage, boolean blocked) {
         shooter.recordThreePointShot(made);
-        return new ThreePointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked);
+        return new ThreePointShotEvent(shooter.getPlayer().getId(), shotNumber, assisted, assisterId, pct, made, advantage, blocked, ShotType.THREE_POINT);
     }
 
 
@@ -146,4 +150,6 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         return playerToReturn;
 
     }
+
+
 }

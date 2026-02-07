@@ -1,5 +1,7 @@
 package com.sanguiwara.gameevent;
 
+import com.sanguiwara.type.ShotType;
+
 import java.util.UUID;
 
 public record TwoPointShotEvent  (
@@ -10,6 +12,7 @@ public record TwoPointShotEvent  (
         double successPct,
         boolean made,
         double advantageMatchup,
-        boolean blocked
+        boolean blocked,
+        ShotType shotType
 )  implements ShotEvent
 {}

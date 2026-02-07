@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.gameevent.ShotEvent;
 import com.sanguiwara.result.ShotResult;
+import com.sanguiwara.type.ShotType;
 
 import java.util.List;
 
@@ -12,8 +13,6 @@ public interface ShotSpec<E extends ShotEvent, R extends ShotResult<E>> {
 
     void distributeShotAttempts(GamePlan plan);
     double computePct(InGamePlayer shooter, double advantage, boolean assistBonusPct);
-    double evaluateMatchupAdvantage(Player attacker, Player defender );
-
     int getAttempts(InGamePlayer shooter);
 
 
@@ -28,6 +27,11 @@ public interface ShotSpec<E extends ShotEvent, R extends ShotResult<E>> {
 
     R combine(R a, R b);
 
+    double getPlayerScoreForAShot(Player attacker);
+
+    double getDefensiveScoreForAShot(Player defender);
+
+    ShotType getShotType();
 
     double getBlockProbabilityCoefficient();
 }
