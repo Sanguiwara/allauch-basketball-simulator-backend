@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public record GamePlanDTO(UUID id,Team teamHome, Team teamVisitor, List<InGamePlayer> activePlayers, Map<UUID, UUID> matchups,
+public record GamePlanDTO(UUID id,Team ownerTeam, Team opponentTeam, List<InGamePlayer> activePlayers, Map<UUID, UUID> matchups,
                           Map<Position, InGamePlayer> positions) {
 
 }

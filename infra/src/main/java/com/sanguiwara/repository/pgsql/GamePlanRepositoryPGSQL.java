@@ -42,8 +42,8 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
         if (gamePlan.getActivePlayers() != null) {
             for (var activePlayer : gamePlan.getActivePlayers()) {
-                var activePlayerEntity = inGamePlayerMapper.toEntity(activePlayer); // ton mapper existant
-                activePlayerEntity.setGamePlan(gamePlanEntity);                         // backref FK
+                var activePlayerEntity = inGamePlayerMapper.toEntity(activePlayer);
+                activePlayerEntity.setGamePlan(gamePlanEntity);
                 gamePlanEntity.getActivePlayers().add(activePlayerEntity);
             }
         }

@@ -9,6 +9,7 @@ import com.sanguiwara.factory.TeamFactory;
 import com.sanguiwara.repository.*;
 import com.sanguiwara.timeevent.EventManager;
 import com.sanguiwara.timeevent.GameTimeEvent;
+import com.sanguiwara.timeevent.TimeEvent;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,32 +59,36 @@ public class SeasonInitializer {
 
             //GENERATE TEAMS FOR EACH AGE CATEGORY
 
-            Team team = teamFactory.generateTeam(AgeCategory.SENIOR, Gender.MALE, new ArrayList<>(),randomFrenchBasketClubName );
+            Team team = teamFactory.generateTeam(AgeCategory.SENIOR, Gender.MALE, new ArrayList<>(), randomFrenchBasketClubName);
             team.setClubID(club.getId());
             team = teamRepository.save(team);
 
             List<Player> players = new ArrayList<>();
             for (int k = 0; k < NB_PLAYERS_PER_TEAM; k++) {
                 Player player = playerFactory.generatePlayer("");
-                player.setClubID(club.getId());
-                player.getTeamsID().add(team.getId());
                 player = playerRepository.save(player);
                 players.add(player);
 
             }
+            team.setPlayers(players);
             club.getTeams().add(team);
-            leagueSeason = leagueSeasonRepository.save(leagueSeason);
+            team = teamRepository.save(team);
+            club.getPlayers().addAll(players);
+            clubRepository.save(club);
+
 
             TeamSeason teamSeason = new TeamSeason(null, team, leagueSeason.getId(), seasonYear);
+            teamSeason = teamForSeasonRepository.save(teamSeason);
             teamSeasonList.add(teamSeason);
-            teamForSeasonRepository.save(teamSeason);
 
 
         }
         leagueSeason.getTeamSeasons().addAll(teamSeasonList);
-        leagueSeasonRepository.save(leagueSeason);
+        leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
         createGamesForSeason(startDate, leagueSeason);
+
+        eventManager.listAllOrdered().forEach(TimeEvent::execute);
 
     }
 
@@ -172,19 +177,22 @@ public class SeasonInitializer {
         homeGamePlan = gamePlanRepository.save(homeGamePlan);
         visitorGamePlan = gamePlanRepository.save(visitorGamePlan);
 
+
+        GamePlan finalHomeGamePlan = homeGamePlan;
         List<InGamePlayer> activePlayers = homeGamePlan.getOwnerTeam().getPlayers().stream()
                 .limit(10)
-                .map(InGamePlayer::new)
+                .map(player -> new InGamePlayer(player, finalHomeGamePlan.getId())) // map Player -> InGamePlayer
                 .toList();
         homeGamePlan.setActivePlayers(activePlayers);
-        gamePlanRepository.update(homeGamePlan);
+        homeGamePlan = gamePlanRepository.update(homeGamePlan);
 
+        GamePlan finalVisitorGamePlan = visitorGamePlan;
         List<InGamePlayer> visitorActivePlayers = visitorGamePlan.getOwnerTeam().getPlayers().stream()
                 .limit(10)
-                .map(InGamePlayer::new)
+                .map(player -> new InGamePlayer(player, finalVisitorGamePlan.getId()))
                 .toList();
         visitorGamePlan.setActivePlayers(visitorActivePlayers);
-        gamePlanRepository.update(visitorGamePlan);
+        visitorGamePlan = gamePlanRepository.update(visitorGamePlan);
         return new Result(homeGamePlan, visitorGamePlan);
     }
 
