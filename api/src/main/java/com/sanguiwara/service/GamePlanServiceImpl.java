@@ -21,6 +21,11 @@ public class GamePlanServiceImpl implements GamePlanService {
 
     }
 
+    @Override
+    public Optional<GamePlan> getNextUpcomingGamePlanForClub(UUID clubId) {
+        return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId);
+    }
+
 
     @Override
     public GamePlan update(GamePlan gamePlan) {

@@ -23,11 +23,16 @@ public class GameController {
     private final GameService gameService;
     private final GameDTOMapper gameDTOMapper;
 
-    @GetMapping("/{gameId}")
-    public ResponseEntity<List<GameDTO>> getGameForATeam(@PathVariable UUID gameId) {
+    @GetMapping("/teamID/{teamId}")
+    public ResponseEntity<List<GameDTO>> getGameForATeam(@PathVariable UUID teamId) {
 
-        return ResponseEntity.of(Optional.of(gameService.getAllGamesForATeam(gameId).stream().map(gameDTOMapper::toDto).toList()));
+        return ResponseEntity.of(Optional.of(gameService.getAllGamesForATeam(teamId).stream().map(gameDTOMapper::toDto).toList()));
 
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GameDTO> getGame(@PathVariable UUID id) {
+        return ResponseEntity.of(Optional.of(gameDTOMapper.toDto(gameService.getGameById(id))));
     }
 
     @GetMapping()
@@ -36,5 +41,7 @@ public class GameController {
         return ResponseEntity.of(Optional.of(gameService.getAllGames().stream().map(gameDTOMapper::toDto).toList()));
 
     }
+
+
 
 }

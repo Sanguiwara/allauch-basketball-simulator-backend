@@ -6,7 +6,7 @@ public record GameResultDTO(
 ) {
     public record BoxScoreDTO(
             ShootingResultDTO threePointShootingResult,
-            DriveResultDTO driveResult,
+            ShootingResultDTO driveResult,
             ShootingResultDTO twoPointShootingResult
     ) {
     }
@@ -17,11 +17,5 @@ public record GameResultDTO(
     ) {
     }
 
-    public record DriveResultDTO(
-            int attempts,
-            int made,
-            int foulsDrawn
-    ) {
-    }
 }
 

@@ -108,16 +108,16 @@ public class InGamePlayerEntity {
     private int fgm;
 
     @Column(name = "tpa", nullable = false)
-    private int tpa;
+    private int threePointAttempt;
 
     @Column(name = "tpm", nullable = false)
-    private int tpm;
+    private int threePointMade;
 
     @Column(name = "two_pa", nullable = false)
-    private int twoPa;
+    private int twoPointAttempts;
 
     @Column(name = "two_pm", nullable = false)
-    private int twoPm;
+    private int twoPointMade;
 
     @Column(name = "is_starter", nullable = false)
     private boolean starter;

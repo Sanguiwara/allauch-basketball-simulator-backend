@@ -10,6 +10,8 @@ public interface GameService {
 
     Game getGameById(UUID gameId);
 
+
+
     List<Game> getAllGamesForATeam(UUID teamId);
 
     List<Game> getAllGames();

@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -66,14 +67,16 @@ public class SeasonInitializer {
             List<Player> players = new ArrayList<>();
             for (int k = 0; k < NB_PLAYERS_PER_TEAM; k++) {
                 Player player = playerFactory.generatePlayer("");
+                player.setClubID(club.getId());
+
                 player = playerRepository.save(player);
                 players.add(player);
+
 
             }
             team.setPlayers(players);
             club.getTeams().add(team);
             team = teamRepository.save(team);
-            club.getPlayers().addAll(players);
             clubRepository.save(club);
 
 
