@@ -4,6 +4,8 @@ import com.sanguiwara.baserecords.LeagueSeason;
 import com.sanguiwara.mapper.LeagueSeasonMapper;
 import com.sanguiwara.repository.LeagueSeasonRepository;
 import com.sanguiwara.repository.jpa.LeagueSeasonJpaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,7 +17,8 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class LeagueSeasonRepositoryPGSQL implements LeagueSeasonRepository {
-
+    @PersistenceContext
+    private EntityManager em;
     private final LeagueSeasonJpaRepository leagueSeasonJpaRepository;
     private final LeagueSeasonMapper leagueSeasonMapper;
 
@@ -33,7 +36,7 @@ public class LeagueSeasonRepositoryPGSQL implements LeagueSeasonRepository {
 
     @Override
     public LeagueSeason save(LeagueSeason leagueSeason) {
-        var entity = leagueSeasonMapper.toEntity(leagueSeason);
+        var entity = leagueSeasonMapper.toEntity(leagueSeason, em);
         var saved = leagueSeasonJpaRepository.save(entity);
         return leagueSeasonMapper.toDomain(saved);
     }

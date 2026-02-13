@@ -24,4 +24,8 @@ public class GameTimeEventEntity {
 
     @Column(name = "game_id", columnDefinition = "uuid", nullable = false)
     private UUID gameId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private GameEntity game;
 }

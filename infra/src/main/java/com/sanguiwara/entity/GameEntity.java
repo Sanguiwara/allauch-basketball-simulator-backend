@@ -22,16 +22,18 @@ public class GameEntity {
     private UUID id;
 
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "home_team_id", nullable = false)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true, optional = false)
+    @JoinColumn(name = "home_plan_id", nullable = false, unique = true)
     private GamePlanEntity homeGamePlan;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "away_team_id", nullable = false)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true, optional = false)
+    @JoinColumn(name = "away_plan_id", nullable = false, unique = true)
     private GamePlanEntity awayGamePlan;
 
     @Column(name = "execute_at", nullable = false)
     private Instant executeAt;
 
+    @OneToOne(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    private GameResultEntity gameResult;
 
 }

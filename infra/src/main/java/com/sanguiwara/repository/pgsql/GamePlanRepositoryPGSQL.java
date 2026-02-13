@@ -1,14 +1,20 @@
 package com.sanguiwara.repository.pgsql;
 
 import com.sanguiwara.baserecords.GamePlan;
+import com.sanguiwara.entity.GameEntity;
+import com.sanguiwara.entity.GamePlanEntity;
 import com.sanguiwara.mapper.GamePlanMapper;
 import com.sanguiwara.mapper.InGamePlayerMapper;
 import com.sanguiwara.repository.GamePlanRepository;
+import com.sanguiwara.repository.jpa.GameJpaRepository;
 import com.sanguiwara.repository.jpa.GamePlanJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,6 +23,7 @@ import java.util.UUID;
 public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
     private final GamePlanJpaRepository gamePlanJpaRepository;
+    private final GameJpaRepository gameJpaRepository;
     private final GamePlanMapper gamePlanMapper;
     private final InGamePlayerMapper inGamePlayerMapper;
 
@@ -24,6 +31,20 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
     @Override
     public Optional<GamePlan> findById(UUID uuid) {
         return gamePlanJpaRepository.findById(uuid).map(gamePlanMapper::toDomain);
+    }
+
+
+    @Override
+    public Optional<GamePlan> findNextUpcomingGamePlanForClub(UUID clubId) {
+        List<GameEntity> nextGameForClub = gameJpaRepository.findNextGameForClub(clubId, Instant.now(), PageRequest.of(0, 10));
+        return nextGameForClub
+                .stream()
+                .findFirst()
+                .map(g -> {
+                    UUID homeClubId = g.getHomeGamePlan().getOwnerTeam().getClub().getId();
+                    GamePlanEntity toreturn = homeClubId.equals(clubId) ? g.getHomeGamePlan() : g.getAwayGamePlan();
+                    return gamePlanMapper.toDomain(toreturn);
+                });
     }
 
     @Override
@@ -42,8 +63,8 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
         if (gamePlan.getActivePlayers() != null) {
             for (var activePlayer : gamePlan.getActivePlayers()) {
-                var activePlayerEntity = inGamePlayerMapper.toEntity(activePlayer); // ton mapper existant
-                activePlayerEntity.setGamePlan(gamePlanEntity);                         // backref FK
+                var activePlayerEntity = inGamePlayerMapper.toEntity(activePlayer);
+                activePlayerEntity.setGamePlan(gamePlanEntity);
                 gamePlanEntity.getActivePlayers().add(activePlayerEntity);
             }
         }

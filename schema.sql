@@ -1,5 +1,3 @@
-
--- 3) Extensions
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 4) Enums
@@ -9,208 +7,231 @@ CREATE TYPE position_enum AS ENUM ('PG', 'SG', 'SF', 'PF', 'C');
 
 -- 5) Tables
 CREATE TABLE app_user (
-  id BIGSERIAL PRIMARY KEY,
-  sub VARCHAR(255) NOT NULL UNIQUE,
-  email VARCHAR(255),
-  name VARCHAR(255)
+                          id BIGSERIAL PRIMARY KEY,
+                          sub VARCHAR(255) NOT NULL UNIQUE,
+                          email VARCHAR(255),
+                          name VARCHAR(255)
 );
 
 CREATE TABLE clubs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL
+                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       name TEXT NOT NULL,
+                       user_id BIGINT UNIQUE,
+                       CONSTRAINT fk_clubs_user
+                           FOREIGN KEY (user_id) REFERENCES app_user(id)
 );
 
-ALTER TABLE clubs
-ADD COLUMN user_id BIGINT UNIQUE;
-
-ALTER TABLE clubs
-ADD CONSTRAINT fk_clubs_user
-FOREIGN KEY (user_id) REFERENCES app_user(id);
-
 CREATE TABLE teams (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT,
-  age_category age_category NOT NULL,
-  gender gender NOT NULL,
-  club_id UUID,
-  CONSTRAINT fk_teams_club
-    FOREIGN KEY (club_id) REFERENCES clubs (id)
+                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       name TEXT,
+                       age_category age_category NOT NULL,
+                       gender gender NOT NULL,
+                       club_id UUID,
+                       CONSTRAINT fk_teams_club
+                           FOREIGN KEY (club_id) REFERENCES clubs (id)
 );
 
 CREATE TABLE players (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  team_id UUID,
-  club_id UUID,
-  birth_date INTEGER NOT NULL,
-  tir_3_pts INTEGER NOT NULL,
-  tir_2_pts INTEGER NOT NULL,
-  lancer_franc INTEGER NOT NULL,
-  floater INTEGER NOT NULL,
-  finition_au_cercle INTEGER NOT NULL,
-  speed INTEGER NOT NULL,
-  ballhandling INTEGER NOT NULL,
-  size INTEGER NOT NULL,
-  weight INTEGER NOT NULL,
-  agressivite INTEGER NOT NULL,
-  def_exterieur INTEGER NOT NULL,
-  def_poste INTEGER NOT NULL,
-  protection_cercle INTEGER NOT NULL,
-  timing_rebond INTEGER NOT NULL,
-  agressivite_rebond INTEGER NOT NULL,
-  steal INTEGER NOT NULL,
-  timing_block INTEGER NOT NULL,
-  physique INTEGER NOT NULL,
-  basketball_iq_off INTEGER NOT NULL,
-  basketball_iq_def INTEGER NOT NULL,
-  passing_skills INTEGER NOT NULL,
-  iq INTEGER NOT NULL,
-  endurance INTEGER NOT NULL,
-  solidite INTEGER NOT NULL,
-  potentiel_skill INTEGER NOT NULL,
-  potentiel_physique INTEGER NOT NULL,
-  coachability INTEGER NOT NULL,
-  ego INTEGER NOT NULL,
-  soft_skills INTEGER NOT NULL,
-  leadership INTEGER NOT NULL,
-  CONSTRAINT fk_players_team
-    FOREIGN KEY (team_id) REFERENCES teams (id),
-  CONSTRAINT fk_players_club
-    FOREIGN KEY (club_id) REFERENCES clubs (id)
+                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                         name TEXT NOT NULL,
+                         team_id UUID,
+                         club_id UUID,
+                         birth_date INTEGER NOT NULL,
+                         tir_3_pts INTEGER NOT NULL,
+                         tir_2_pts INTEGER NOT NULL,
+                         lancer_franc INTEGER NOT NULL,
+                         floater INTEGER NOT NULL,
+                         finition_au_cercle INTEGER NOT NULL,
+                         speed INTEGER NOT NULL,
+                         ballhandling INTEGER NOT NULL,
+                         size INTEGER NOT NULL,
+                         weight INTEGER NOT NULL,
+                         agressivite INTEGER NOT NULL,
+                         def_exterieur INTEGER NOT NULL,
+                         def_poste INTEGER NOT NULL,
+                         protection_cercle INTEGER NOT NULL,
+                         timing_rebond INTEGER NOT NULL,
+                         agressivite_rebond INTEGER NOT NULL,
+                         steal INTEGER NOT NULL,
+                         timing_block INTEGER NOT NULL,
+                         physique INTEGER NOT NULL,
+                         basketball_iq_off INTEGER NOT NULL,
+                         basketball_iq_def INTEGER NOT NULL,
+                         passing_skills INTEGER NOT NULL,
+                         iq INTEGER NOT NULL,
+                         endurance INTEGER NOT NULL,
+                         solidite INTEGER NOT NULL,
+                         potentiel_skill INTEGER NOT NULL,
+                         potentiel_physique INTEGER NOT NULL,
+                         coachability INTEGER NOT NULL,
+                         ego INTEGER NOT NULL,
+                         soft_skills INTEGER NOT NULL,
+                         leadership INTEGER NOT NULL,
+                         CONSTRAINT fk_players_team
+                             FOREIGN KEY (team_id) REFERENCES teams (id),
+                         CONSTRAINT fk_players_club
+                             FOREIGN KEY (club_id) REFERENCES clubs (id)
 );
 
 CREATE TABLE leagues (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  age_category age_category NOT NULL,
-  gender gender NOT NULL
+                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                         age_category age_category NOT NULL,
+                         gender gender NOT NULL
 );
 
 CREATE TABLE league_seasons (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  year INTEGER NOT NULL,
-  league_id UUID NOT NULL,
-  CONSTRAINT fk_league_seasons_league
-    FOREIGN KEY (league_id) REFERENCES leagues (id)
+                                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                year INTEGER NOT NULL,
+                                league_id UUID NOT NULL,
+                                CONSTRAINT fk_league_seasons_league
+                                    FOREIGN KEY (league_id) REFERENCES leagues (id)
 );
 
 CREATE TABLE team_season (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  team_id UUID NOT NULL,
-  league_season_id UUID NOT NULL,
-  season INTEGER NOT NULL,
-  CONSTRAINT fk_team_season_team
-    FOREIGN KEY (team_id) REFERENCES teams (id),
-  CONSTRAINT fk_team_season_league_season
-    FOREIGN KEY (league_season_id) REFERENCES league_seasons (id)
+                             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                             team_id UUID NOT NULL,
+                             league_season_id UUID NOT NULL,
+                             season INTEGER NOT NULL,
+                             CONSTRAINT fk_team_season_team
+                                 FOREIGN KEY (team_id) REFERENCES teams (id),
+                             CONSTRAINT fk_team_season_league_season
+                                 FOREIGN KEY (league_season_id) REFERENCES league_seasons (id)
 );
 
 CREATE TABLE gameplans (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  team_home_id UUID NOT NULL,
-  team_visitor_id UUID NOT NULL,
-  three_pt_attempt_share DOUBLE PRECISION NOT NULL,
-  mid_range_attempt_share DOUBLE PRECISION NOT NULL,
-  drive_attempt_share DOUBLE PRECISION NOT NULL,
-  total_shot_number INTEGER NOT NULL,
-  block_score DOUBLE PRECISION NOT NULL,
-  block_probability DOUBLE PRECISION NOT NULL,
-  assist_probability DOUBLE PRECISION NOT NULL,
-  CONSTRAINT fk_gameplans_owner_team
-    FOREIGN KEY (team_home_id) REFERENCES teams (id),
-  CONSTRAINT fk_gameplans_opponent_team
-    FOREIGN KEY (team_visitor_id) REFERENCES teams (id)
+                           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                           team_home_id UUID NOT NULL,
+                           team_visitor_id UUID NOT NULL,
+                           three_pt_attempt_share DOUBLE PRECISION NOT NULL,
+                           mid_range_attempt_share DOUBLE PRECISION NOT NULL,
+                           drive_attempt_share DOUBLE PRECISION NOT NULL,
+                           total_shot_number INTEGER NOT NULL,
+                           block_score DOUBLE PRECISION NOT NULL,
+                           block_probability DOUBLE PRECISION NOT NULL,
+                           assist_probability DOUBLE PRECISION NOT NULL,
+                           CONSTRAINT fk_gameplans_owner_team
+                               FOREIGN KEY (team_home_id) REFERENCES teams (id),
+                           CONSTRAINT fk_gameplans_opponent_team
+                               FOREIGN KEY (team_visitor_id) REFERENCES teams (id)
 );
 
 CREATE TABLE in_game_players (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  gameplan_id UUID NOT NULL,
-  player_id UUID NOT NULL,
-  playmaking_contrib DOUBLE PRECISION NOT NULL,
-  assist_weight DOUBLE PRECISION NOT NULL,
-  rebound_contrib DOUBLE PRECISION NOT NULL,
-  rebound_weight DOUBLE PRECISION NOT NULL,
-  three_pt_contrib DOUBLE PRECISION NOT NULL,
-  three_pt_weight DOUBLE PRECISION NOT NULL,
-  two_pt_contrib DOUBLE PRECISION NOT NULL,
-  two_pt_weight DOUBLE PRECISION NOT NULL,
-  drive_contrib DOUBLE PRECISION NOT NULL,
-  drive_weight DOUBLE PRECISION NOT NULL,
-  block_contrib DOUBLE PRECISION NOT NULL,
-  block_weight DOUBLE PRECISION NOT NULL,
-  steal_contrib DOUBLE PRECISION NOT NULL,
-  steal_weight DOUBLE PRECISION NOT NULL,
-  usage_shoot INTEGER NOT NULL,
-  usage_drive INTEGER NOT NULL,
-  usage_post INTEGER NOT NULL,
-  assists INTEGER NOT NULL,
-  points INTEGER NOT NULL,
-  off_reb INTEGER NOT NULL,
-  def_reb INTEGER NOT NULL,
-  steals INTEGER NOT NULL,
-  blocks INTEGER NOT NULL,
-  fga INTEGER NOT NULL,
-  fgm INTEGER NOT NULL,
-  tpa INTEGER NOT NULL,
-  tpm INTEGER NOT NULL,
-  two_pa INTEGER NOT NULL,
-  two_pm INTEGER NOT NULL,
-  is_starter BOOLEAN NOT NULL,
-  drive_pa INTEGER NOT NULL,
-  drive_pm INTEGER NOT NULL,
-  minutes_played INTEGER NOT NULL,
-  CONSTRAINT fk_in_game_players_gameplan
-    FOREIGN KEY (gameplan_id) REFERENCES gameplans (id),
-  CONSTRAINT fk_in_game_players_player
-    FOREIGN KEY (player_id) REFERENCES players (id)
+                                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                 gameplan_id UUID NOT NULL,
+                                 player_id UUID NOT NULL,
+                                 playmaking_contrib DOUBLE PRECISION NOT NULL,
+                                 assist_weight DOUBLE PRECISION NOT NULL,
+                                 rebound_contrib DOUBLE PRECISION NOT NULL,
+                                 rebound_weight DOUBLE PRECISION NOT NULL,
+                                 three_pt_contrib DOUBLE PRECISION NOT NULL,
+                                 three_pt_weight DOUBLE PRECISION NOT NULL,
+                                 two_pt_contrib DOUBLE PRECISION NOT NULL,
+                                 two_pt_weight DOUBLE PRECISION NOT NULL,
+                                 drive_contrib DOUBLE PRECISION NOT NULL,
+                                 drive_weight DOUBLE PRECISION NOT NULL,
+                                 block_contrib DOUBLE PRECISION NOT NULL,
+                                 block_weight DOUBLE PRECISION NOT NULL,
+                                 steal_contrib DOUBLE PRECISION NOT NULL,
+                                 steal_weight DOUBLE PRECISION NOT NULL,
+                                 usage_shoot INTEGER NOT NULL,
+                                 usage_drive INTEGER NOT NULL,
+                                 usage_post INTEGER NOT NULL,
+                                 assists INTEGER NOT NULL,
+                                 points INTEGER NOT NULL,
+                                 off_reb INTEGER NOT NULL,
+                                 def_reb INTEGER NOT NULL,
+                                 steals INTEGER NOT NULL,
+                                 blocks INTEGER NOT NULL,
+                                 fga INTEGER NOT NULL,
+                                 fgm INTEGER NOT NULL,
+                                 tpa INTEGER NOT NULL,
+                                 tpm INTEGER NOT NULL,
+                                 two_pa INTEGER NOT NULL,
+                                 two_pm INTEGER NOT NULL,
+                                 is_starter BOOLEAN NOT NULL,
+                                 drive_pa INTEGER NOT NULL,
+                                 drive_pm INTEGER NOT NULL,
+                                 minutes_played INTEGER NOT NULL,
+                                 CONSTRAINT fk_in_game_players_gameplan
+                                     FOREIGN KEY (gameplan_id) REFERENCES gameplans (id),
+                                 CONSTRAINT fk_in_game_players_player
+                                     FOREIGN KEY (player_id) REFERENCES players (id)
 );
 
+-- ✅ CHANGEMENT STRICTEMENT NECESSAIRE ICI :
+-- games ne référence plus home_team_id/away_team_id mais home_plan_id/away_plan_id,
+-- et les deux FK sont UNIQUE pour imposer le OneToOne (un plan ne peut être utilisé que par un seul game)
 CREATE TABLE games (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  home_team_id UUID NOT NULL,
-  away_team_id UUID NOT NULL,
-  execute_at TIMESTAMPTZ NOT NULL,
-  CONSTRAINT fk_games_home_gameplan
-    FOREIGN KEY (home_team_id) REFERENCES gameplans (id),
-  CONSTRAINT fk_games_away_gameplan
-    FOREIGN KEY (away_team_id) REFERENCES gameplans (id)
+                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       home_plan_id UUID NOT NULL UNIQUE,
+                       away_plan_id UUID NOT NULL UNIQUE,
+                       execute_at TIMESTAMPTZ NOT NULL,
+                       CONSTRAINT fk_games_home_gameplan
+                           FOREIGN KEY (home_plan_id) REFERENCES gameplans (id),
+                       CONSTRAINT fk_games_away_gameplan
+                           FOREIGN KEY (away_plan_id) REFERENCES gameplans (id)
+);
+
+CREATE TABLE game_results (
+                              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                              game_id UUID NOT NULL UNIQUE,
+
+                              home_three_pt_attempts INTEGER NOT NULL,
+                              home_three_pt_made INTEGER NOT NULL,
+                              home_drive_attempts INTEGER NOT NULL,
+                              home_drive_made INTEGER NOT NULL,
+                              home_drive_fouls_drawn INTEGER NOT NULL,
+                              home_two_pt_attempts INTEGER NOT NULL,
+                              home_two_pt_made INTEGER NOT NULL,
+
+                              away_three_pt_attempts INTEGER NOT NULL,
+                              away_three_pt_made INTEGER NOT NULL,
+                              away_drive_attempts INTEGER NOT NULL,
+                              away_drive_made INTEGER NOT NULL,
+                              away_drive_fouls_drawn INTEGER NOT NULL,
+                              away_two_pt_attempts INTEGER NOT NULL,
+                              away_two_pt_made INTEGER NOT NULL,
+
+                              CONSTRAINT fk_game_results_game
+                                  FOREIGN KEY (game_id) REFERENCES games (id)
 );
 
 CREATE TABLE game_time_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  execute_at TIMESTAMPTZ NOT NULL,
-  game_id UUID NOT NULL
+                                  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                  execute_at TIMESTAMPTZ NOT NULL,
+                                  game_id UUID NOT NULL
 );
 
 CREATE TABLE team_players (
-  team_id UUID NOT NULL,
-  player_id UUID NOT NULL,
-  PRIMARY KEY (team_id, player_id),
-  CONSTRAINT fk_team_players_team
-    FOREIGN KEY (team_id) REFERENCES teams (id),
-  CONSTRAINT fk_team_players_player
-    FOREIGN KEY (player_id) REFERENCES players (id)
+                              team_id UUID NOT NULL,
+                              player_id UUID NOT NULL,
+                              PRIMARY KEY (team_id, player_id),
+                              CONSTRAINT fk_team_players_team
+                                  FOREIGN KEY (team_id) REFERENCES teams (id),
+                              CONSTRAINT fk_team_players_player
+                                  FOREIGN KEY (player_id) REFERENCES players (id)
 );
 
 CREATE TABLE game_matchups (
-  game_id UUID NOT NULL,
-  player_attacker_id UUID NOT NULL,
-  player_defender_id UUID NOT NULL,
-  PRIMARY KEY (game_id, player_attacker_id),
-  CONSTRAINT fk_game_matchups_game
-    FOREIGN KEY (game_id) REFERENCES gameplans (id),
-  CONSTRAINT fk_game_matchups_attacker
-    FOREIGN KEY (player_attacker_id) REFERENCES players (id),
-  CONSTRAINT fk_game_matchups_defender
-    FOREIGN KEY (player_defender_id) REFERENCES players (id)
+                               game_id UUID NOT NULL,
+                               player_attacker_id UUID NOT NULL,
+                               player_defender_id UUID NOT NULL,
+                               PRIMARY KEY (game_id, player_attacker_id),
+                               CONSTRAINT fk_game_matchups_game
+                                   FOREIGN KEY (game_id) REFERENCES gameplans (id),
+                               CONSTRAINT fk_game_matchups_attacker
+                                   FOREIGN KEY (player_attacker_id) REFERENCES players (id),
+                               CONSTRAINT fk_game_matchups_defender
+                                   FOREIGN KEY (player_defender_id) REFERENCES players (id)
 );
 
 CREATE TABLE game_positions (
-  game_id UUID NOT NULL,
-  position_code position_enum NOT NULL,
-  in_game_player_id UUID NOT NULL,
-  PRIMARY KEY (game_id, position_code),
-  CONSTRAINT fk_game_positions_game
-    FOREIGN KEY (game_id) REFERENCES gameplans (id),
-  CONSTRAINT fk_game_positions_in_game_player
-    FOREIGN KEY (in_game_player_id) REFERENCES in_game_players (id)
+                                game_id UUID NOT NULL,
+                                position_code position_enum NOT NULL,
+                                in_game_player_id UUID NOT NULL,
+                                PRIMARY KEY (game_id, position_code),
+                                CONSTRAINT fk_game_positions_game
+                                    FOREIGN KEY (game_id) REFERENCES gameplans (id),
+                                CONSTRAINT fk_game_positions_in_game_player
+                                    FOREIGN KEY (in_game_player_id) REFERENCES in_game_players (id)
 );

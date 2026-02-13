@@ -1,5 +1,6 @@
 package com.sanguiwara.repository;
 
+import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.timeevent.GameTimeEvent;
 
 import java.util.Collection;
@@ -13,6 +14,8 @@ public interface GameTimeEventRepository {
     GameTimeEvent save(GameTimeEvent event);
 
     Collection<GameTimeEvent> findAll();
+
+    Optional<Game> findNextUpcomingGameForClub(UUID clubId);
 
     void deleteById(UUID id);
 

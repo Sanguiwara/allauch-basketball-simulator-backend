@@ -5,13 +5,15 @@ import com.sanguiwara.dto.GameDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class})
 public interface GameDTOMapper {
 
 
 
     // GamePlan id (tu ne veux que celui du home)
     @Mapping(target = "homeGamePlanId", source = "homeGamePlan.id")
+    @Mapping(target = "awayGamePlanId", source = "awayGamePlan.id")
+
 
     // Home side = ownerTeam du homeGamePlan
     @Mapping(target = "homeTeamId", source = "homeGamePlan.ownerTeam.id")
@@ -20,7 +22,12 @@ public interface GameDTOMapper {
     // Away side = ownerTeam du awayGamePlan (ownerTeam = l’équipe qui “porte” ce plan)
     @Mapping(target = "awayTeamId", source = "awayGamePlan.ownerTeam.id")
     @Mapping(target = "awayTeamName", source = "awayGamePlan.ownerTeam.name")
+    @Mapping(target = "homeClubID", source = "homeGamePlan.ownerTeam.clubID")
+    @Mapping(target = "awayClubID", source = "awayGamePlan.ownerTeam.clubID")
+    @Mapping(target = "gameResult", source = "gameResult")
+    @Mapping(target = "homeActivePlayers", source = "homeGamePlan.activePlayers")
+    @Mapping(target = "awayActivePlayers", source = "awayGamePlan.activePlayers")
+
     GameDTO toDto(Game game);
 
-    Game toDomain(GameDTO gameDTO);
 }

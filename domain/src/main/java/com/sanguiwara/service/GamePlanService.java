@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface GamePlanService {
     Optional<GamePlan> getGamePlan(UUID id);
 
+    Optional<GamePlan> getNextUpcomingGamePlanForClub(UUID clubId);
+
 
     GamePlan update(GamePlan gamePlan);
 

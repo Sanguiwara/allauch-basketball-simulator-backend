@@ -9,6 +9,8 @@ public interface GamePlanRepository {
 
     Optional<GamePlan> findById(UUID id);
 
+    Optional<GamePlan> findNextUpcomingGamePlanForClub(UUID clubId);
+
     GamePlan update(GamePlan gamePlan);
 
     GamePlan save(GamePlan gamePlan);

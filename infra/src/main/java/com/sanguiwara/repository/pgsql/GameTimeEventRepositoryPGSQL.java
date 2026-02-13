@@ -1,15 +1,18 @@
 package com.sanguiwara.repository.pgsql;
 
+import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.executor.GameExecutor;
+import com.sanguiwara.mapper.GameMapper;
 import com.sanguiwara.mapper.GameTimeEventMapper;
 import com.sanguiwara.repository.GameTimeEventRepository;
 import com.sanguiwara.repository.jpa.GameTimeEventJpaRepository;
 import com.sanguiwara.timeevent.GameTimeEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +23,7 @@ public class GameTimeEventRepositoryPGSQL implements GameTimeEventRepository {
     private final GameTimeEventJpaRepository jpaRepository;
     private final GameTimeEventMapper mapper;
     private final GameExecutor gameExecutor;
+    private final GameMapper gameMapper;
 
     @Override
     public Optional<GameTimeEvent> findById(UUID id) {
@@ -36,6 +40,15 @@ public class GameTimeEventRepositoryPGSQL implements GameTimeEventRepository {
     @Override
     public Collection<GameTimeEvent> findAll() {
         return jpaRepository.findAll().stream().map(e -> mapper.toDomain(e, gameExecutor)).toList();
+    }
+
+    @Override
+    public Optional<Game> findNextUpcomingGameForClub(UUID clubId) {
+        return jpaRepository
+                .findNextUpcomingGamesByClubId(clubId, Instant.now(), PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .map(gameMapper::toDomain);
     }
 
     @Override

@@ -3,14 +3,16 @@ package com.sanguiwara.baserecords;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
 @Setter
 public class InGamePlayer {
 
-
+    private UUID id;
     private final Player player;
+    private final UUID gamePlanId;
 
     private int usageShoot = 10;
     private int usageDrive = 10 ;

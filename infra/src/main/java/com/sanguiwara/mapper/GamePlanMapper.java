@@ -5,7 +5,7 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.entity.GamePlanEntity;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {InGamePlayerMapper.class, TeamMapper.class})
 public interface GamePlanMapper {
 
      GamePlanEntity toEntity(GamePlan gamePlan);
