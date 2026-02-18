@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamFactory {
 
-
+//TODO A SUPPRIMER
     public Team generateTeam(AgeCategory ageCategory, Gender gender, List<Player> players, String name) {
         var team = new Team(null, ageCategory, gender, name + " " + ageCategory + " " + gender);
         team.setPlayers(players);

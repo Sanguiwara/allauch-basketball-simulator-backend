@@ -5,7 +5,7 @@ import com.sanguiwara.dto.GameDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class})
+@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class, PlayerProgressionDTOMapper.class})
 public interface GameDTOMapper {
 
 
@@ -27,6 +27,7 @@ public interface GameDTOMapper {
     @Mapping(target = "gameResult", source = "gameResult")
     @Mapping(target = "homeActivePlayers", source = "homeGamePlan.activePlayers")
     @Mapping(target = "awayActivePlayers", source = "awayGamePlan.activePlayers")
+    @Mapping(target = "playerProgressions", source = "playerProgressions")
 
     GameDTO toDto(Game game);
 

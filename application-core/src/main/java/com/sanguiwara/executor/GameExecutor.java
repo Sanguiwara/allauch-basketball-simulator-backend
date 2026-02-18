@@ -1,5 +1,6 @@
 package com.sanguiwara.executor;
 
+import com.sanguiwara.PostGameManager;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -8,9 +9,11 @@ import com.sanguiwara.calculator.GameSimulator;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.repository.GameRepository;
+import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.result.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +25,11 @@ public class GameExecutor {
 
     private final GameSimulator gameSimulator;
     private final GameRepository gameRepository;
+    private final PostGameManager postGameManager;
+    private final PlayerProgressionRepository playerProgressionRepository;
 
 
+    @Transactional
     public void executeGame(UUID gameId) {
         Optional<Game> optionalGame = gameRepository.findById(gameId);
         Game game = optionalGame.orElseThrow();
@@ -32,8 +38,12 @@ public class GameExecutor {
         BoxScore homeStats = boxScore.homeScore();
         BoxScore awayStats = boxScore.awayScore();
         printGame(game, homeStats, awayStats);
+        var progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
         gameRepository.save(game);
+        playerProgressionRepository.saveAll(progressions);
     }
+
+
 
     private void printGame(Game game, BoxScore homeStats, BoxScore awayStats) {
         System.out.println("============================================================");

@@ -42,6 +42,9 @@ public class PlayerEntity {
     @Column(name = "birth_date", nullable = false)
     private int birthDate;
 
+    @Column(name = "injured", nullable = false)
+    private boolean injured;
+
     // Tirs / finition
     @Column(name = "tir_3_pts", nullable = false)
     private int tir3Pts;
@@ -136,6 +139,9 @@ public class PlayerEntity {
 
     @Column(name = "leadership", nullable = false)
     private int leadership;
+
+    @Column(name = "morale", nullable = false)
+    private int morale;
 
     @Override
     public boolean equals(Object o) {

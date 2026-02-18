@@ -2,6 +2,7 @@ package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.repository.GameRepository;
+import com.sanguiwara.repository.PlayerProgressionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +13,13 @@ import java.util.UUID;
 @Service
 public class GameServiceImpl implements GameService{
     private final GameRepository gameRepository;
+    private final PlayerProgressionRepository playerProgressionRepository;
 
     @Override
     public Game getGameById(UUID gameId) {
-        return gameRepository.findById(gameId).orElseThrow();
+        Game game = gameRepository.findById(gameId).orElseThrow();
+        game.setPlayerProgressions(playerProgressionRepository.findByEventId(gameId));
+        return game;
     }
 
     @Override

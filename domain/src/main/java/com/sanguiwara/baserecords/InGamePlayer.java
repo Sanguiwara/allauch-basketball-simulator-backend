@@ -64,6 +64,8 @@ public class InGamePlayer {
 
     private int minutesPlayed = 20;
 
+    // Post-game computed rating in [0..10].
+    private double matchRating;
 
 
 

@@ -17,7 +17,8 @@ public record GameDTO(
         UUID awayClubID,
         GameResultDTO gameResult,
         List<InGamePlayerDTO> homeActivePlayers,
-        List<InGamePlayerDTO> awayActivePlayers
+        List<InGamePlayerDTO> awayActivePlayers,
+        List<PlayerProgressionDTO> playerProgressions
 
 ) {
 }

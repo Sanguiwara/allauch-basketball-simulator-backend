@@ -4,6 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE age_category AS ENUM ('U11', 'U13', 'U15', 'U18', 'U21', 'SENIOR');
 CREATE TYPE gender AS ENUM ('MALE', 'FEMALE');
 CREATE TYPE position_enum AS ENUM ('PG', 'SG', 'SF', 'PF', 'C');
+CREATE TYPE defense_type AS ENUM ('MAN_TO_MAN', 'ZONE_2_1_2', 'ZONE_2_3', 'ZONE_3_2');
 
 -- 5) Tables
 CREATE TABLE app_user (
@@ -37,6 +38,7 @@ CREATE TABLE players (
                          team_id UUID,
                          club_id UUID,
                          birth_date INTEGER NOT NULL,
+                         injured BOOLEAN NOT NULL DEFAULT FALSE,
                          tir_3_pts INTEGER NOT NULL,
                          tir_2_pts INTEGER NOT NULL,
                          lancer_franc INTEGER NOT NULL,
@@ -67,6 +69,7 @@ CREATE TABLE players (
                          ego INTEGER NOT NULL,
                          soft_skills INTEGER NOT NULL,
                          leadership INTEGER NOT NULL,
+                         morale INTEGER NOT NULL DEFAULT 50,
                          CONSTRAINT fk_players_team
                              FOREIGN KEY (team_id) REFERENCES teams (id),
                          CONSTRAINT fk_players_club
@@ -102,10 +105,11 @@ CREATE TABLE gameplans (
                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                            team_home_id UUID NOT NULL,
                            team_visitor_id UUID NOT NULL,
+                           defense_type defense_type NOT NULL DEFAULT 'MAN_TO_MAN',
                            three_pt_attempt_share DOUBLE PRECISION NOT NULL,
                            mid_range_attempt_share DOUBLE PRECISION NOT NULL,
                            drive_attempt_share DOUBLE PRECISION NOT NULL,
-                           total_shot_number INTEGER NOT NULL,
+                           total_shot_number INTEGER NOT NULL DEFAULT 75,
                            block_score DOUBLE PRECISION NOT NULL,
                            block_probability DOUBLE PRECISION NOT NULL,
                            assist_probability DOUBLE PRECISION NOT NULL,
@@ -152,6 +156,7 @@ CREATE TABLE in_game_players (
                                  drive_pa INTEGER NOT NULL,
                                  drive_pm INTEGER NOT NULL,
                                  minutes_played INTEGER NOT NULL,
+                                 match_rating DOUBLE PRECISION NOT NULL DEFAULT 0.0,
                                  CONSTRAINT fk_in_game_players_gameplan
                                      FOREIGN KEY (gameplan_id) REFERENCES gameplans (id),
                                  CONSTRAINT fk_in_game_players_player
@@ -201,6 +206,55 @@ CREATE TABLE game_time_events (
                                   execute_at TIMESTAMPTZ NOT NULL,
                                   game_id UUID NOT NULL
 );
+
+-- Player progression deltas (1 row per player per event). For now, event_id references games(id).
+CREATE TABLE player_progressions (
+                                    player_id UUID NOT NULL,
+                                    event_id  UUID NOT NULL,
+
+                                    tir_3_pts INTEGER NULL,
+                                    tir_2_pts INTEGER NULL,
+                                    lancer_franc INTEGER NULL,
+                                    floater INTEGER NULL,
+                                    finition_au_cercle INTEGER NULL,
+                                    speed INTEGER NULL,
+                                    ballhandling INTEGER NULL,
+                                    size INTEGER NULL,
+                                    weight INTEGER NULL,
+                                    agressivite INTEGER NULL,
+
+                                    def_exterieur INTEGER NULL,
+                                    def_poste INTEGER NULL,
+                                    protection_cercle INTEGER NULL,
+                                    timing_rebond INTEGER NULL,
+                                    agressivite_rebond INTEGER NULL,
+                                    steal INTEGER NULL,
+                                    timing_block INTEGER NULL,
+
+                                    physique INTEGER NULL,
+                                    basketball_iq_off INTEGER NULL,
+                                    basketball_iq_def INTEGER NULL,
+                                    passing_skills INTEGER NULL,
+                                    iq INTEGER NULL,
+                                    endurance INTEGER NULL,
+                                    solidite INTEGER NULL,
+
+                                    potentiel_skill INTEGER NULL,
+                                    potentiel_physique INTEGER NULL,
+
+                                    coachability INTEGER NULL,
+                                    ego INTEGER NULL,
+                                    soft_skills INTEGER NULL,
+                                    leadership INTEGER NULL,
+                                    morale INTEGER NULL,
+
+                                    CONSTRAINT pk_player_progressions PRIMARY KEY (player_id, event_id),
+                                    CONSTRAINT fk_player_progressions_player FOREIGN KEY (player_id) REFERENCES players(id),
+                                    CONSTRAINT fk_player_progressions_event_game FOREIGN KEY (event_id) REFERENCES games(id)
+);
+
+CREATE INDEX idx_player_progressions_player_id ON player_progressions(player_id);
+CREATE INDEX idx_player_progressions_event_id  ON player_progressions(event_id);
 
 CREATE TABLE team_players (
                               team_id UUID NOT NULL,

@@ -3,71 +3,73 @@ package com.sanguiwara.factory;
 import com.sanguiwara.baserecords.Player;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Random;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public final class PlayerFactory {
 
     private final Random rng;
 
-
-
-
     private int r(int min, int max) {
         return rng.nextInt(max - min + 1) + min;
     }
 
     public Player generatePlayer(String name) {
+        String effectiveName = (name == null || name.isBlank()) ? generateRandomName() : name;
 
-        return new Player(
-                null,
-                generateRandomName(),
-                r(1985, 2006), // birthDate (année) si tu gardes int
+        // Player is now built via Lombok @Builder; keep the same random ranges and field intent.
+        Player player = Player.builder()
+                .id(null)
+                .name(effectiveName)
+                .birthDate(r(1985, 2006)) // birthDate (year) if you keep int
+                .injured(false)
 
-                // Tirs / finition
-                r(30, 95), // tir3Pts
-                r(30, 95), // tir2Pts
-                r(30, 95), // lancerFranc
-                r(20, 90), // floater
-                r(30, 95), // finitionAuCercle
-                r(30, 95),
-                r(30, 95), // speed
-                r(30, 95), // ballhandling
-                r(55, 95), // size
-                r(30, 95), // weight
+                // Shooting / finishing
+                .tir3Pts(r(30, 95))
+                .tir2Pts(r(30, 95))
+                .lancerFranc(r(30, 95))
+                .floater(r(20, 90))
+                .finitionAuCercle(r(30, 95))
+                .agressivite(r(30, 95))
+                .speed(r(30, 95))
+                .ballhandling(r(30, 95))
+                .size(r(55, 95))
+                .weight(r(30, 95))
 
-                // Défense / rebond
-                r(30, 95), // defExterieur
-                r(30, 95), // defPoste
-                r(30, 95), // protectionCercle
-                r(30, 95), // timingRebond
-                r(30, 95), // agressiviteRebond
-                r(30, 95), // steal
+                // Defense / rebound
+                .defExterieur(r(30, 95))
+                .defPoste(r(30, 95))
+                .protectionCercle(r(30, 95))
+                .timingRebond(r(30, 95))
+                .agressiviteRebond(r(30, 95))
+                .steal(r(30, 95))
+                .timingBlock(r(30, 95))
 
+                // Physical / mental / skills
+                .physique(r(30, 95))
+                .basketballIqOff(r(30, 95))
+                .basketballIqDef(r(30, 95))
+                .passingSkills(r(30, 95))
+                .iq(r(30, 95))
+                .endurance(r(30, 95))
+                .solidite(r(30, 95))
 
-                // Physique / mental / skills
-                r(30, 95), // physique
-                r(30, 95), // basketballIqOff
-                r(30, 95), // basketballIqDef
-                r(30, 95), // passingSkills
-                r(30, 95), // iq
-                r(30, 95), // endurance
-                r(30, 95), // timingBlock
+                // Potential
+                .potentielSkill(r(30, 95))
+                .potentielPhysique(r(30, 95))
 
+                // Attitude / behavior
+                .coachability(r(30, 95))
+                .ego(r(0, 100))
+                .softSkills(r(30, 95))
+                .leadership(r(30, 95))
+                .morale(r(30, 95))
+                .build();
 
-                r(30, 95), // solidite
-
-                // Potentiel
-                r(30, 95), // potentielSkill
-                r(30, 95), // potentielPhysique
-
-                // Attitude / comportement
-                r(30, 95), // coachability
-                r(0, 100),  // ego
-                r(30, 95), // softSkills
-                r(30, 95)  // leadership
-        );
+        // Avoid null collections when using Lombok builders (field initializers are overridden).
+        player.setTeamsID(new HashSet<>());
+        return player;
     }
 
     public String generateRandomName() {
@@ -88,5 +90,4 @@ public final class PlayerFactory {
 
         return firstName + " " + lastName;
     }
-
 }

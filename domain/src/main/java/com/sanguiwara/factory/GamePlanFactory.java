@@ -4,12 +4,10 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.Team;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class GamePlanFactory {
 
-
+//TODO SUPPRIMER
 
     public GamePlan generateGamePlan(Team t1, Team t2) {
 

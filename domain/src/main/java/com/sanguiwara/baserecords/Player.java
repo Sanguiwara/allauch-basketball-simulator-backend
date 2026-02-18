@@ -1,9 +1,7 @@
 package com.sanguiwara.baserecords;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -11,11 +9,12 @@ import java.util.Set;
 import java.util.UUID;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Player {
 
     @Setter
-    private Set<UUID> teamsID = new HashSet<>();
+    private Set<UUID> teamsID;
     @Setter
     private UUID clubID;
 
@@ -23,49 +22,110 @@ public class Player {
     private final String name;
     private final int birthDate;
 
+    @Setter
+    private boolean injured;
+
     // Tirs / finition
-    private final int tir3Pts;
-    private final int tir2Pts;
-    private final int lancerFranc;
-    private final int floater;
-    private final int finitionAuCercle;
-    private final int speed;
-    private final int ballhandling;
-    private final int size;
-    private final int weight;
-    private final int agressivite;
+    @Setter
+    private  int tir3Pts;
+    @Setter
+    private  int tir2Pts;
+    private  int lancerFranc;
+    @Setter
+    private  int floater;
+    @Setter
+    private  int finitionAuCercle;
+    private  int speed;
+    private  int ballhandling;
+    private  int size;
+    private  int weight;
+    private  int agressivite;
 
     // Défense / rebond
-    private final int defExterieur;
-    private final int defPoste;
-    private final int protectionCercle;
-    private final int timingRebond;
-    private final int agressiviteRebond;
-    private final int steal;
-    private final int timingBlock;
+    private  int defExterieur;
+    private  int defPoste;
+    @Setter
+    private  int protectionCercle;
+    @Setter
+    private  int timingRebond;
+    @Setter
+    private  int agressiviteRebond;
+    @Setter
+    private  int steal;
+    @Setter
+    private  int timingBlock;
 
     // Physique / mental / skills
-    private final int physique;
-    private final int basketballIqOff;
-    private final int basketballIqDef;
-    private final int passingSkills;
-    private final int iq;
-    private final int endurance;
+    private  int physique;
+    private  int basketballIqOff;
+    private  int basketballIqDef;
+    private  int passingSkills;
+    private  int iq;
+    private  int endurance;
 
-    private final int solidite;
+    private  int solidite;
 
     // Potentiel
-    private final int potentielSkill;
-    private final int potentielPhysique;
+    @Setter
+    private  int potentielSkill;
+    private  int potentielPhysique;
 
     // Attitude / comportement
-    private final int coachability;
-    private final int ego;
-    private final int softSkills;
-    private final int leadership;
+    private  int coachability;
+    private  int ego;
+    private  int softSkills;
+    private  int leadership;
+    @Setter
+    private  int morale;
 
 
+    /**
+     * Deep snapshot of this Player at the current instant (copies mutable collections).
+     * Used to compute progression deltas after post-game mutations.
+     */
+    public Player snapshotPlayer() {
+        Set<UUID> teamsCopy = (teamsID == null) ? new HashSet<>() : new HashSet<>(teamsID);
 
+        return Player.builder()
+                .teamsID(teamsCopy)
+                .clubID(clubID)
+                .id(id)
+                .name(name)
+                .birthDate(birthDate)
+                .injured(injured)
+                .tir3Pts(tir3Pts)
+                .tir2Pts(tir2Pts)
+                .lancerFranc(lancerFranc)
+                .floater(floater)
+                .finitionAuCercle(finitionAuCercle)
+                .speed(speed)
+                .ballhandling(ballhandling)
+                .size(size)
+                .weight(weight)
+                .agressivite(agressivite)
+                .defExterieur(defExterieur)
+                .defPoste(defPoste)
+                .protectionCercle(protectionCercle)
+                .timingRebond(timingRebond)
+                .agressiviteRebond(agressiviteRebond)
+                .steal(steal)
+                .timingBlock(timingBlock)
+                .physique(physique)
+                .basketballIqOff(basketballIqOff)
+                .basketballIqDef(basketballIqDef)
+                .passingSkills(passingSkills)
+                .iq(iq)
+                .endurance(endurance)
+                .solidite(solidite)
+                .potentielSkill(potentielSkill)
+                .potentielPhysique(potentielPhysique)
+                .coachability(coachability)
+                .ego(ego)
+                .softSkills(softSkills)
+                .leadership(leadership)
+                .morale(morale)
+                .build();
+    }
 
 
 

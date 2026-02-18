@@ -85,4 +85,9 @@ public class GamePlan {
         return Math.toIntExact(Math.round(totalShotNumber * driveAttemptShare));
     }
 
+
+    private int getTeamMorale(){
+        return (int) activePlayers.stream().mapToDouble(p -> p.getPlayer().getMorale()).average().orElse(0.0);
+    }
+
 }

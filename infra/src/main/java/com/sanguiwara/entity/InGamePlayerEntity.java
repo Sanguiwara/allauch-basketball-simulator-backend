@@ -130,4 +130,7 @@ public class InGamePlayerEntity {
 
     @Column(name = "minutes_played", nullable = false)
     private int minutesPlayed = 20;
+
+    @Column(name = "match_rating", nullable = false)
+    private double matchRating = 0.0;
 }

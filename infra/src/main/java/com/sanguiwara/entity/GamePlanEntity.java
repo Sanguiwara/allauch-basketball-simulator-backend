@@ -1,5 +1,6 @@
 package com.sanguiwara.entity;
 
+import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.Position;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,6 +27,10 @@ public class GamePlanEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "team_visitor_id", nullable = false)
     private TeamEntity opponentTeam;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "defense_type", nullable = false)
+    private DefenseType defenseType = DefenseType.MAN_TO_MAN;
 
     /**
      * Les joueurs actifs du match (roster in-game).
@@ -60,7 +65,7 @@ public class GamePlanEntity {
             inverseJoinColumns = @JoinColumn(name = "in_game_player_id")
     )
     @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "position")
+    @MapKeyColumn(name = "position_code")
     private Map<Position, InGamePlayerEntity> positions = new EnumMap<>(Position.class);
 
     // ---- Shares & totals (doivent refléter GamePlan du domaine) ----
@@ -74,7 +79,7 @@ public class GamePlanEntity {
     private double driveAttemptShare = 1.0 / 3.0;
 
     @Column(name = "total_shot_number", nullable = false)
-    private int totalShotNumber = 0;
+    private int totalShotNumber = 75;
 
     @Column(name = "block_score", nullable = false)
     private double blockScore = 0.0;
