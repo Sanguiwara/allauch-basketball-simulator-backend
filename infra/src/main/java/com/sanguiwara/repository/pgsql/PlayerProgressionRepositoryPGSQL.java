@@ -2,6 +2,7 @@ package com.sanguiwara.repository.pgsql;
 
 import com.sanguiwara.mapper.PlayerProgressionMapper;
 import com.sanguiwara.progression.PlayerProgression;
+import com.sanguiwara.progression.ProgressionEventType;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.repository.jpa.PlayerProgressionJpaRepository;
 import lombok.NonNull;
@@ -31,8 +32,8 @@ public class PlayerProgressionRepositoryPGSQL implements PlayerProgressionReposi
     }
 
     @Override
-    public @NonNull List<PlayerProgression> findByEventId(@NonNull UUID eventId) {
-        return jpaRepository.findAllByEventGame_Id(eventId).stream().map(mapper::toDomain).toList();
+    public @NonNull List<PlayerProgression> findByEvent(@NonNull ProgressionEventType eventType, @NonNull UUID eventId) {
+        return jpaRepository.findAllById_EventTypeAndId_EventId(eventType, eventId).stream().map(mapper::toDomain).toList();
     }
 
     @Override
@@ -40,4 +41,3 @@ public class PlayerProgressionRepositoryPGSQL implements PlayerProgressionReposi
         return jpaRepository.findAllByPlayer_Id(playerId).stream().map(mapper::toDomain).toList();
     }
 }
-

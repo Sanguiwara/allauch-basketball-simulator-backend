@@ -5,6 +5,8 @@ CREATE TYPE age_category AS ENUM ('U11', 'U13', 'U15', 'U18', 'U21', 'SENIOR');
 CREATE TYPE gender AS ENUM ('MALE', 'FEMALE');
 CREATE TYPE position_enum AS ENUM ('PG', 'SG', 'SF', 'PF', 'C');
 CREATE TYPE defense_type AS ENUM ('MAN_TO_MAN', 'ZONE_2_1_2', 'ZONE_2_3', 'ZONE_3_2');
+CREATE TYPE training_type AS ENUM ('SHOOTING', 'DEFENSE', 'PHYSICAL', 'PLAYMAKING', 'MORALE', 'TACTICAL');
+CREATE TYPE progression_event_type AS ENUM ('GAME', 'TRAINING');
 
 -- 5) Tables
 CREATE TABLE app_user (
@@ -204,12 +206,33 @@ CREATE TABLE game_results (
 CREATE TABLE game_time_events (
                                   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                                   execute_at TIMESTAMPTZ NOT NULL,
-                                  game_id UUID NOT NULL
+                                  game_id UUID NOT NULL,
+                              CONSTRAINT fk_game_id_game
+                                FOREIGN KEY (game_id) REFERENCES games (id)
 );
 
--- Player progression deltas (1 row per player per event). For now, event_id references games(id).
+CREATE TABLE trainings (
+                           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                           execute_at TIMESTAMPTZ NOT NULL,
+                           team_id UUID NOT NULL,
+                           training_type training_type NOT NULL,
+                           CONSTRAINT fk_trainings_team
+                               FOREIGN KEY (team_id) REFERENCES teams (id),
+                           CONSTRAINT uq_trainings_team_execute_at UNIQUE (team_id, execute_at)
+);
+
+CREATE TABLE training_time_events (
+                                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                      execute_at TIMESTAMPTZ NOT NULL,
+                                      training_id UUID NOT NULL UNIQUE,
+                                      CONSTRAINT fk_training_time_events_training
+                                          FOREIGN KEY (training_id) REFERENCES trainings (id)
+);
+
+-- Player progression deltas (1 row per player per event). event_type+event_id identify the triggering event.
 CREATE TABLE player_progressions (
                                     player_id UUID NOT NULL,
+                                    event_type progression_event_type NOT NULL DEFAULT 'GAME',
                                     event_id  UUID NOT NULL,
 
                                     tir_3_pts INTEGER NULL,
@@ -248,13 +271,14 @@ CREATE TABLE player_progressions (
                                     leadership INTEGER NULL,
                                     morale INTEGER NULL,
 
-                                    CONSTRAINT pk_player_progressions PRIMARY KEY (player_id, event_id),
+                                    CONSTRAINT pk_player_progressions PRIMARY KEY (player_id, event_type, event_id),
                                     CONSTRAINT fk_player_progressions_player FOREIGN KEY (player_id) REFERENCES players(id),
-                                    CONSTRAINT fk_player_progressions_event_game FOREIGN KEY (event_id) REFERENCES games(id)
+                                    CONSTRAINT ck_player_progressions_event_not_null CHECK (event_id IS NOT NULL)
 );
 
 CREATE INDEX idx_player_progressions_player_id ON player_progressions(player_id);
 CREATE INDEX idx_player_progressions_event_id  ON player_progressions(event_id);
+CREATE INDEX idx_player_progressions_event_type_id ON player_progressions(event_type, event_id);
 
 CREATE TABLE team_players (
                               team_id UUID NOT NULL,

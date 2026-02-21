@@ -8,6 +8,7 @@ import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.GameSimulator;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
+import com.sanguiwara.progression.PlayerProgression;
 import com.sanguiwara.repository.GameRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.result.*;
@@ -38,7 +39,7 @@ public class GameExecutor {
         BoxScore homeStats = boxScore.homeScore();
         BoxScore awayStats = boxScore.awayScore();
         printGame(game, homeStats, awayStats);
-        var progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
+        List<PlayerProgression> progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
         gameRepository.save(game);
         playerProgressionRepository.saveAll(progressions);
     }

@@ -1,7 +1,6 @@
 package com.sanguiwara.timeevent;
 
 
-import com.sanguiwara.repository.GameTimeEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
  * EventManager is responsible for:
  * - storing all scheduled events
  * - executing events when they become due
- *
+ * <p>
  * Designed for a "simulation/game loop" style:
  * you call {@link #runDueEvents(Instant)} whenever your game time advances.
  */
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class EventManager {
 
-    private final GameTimeEventRepository gameTimeEventRepository;
 
     // Next events first
     private final PriorityQueue<TimeEvent> queue = new PriorityQueue<>(
@@ -31,7 +29,9 @@ public class EventManager {
     // For fast cancel / lookup
     private final Map<UUID, TimeEvent> eventById = new HashMap<>();
 
-    /** Schedule an event. */
+    /**
+     * Schedule an event.
+     */
     public void schedule(TimeEvent timeEvent) {
         Objects.requireNonNull(timeEvent, "event");
 
@@ -39,16 +39,10 @@ public class EventManager {
         queue.add(timeEvent);
     }
 
-    public void populateFromDatabase() {
 
-
-            gameTimeEventRepository.findAll().forEach(this::schedule);
-
-
-
-    }
-
-    /** Cancel a scheduled event by id. Returns true if it existed. */
+    /**
+     * Cancel a scheduled event by id. Returns true if it existed.
+     */
     public boolean cancel(UUID eventId) {
         TimeEvent existing = eventById.remove(eventId);
         if (existing == null) return false;
@@ -58,17 +52,23 @@ public class EventManager {
         return queue.remove(existing);
     }
 
-    /** Returns the next event to execute (without removing it). */
+    /**
+     * Returns the next event to execute (without removing it).
+     */
     public Optional<TimeEvent> returnNext() {
         return Optional.ofNullable(queue.peek());
     }
 
-    /** Returns number of scheduled events. */
+    /**
+     * Returns number of scheduled events.
+     */
     public int size() {
         return queue.size();
     }
 
-    /** List all scheduled events ordered by executeAt. */
+    /**
+     * List all scheduled events ordered by executeAt.
+     */
     public List<TimeEvent> listAllOrdered() {
         // Copy to avoid mutating the queue order
         return queue.stream()
@@ -79,7 +79,7 @@ public class EventManager {
     /**
      * Execute all events with executeAt <= now.
      * Returns how many were executed.
-     *
+     * <p>
      * IMPORTANT: This method is synchronous. It executes immediately.
      */
     public int runDueEvents(Instant now) {

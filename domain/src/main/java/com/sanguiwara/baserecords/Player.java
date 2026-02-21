@@ -30,19 +30,27 @@ public class Player {
     private  int tir3Pts;
     @Setter
     private  int tir2Pts;
+    @Setter
     private  int lancerFranc;
     @Setter
     private  int floater;
     @Setter
     private  int finitionAuCercle;
+    @Setter
     private  int speed;
+    @Setter
     private  int ballhandling;
+    @Setter
     private  int size;
+    @Setter
     private  int weight;
+    @Setter
     private  int agressivite;
 
     // Défense / rebond
+    @Setter
     private  int defExterieur;
+    @Setter
     private  int defPoste;
     @Setter
     private  int protectionCercle;
@@ -56,24 +64,36 @@ public class Player {
     private  int timingBlock;
 
     // Physique / mental / skills
+    @Setter
     private  int physique;
+    @Setter
     private  int basketballIqOff;
+    @Setter
     private  int basketballIqDef;
+    @Setter
     private  int passingSkills;
+    @Setter
     private  int iq;
+    @Setter
     private  int endurance;
 
+    @Setter
     private  int solidite;
 
     // Potentiel
     @Setter
     private  int potentielSkill;
+    @Setter
     private  int potentielPhysique;
 
     // Attitude / comportement
+    @Setter
     private  int coachability;
+    @Setter
     private  int ego;
+    @Setter
     private  int softSkills;
+    @Setter
     private  int leadership;
     @Setter
     private  int morale;

@@ -4,12 +4,12 @@ import java.util.UUID;
 
 /**
  * Progression deltas for a given player, triggered by a given event.
- * For now, eventId refers to a Game id. The model stays generic for future event types.
+ * eventType+eventId identify the event (GAME, TRAINING, ...).
  */
 public record PlayerProgression(
         UUID playerId,
+        ProgressionEventType eventType,
         UUID eventId,
         PlayerProgressionDelta delta
 ) {
 }
-

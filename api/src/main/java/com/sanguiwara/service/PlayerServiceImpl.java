@@ -1,7 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.factory.PlayerFactory;
+import com.sanguiwara.PlayerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sanguiwara.repository.PlayerRepository;

@@ -1,6 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Game;
+import com.sanguiwara.progression.ProgressionEventType;
 import com.sanguiwara.repository.GameRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class GameServiceImpl implements GameService{
     @Override
     public Game getGameById(UUID gameId) {
         Game game = gameRepository.findById(gameId).orElseThrow();
-        game.setPlayerProgressions(playerProgressionRepository.findByEventId(gameId));
+        game.setPlayerProgressions(playerProgressionRepository.findByEvent(ProgressionEventType.GAME, gameId));
         return game;
     }
 

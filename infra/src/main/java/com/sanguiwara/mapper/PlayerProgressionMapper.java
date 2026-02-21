@@ -1,6 +1,5 @@
 package com.sanguiwara.mapper;
 
-import com.sanguiwara.entity.GameEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.entity.PlayerProgressionEntity;
 import com.sanguiwara.progression.PlayerProgression;
@@ -14,13 +13,13 @@ import java.util.UUID;
 public interface PlayerProgressionMapper {
 
     @Mapping(target = "playerId", source = "player.id")
-    @Mapping(target = "eventId", source = "eventGame.id")
+    @Mapping(target = "eventType", source = "id.eventType")
+    @Mapping(target = "eventId", source = "id.eventId")
     @Mapping(target = "delta", expression = "java(toDelta(entity))")
     PlayerProgression toDomain(PlayerProgressionEntity entity);
 
-    @Mapping(target = "id", expression = "java(new PlayerProgressionId(progression.playerId(), progression.eventId()))")
+    @Mapping(target = "id", expression = "java(new PlayerProgressionId(progression.playerId(), progression.eventType(), progression.eventId()))")
     @Mapping(target = "player", expression = "java(playerRef(progression.playerId()))")
-    @Mapping(target = "eventGame", expression = "java(gameRef(progression.eventId()))")
     @Mapping(target = "tir3Pts", source = "delta.tir3Pts")
     @Mapping(target = "tir2Pts", source = "delta.tir2Pts")
     @Mapping(target = "lancerFranc", source = "delta.lancerFranc")
@@ -96,12 +95,5 @@ public interface PlayerProgressionMapper {
         PlayerEntity p = new PlayerEntity();
         p.setId(id);
         return p;
-    }
-
-    default GameEntity gameRef(UUID id) {
-        if (id == null) return null;
-        GameEntity g = new GameEntity();
-        g.setId(id);
-        return g;
     }
 }

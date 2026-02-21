@@ -5,9 +5,8 @@ import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import com.sanguiwara.calculator.spec.TwoPointSpecification;
 import com.sanguiwara.defense.*;
-import com.sanguiwara.factory.GamePlanFactory;
-import com.sanguiwara.factory.PlayerFactory;
-import com.sanguiwara.factory.TeamFactory;
+import com.sanguiwara.PlayerFactory;
+import com.sanguiwara.TeamFactory;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
@@ -34,9 +33,6 @@ public class GameConfig {
 
     @Bean
     public TeamFactory teamFactory() { return new TeamFactory();}
-
-    @Bean
-    public GamePlanFactory gamePlanFactory() { return new GamePlanFactory();}
 
     @Bean
     public DefenseSchemeResolver defenseSchemeResolver() {

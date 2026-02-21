@@ -1,4 +1,4 @@
-package com.sanguiwara.factory;
+package com.sanguiwara;
 
 import com.sanguiwara.baserecords.AgeCategory;
 import com.sanguiwara.baserecords.Gender;

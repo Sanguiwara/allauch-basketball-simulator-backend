@@ -1,16 +1,16 @@
 package com.sanguiwara.initializer;
 
+import com.sanguiwara.ClubNameFactory;
+import com.sanguiwara.GamePlanFactory;
+import com.sanguiwara.PlayerFactory;
+import com.sanguiwara.TeamFactory;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.executor.GameExecutor;
-import com.sanguiwara.factory.ClubNameFactory;
-import com.sanguiwara.factory.GamePlanFactory;
-import com.sanguiwara.factory.PlayerFactory;
-import com.sanguiwara.factory.TeamFactory;
+import com.sanguiwara.executor.TrainingExecutor;
 import com.sanguiwara.repository.*;
 import com.sanguiwara.timeevent.EventManager;
 import com.sanguiwara.timeevent.GameTimeEvent;
-import com.sanguiwara.timeevent.TimeEvent;
-import lombok.NonNull;
+import com.sanguiwara.timeevent.TrainingTimeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +41,15 @@ public class SeasonInitializer {
     private final GameRepository gameRepository;
     private final ClubRepository clubRepository;
     private final GameExecutor gameExecutor;
+    private final TrainingExecutor trainingExecutor;
     private final EventManager eventManager;
     private final GameTimeEventRepository gameTimeEventRepository;
+    private final TrainingRepository trainingRepository;
+    private final TrainingTimeEventRepository trainingTimeEventRepository;
+
+    // Fixed hours (relative to the day start of the round date)
+    private static final long TRAINING_START_HOUR = 18;
+    private static final long GAME_START_HOUR = 20;
 
     public void createSeason(Instant startDate) {
 
@@ -91,7 +98,6 @@ public class SeasonInitializer {
 
         createGamesForSeason(startDate, leagueSeason);
 
-        eventManager.listAllOrdered().forEach(TimeEvent::execute);
 
     }
 
@@ -159,48 +165,27 @@ public class SeasonInitializer {
             TeamSeason homeTeam = reverse ? t2 : t1;
             TeamSeason visitorTeam = reverse ? t1 : t2;
 
-            Result result = getResult(homeTeam, visitorTeam);
+            GamePlan homeGamePlan = gamePlanFactory.generateGamePlan(homeTeam.team(), visitorTeam.team());
+            GamePlan visitorGamePlan = gamePlanFactory.generateGamePlan(visitorTeam.team(), homeTeam.team());
             // =========================
 
-            Game game = new Game(null, result.homeGamePlan(), result.visitorGamePlan(), leagueSeason, day);
+            Instant dayStart = day.truncatedTo(ChronoUnit.DAYS);
+            Instant trainingExecuteAt = dayStart.plus(TRAINING_START_HOUR, ChronoUnit.HOURS);
+            Instant gameExecuteAt = dayStart.plus(GAME_START_HOUR, ChronoUnit.HOURS);
+
+            createAndScheduleTraining(homeTeam.team(), trainingExecuteAt);
+            createAndScheduleTraining(visitorTeam.team(), trainingExecuteAt);
+
+            Game game = new Game(null, homeGamePlan, visitorGamePlan, leagueSeason, gameExecuteAt);
             game = gameRepository.save(game);
 
-            GameTimeEvent gameTimeEvent = new GameTimeEvent(null, day, game.getId(), gameExecutor);
+            GameTimeEvent gameTimeEvent = new GameTimeEvent(null, gameExecuteAt, game.getId(), gameExecutor);
             gameTimeEvent = gameTimeEventRepository.save(gameTimeEvent);
 
             eventManager.schedule(gameTimeEvent);
         }
     }
 
-    private @NonNull Result getResult(TeamSeason homeTeam, TeamSeason visitorTeam) {
-        // === Ton flow inchangé ===
-        GamePlan homeGamePlan = gamePlanFactory.generateGamePlan(homeTeam.team(), visitorTeam.team());
-        GamePlan visitorGamePlan = gamePlanFactory.generateGamePlan(visitorTeam.team(), homeTeam.team());
-
-        homeGamePlan = gamePlanRepository.save(homeGamePlan);
-        visitorGamePlan = gamePlanRepository.save(visitorGamePlan);
-
-
-        GamePlan finalHomeGamePlan = homeGamePlan;
-        List<InGamePlayer> activePlayers = homeGamePlan.getOwnerTeam().getPlayers().stream()
-                .limit(10)
-                .map(player -> new InGamePlayer(player, finalHomeGamePlan.getId())) // map Player -> InGamePlayer
-                .toList();
-        homeGamePlan.setActivePlayers(activePlayers);
-        homeGamePlan = gamePlanRepository.update(homeGamePlan);
-
-        GamePlan finalVisitorGamePlan = visitorGamePlan;
-        List<InGamePlayer> visitorActivePlayers = visitorGamePlan.getOwnerTeam().getPlayers().stream()
-                .limit(10)
-                .map(player -> new InGamePlayer(player, finalVisitorGamePlan.getId()))
-                .toList();
-        visitorGamePlan.setActivePlayers(visitorActivePlayers);
-        visitorGamePlan = gamePlanRepository.update(visitorGamePlan);
-        return new Result(homeGamePlan, visitorGamePlan);
-    }
-
-    private record Result(GamePlan homeGamePlan, GamePlan visitorGamePlan) {
-    }
 
     /**
      * Rotation "circle method"
@@ -210,6 +195,19 @@ public class SeasonInitializer {
         if (rotating.isEmpty()) return;
         TeamSeason last = rotating.removeLast();
         rotating.addFirst(last);
+    }
+
+    private void createAndScheduleTraining(Team team, Instant executeAt) {
+        Objects.requireNonNull(team, "team");
+
+        TrainingType trainingType = TrainingType.PHYSICAL;
+        Training training = new Training(null, executeAt, team, trainingType);
+        Training saved = trainingRepository.save(training);
+
+        // Event id is generated by persistence; trainingId links the event to the training.
+        TrainingTimeEvent timeEvent = new TrainingTimeEvent(null, saved.getExecuteAt(), saved.getId(), trainingExecutor);
+        TrainingTimeEvent persisted = trainingTimeEventRepository.save(timeEvent);
+        eventManager.schedule(persisted);
     }
 
 

@@ -1,4 +1,4 @@
-package com.sanguiwara.factory;
+package com.sanguiwara;
 
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;

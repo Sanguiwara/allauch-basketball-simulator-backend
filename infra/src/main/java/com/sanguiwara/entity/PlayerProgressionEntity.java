@@ -27,12 +27,6 @@ public class PlayerProgressionEntity {
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
 
-    // For now: event_id refers to GameEntity.id. Kept generic in naming at domain level.
-    @MapsId("eventId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "event_id", nullable = false)
-    private GameEntity eventGame;
-
     @Column(name = "tir_3_pts")
     private Integer tir3Pts;
 

@@ -1,6 +1,7 @@
 package com.sanguiwara.repository;
 
 import com.sanguiwara.progression.PlayerProgression;
+import com.sanguiwara.progression.ProgressionEventType;
 import lombok.NonNull;
 
 import java.util.List;
@@ -15,9 +16,8 @@ public interface PlayerProgressionRepository {
     List<PlayerProgression> saveAll(@NonNull List<PlayerProgression> progressions);
 
     @NonNull
-    List<PlayerProgression> findByEventId(@NonNull UUID eventId);
+    List<PlayerProgression> findByEvent(@NonNull ProgressionEventType eventType, @NonNull UUID eventId);
 
     @NonNull
     List<PlayerProgression> findByPlayerId(@NonNull UUID playerId);
 }
-
