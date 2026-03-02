@@ -32,6 +32,11 @@ public class ClubRepositoryPGSQL implements ClubRepository {
     }
 
     @Override
+    public @NonNull Optional<Club> findByUserSub(@NonNull String sub) {
+        return clubJpaRepository.findByUser_Sub(sub).map(clubMapper::toDomain);
+    }
+
+    @Override
     public List<UUID> findAllIdsWithoutUser() {
         return clubJpaRepository.findAllByUserIsNull().stream()
                 .map(ClubEntity::getId)

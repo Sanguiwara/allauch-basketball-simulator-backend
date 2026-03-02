@@ -101,6 +101,9 @@ public class InGamePlayer {
         this.offensiveRebounds++;
     }
 
+    public void addDefensiveRebound() {
+        this.defensiveRebounds++;
+    }
     public void recordThreePointShot(boolean made) {
         if (made) {
             this.fgm++;

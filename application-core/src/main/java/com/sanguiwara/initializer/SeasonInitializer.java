@@ -1,15 +1,17 @@
 package com.sanguiwara.initializer;
 
-import com.sanguiwara.ClubNameFactory;
-import com.sanguiwara.GamePlanFactory;
-import com.sanguiwara.PlayerFactory;
-import com.sanguiwara.TeamFactory;
+import com.sanguiwara.factory.ClubNameFactory;
+import com.sanguiwara.factory.PlayerGenerator;
+import com.sanguiwara.factory.TeamFactory;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.executor.GameExecutor;
 import com.sanguiwara.executor.TrainingExecutor;
 import com.sanguiwara.repository.*;
+import com.sanguiwara.service.GamePlanService;
+import com.sanguiwara.service.PlayerService;
 import com.sanguiwara.timeevent.EventManager;
 import com.sanguiwara.timeevent.GameTimeEvent;
+import com.sanguiwara.timeevent.TimeEvent;
 import com.sanguiwara.timeevent.TrainingTimeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,15 +30,14 @@ public class SeasonInitializer {
     private final static int NB_PLAYERS_PER_TEAM = 12;
     private final static int NB_TEAMS_PER_CATEGORY = 1;
     private final static int NB_CATEGORIES = 1; //for now only senior
-
-    private final PlayerFactory playerFactory;
+//TODO Supprimer tous les repository et utiliser des services à la place
+    private final PlayerGenerator playerGenerator;
     private final TeamFactory teamFactory;
-    private final GamePlanFactory gamePlanFactory;
+    private final GamePlanService gamePlanService;
     private final TeamRepository teamRepository;
-    private final PlayerRepository playerRepository;
+    private final PlayerService playerService;
     private final TeamSeasonRepository teamForSeasonRepository;
     private final LeagueSeasonRepository leagueSeasonRepository;
-    private final GamePlanRepository gamePlanRepository;
     private final LeagueRepository leagueRepository;
     private final GameRepository gameRepository;
     private final ClubRepository clubRepository;
@@ -73,10 +74,10 @@ public class SeasonInitializer {
 
             List<Player> players = new ArrayList<>();
             for (int k = 0; k < NB_PLAYERS_PER_TEAM; k++) {
-                Player player = playerFactory.generatePlayer("");
+                Player player = playerGenerator.generatePlayer("");
                 player.setClubID(club.getId());
 
-                player = playerRepository.save(player);
+                player = playerService.savePlayer(player);
                 players.add(player);
 
 
@@ -97,6 +98,8 @@ public class SeasonInitializer {
         leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
         createGamesForSeason(startDate, leagueSeason);
+
+        eventManager.listAllOrdered().forEach(TimeEvent::execute);
 
 
     }
@@ -165,8 +168,8 @@ public class SeasonInitializer {
             TeamSeason homeTeam = reverse ? t2 : t1;
             TeamSeason visitorTeam = reverse ? t1 : t2;
 
-            GamePlan homeGamePlan = gamePlanFactory.generateGamePlan(homeTeam.team(), visitorTeam.team());
-            GamePlan visitorGamePlan = gamePlanFactory.generateGamePlan(visitorTeam.team(), homeTeam.team());
+            GamePlan homeGamePlan = gamePlanService.generateGamePlan(homeTeam.team(), visitorTeam.team());
+            GamePlan visitorGamePlan = gamePlanService.generateGamePlan(visitorTeam.team(), homeTeam.team());
             // =========================
 
             Instant dayStart = day.truncatedTo(ChronoUnit.DAYS);
@@ -183,6 +186,8 @@ public class SeasonInitializer {
             gameTimeEvent = gameTimeEventRepository.save(gameTimeEvent);
 
             eventManager.schedule(gameTimeEvent);
+
+
         }
     }
 

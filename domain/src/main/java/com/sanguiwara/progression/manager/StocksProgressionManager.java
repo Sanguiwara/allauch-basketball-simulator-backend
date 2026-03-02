@@ -1,8 +1,18 @@
-package com.sanguiwara;
+package com.sanguiwara.progression.manager;
 
+import com.sanguiwara.badges.Badge;
+import com.sanguiwara.badges.BadgeCatalog;
+import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
+import lombok.RequiredArgsConstructor;
 
-final class StocksProgressionManager {
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
+@RequiredArgsConstructor
+public final class StocksProgressionManager {
+    private final Random random;
 
     private static final int MIN_SKILL_VALUE = 1;
     private static final int MAX_SKILL_VALUE = 99;
@@ -16,7 +26,7 @@ final class StocksProgressionManager {
     private static final double BASE_BLOCK_GAIN = 1.9;
     private static final double PROTECT_RIM_DELTA_MULT = 0.75;
 
-    void applyStocksProgression(InGamePlayer p) {
+    public void applyStocksProgression(InGamePlayer p) {
         var player = p.getPlayer();
         int minutesPlayed = p.getMinutesPlayed();
         if (minutesPlayed == 0) {
@@ -27,6 +37,10 @@ final class StocksProgressionManager {
         double potentialMult = potentialMultiplier(player.getPotentielSkill());
 
         int steals = p.getSteals();
+        boolean anyStocks = steals > 0 || p.getBlocks() > 0;
+        if (anyStocks) {
+            applyStocksBadgeDrop(p);
+        }
         if (steals > 0) {
             double delta = BASE_STEAL_GAIN
                     * saturatingLog(steals)
@@ -55,6 +69,25 @@ final class StocksProgressionManager {
         }
     }
 
+    public void applyStocksBadgeDrop(InGamePlayer p) {
+        var player = p.getPlayer();
+
+        Set<Long> badgeIds = player.getBadgeIds();
+        if (badgeIds == null) {
+            badgeIds = new HashSet<>();
+            player.setBadgeIds(badgeIds);
+        }
+
+        for (Badge badge : BadgeCatalog.badgeMap().values()) {
+            if (!badge.types().contains(BadgeType.STEAL)) continue;
+            if (badgeIds.contains(badge.id())) continue;
+
+            if (random.nextDouble() < badge.dropRate()) {
+                badgeIds.add(badge.id());
+            }
+        }
+    }
+
     private static int applyDelta(int currentSkill, int delta) {
         return Math.clamp(currentSkill + delta, MIN_SKILL_VALUE, MAX_SKILL_VALUE);
     }
@@ -63,7 +96,7 @@ final class StocksProgressionManager {
         if (value <= 0) {
             return 0.0;
         }
-        return Math.log1p(value) / Math.log1p(StocksProgressionManager.STOCKS_SOFT_CAP);
+        return Math.log1p(value) / Math.log1p(STOCKS_SOFT_CAP);
     }
 
     private static double minutesMultiplier(int minutesPlayed) {

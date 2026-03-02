@@ -2,11 +2,16 @@ package com.sanguiwara.defense;
 
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.type.ShotType;
 
 import java.util.EnumMap;
 
 public final class Zone212Scheme extends ZoneDefensiveScheme {
+
+    public Zone212Scheme(BadgeEngine badgeEngine) {
+        super(badgeEngine);
+    }
 
 
     private static final double WEIGHT_DEF_EXTERIEUR = 0.15;

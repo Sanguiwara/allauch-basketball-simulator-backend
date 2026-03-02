@@ -92,6 +92,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
                         matchupAdvantage,
                         isAssistedShot
                 );
+                shotPct = applyMoraleBonus(shotPct, shooter.getPlayer().getMorale());
                 boolean made = random.nextDouble() < shotPct;
 
 
@@ -117,6 +118,13 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
 
         return spec.createResult(attempts, madeCount, events);
     }
+
+    private static double applyMoraleBonus(double baseShotPct, int morale) {
+        double moraleBonus = (morale / 99.0) * 0.40 - 0.20;
+        return baseShotPct + moraleBonus;
+    }
+
+
 
 
     public InGamePlayer pickAssister(List<InGamePlayer> potentialPassers, double assistedShotPercentage) {

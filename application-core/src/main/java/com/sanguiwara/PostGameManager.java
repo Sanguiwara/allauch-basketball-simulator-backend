@@ -7,18 +7,62 @@ import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.progression.PlayerProgression;
 import com.sanguiwara.progression.PlayerProgressionDelta;
 import com.sanguiwara.progression.ProgressionEventType;
+import com.sanguiwara.progression.manager.InactivityProgressionManager;
+import com.sanguiwara.progression.manager.MoraleProgressionManager;
+import com.sanguiwara.progression.manager.ReboundingProgressionManager;
+import com.sanguiwara.progression.manager.ShootingSkillProgressionManager;
+import com.sanguiwara.progression.manager.StocksProgressionManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class PostGameManager {
 
-    private final ShootingSkillProgressionManager shootingSkillProgressionManager = new ShootingSkillProgressionManager();
-    private final InactivityProgressionManager inactivityProgressionManager = new InactivityProgressionManager();
-    private final ReboundingProgressionManager reboundingProgressionManager = new ReboundingProgressionManager();
-    private final StocksProgressionManager stocksProgressionManager = new StocksProgressionManager();
-    private final MoraleProgressionManager moraleProgressionManager = new MoraleProgressionManager();
+    private final ShootingSkillProgressionManager shootingSkillProgressionManager;
+    private final InactivityProgressionManager inactivityProgressionManager;
+    private final ReboundingProgressionManager reboundingProgressionManager;
+    private final StocksProgressionManager stocksProgressionManager;
+    private final MoraleProgressionManager moraleProgressionManager;
+
+    public List<PlayerProgression> applyPostGameEffectsAndReturnsPlayersProgression(Game game) {
+        List<PlayerProgression> progressionList = new ArrayList<>();
+        List<InGamePlayer> playersFromGame =
+                Stream.concat(
+                        game.getHomeGamePlan().getActivePlayers().stream(),
+                        game.getAwayGamePlan().getActivePlayers().stream()
+                ).toList();
+
+        Map<UUID, Player> beforeByPlayerId =
+                playersFromGame.stream()
+                        .collect(Collectors.toMap(
+                                inGamePlayer -> inGamePlayer.getPlayer().getId(),
+                                inGamePlayer -> inGamePlayer.getPlayer().snapshotPlayer()
+                        ));
+
+        applyPostGameEffects(game);
+
+        for (InGamePlayer inGamePlayer : playersFromGame) {
+            Player playerAfterProgress = inGamePlayer.getPlayer();
+            Player playerBeforeProgress = beforeByPlayerId.get(playerAfterProgress.getId());
+            PlayerProgressionDelta delta = PlayerProgressionDelta.between(playerBeforeProgress, playerAfterProgress);
+            var badgeIds = playerAfterProgress.getBadgeIds();
+            progressionList.add(new PlayerProgression(playerAfterProgress.getId(), ProgressionEventType.GAME, game.getId(), badgeIds, delta));
+        }
+
+        return progressionList;
+    }
+
+
+
+
+
+
+
 
     public void applyPostGameEffects(Game game) {
 
@@ -34,48 +78,14 @@ public class PostGameManager {
         }
         moraleProgressionManager.applyLosingEffect(losingGamePlan);
         moraleProgressionManager.applyWinningEffect(winningGamePlan);
-        applyProgressionForGamePlan(winningGamePlan);
-        applyProgressionForGamePlan(losingGamePlan);
+
+        winningGamePlan.getActivePlayers().forEach(this::applyProgression);
+        losingGamePlan.getActivePlayers().forEach(this::applyProgression);
     }
-
-    public List<PlayerProgression> applyPostGameEffectsAndReturnsPlayersProgression(Game game) {
-        List<InGamePlayer> all = new ArrayList<>();
-        all.addAll(game.getHomeGamePlan().getActivePlayers());
-        all.addAll(game.getAwayGamePlan().getActivePlayers());
-
-        Map<UUID, Player> beforeByPlayerId = new HashMap<>(all.size());
-        for (InGamePlayer inGamePlayer : all) {
-            Player player = inGamePlayer.getPlayer();
-            beforeByPlayerId.put(player.getId(), player.snapshotPlayer());
-        }
-
-        applyPostGameEffects(game);
-        List<PlayerProgression> progressionList = new ArrayList<>();
-
-        for (InGamePlayer inGamePlayer : all) {
-            Player playerAfterProgress = inGamePlayer.getPlayer();
-            Player playerBeforeProgress = beforeByPlayerId.get(playerAfterProgress.getId());
-            PlayerProgressionDelta delta = PlayerProgressionDelta.between(playerBeforeProgress, playerAfterProgress);
-            progressionList.add(new PlayerProgression(playerAfterProgress.getId(), ProgressionEventType.GAME, game.getId(), delta));
-        }
-
-        return progressionList;
-    }
-
-
-    private void applyProgressionForGamePlan(GamePlan gamePlan) {
-
-        for (InGamePlayer inGamePlayer : gamePlan.getActivePlayers()) {
-
-            moraleProgressionManager.applyMoraleFromPerformance(inGamePlayer);
-            applyProgression(inGamePlayer);
-
-        }
-    }
-
 
 
     private void applyProgression(InGamePlayer inGamePlayer) {
+        moraleProgressionManager.applyMoraleFromPerformance(inGamePlayer);
         inactivityProgressionManager.apply(inGamePlayer);
         shootingSkillProgressionManager.applyShootingSkillProgression(inGamePlayer);
         reboundingProgressionManager.applyReboundingProgression(inGamePlayer);

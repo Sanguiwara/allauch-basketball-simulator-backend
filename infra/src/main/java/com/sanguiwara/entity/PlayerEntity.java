@@ -143,6 +143,14 @@ public class PlayerEntity {
     @Column(name = "morale", nullable = false)
     private int morale;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "player_badges",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "badge_id")
+    )
+    private Set<BadgeEntity> badges = new HashSet<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

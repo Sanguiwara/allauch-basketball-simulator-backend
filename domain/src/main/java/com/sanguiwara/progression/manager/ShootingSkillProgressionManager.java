@@ -1,9 +1,18 @@
-package com.sanguiwara;
+package com.sanguiwara.progression.manager;
 
+import com.sanguiwara.badges.Badge;
+import com.sanguiwara.badges.BadgeCatalog;
+import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.type.ShotType;
+import lombok.RequiredArgsConstructor;
 
-final class ShootingSkillProgressionManager {
+import java.util.Random;
+import java.util.Set;
+
+@RequiredArgsConstructor
+public final class ShootingSkillProgressionManager {
+    private final Random random;
 
     private static final int MIN_SKILL_VALUE = 1;
     private static final int MAX_SKILL_VALUE = 99;
@@ -21,7 +30,7 @@ final class ShootingSkillProgressionManager {
     private static final double SHOOTING_VOLUME_MAX_AT_15 = 10;       // target at 15 attempts (tune 2.0..3.0)
     private static final double SHOOTING_VOLUME_EXPONENT = 2.2;        // tuned so at 8 attempts ~ +1
 
-    void applyShootingSkillProgression(InGamePlayer p) {
+    public void applyShootingSkillProgression(InGamePlayer p) {
         var player = p.getPlayer();
         int minutesPlayed = p.getMinutesPlayed();
         if (minutesPlayed == 0) {
@@ -75,6 +84,34 @@ final class ShootingSkillProgressionManager {
                 }
             }
         }
+
+        int totalAttempts = p.getThreePointAttempt() + p.getTwoPointAttempts() + p.getDriveAttempts();
+        if (totalAttempts > 0 || p.getAssists() > 0) {
+            applyShootingAndAssistBadgeDrop(p);
+        }
+    }
+
+    public void applyShootingAndAssistBadgeDrop(InGamePlayer p) {
+        var player = p.getPlayer();
+
+        Set<Long> badgeIds = player.getBadgeIds();
+
+
+        for (Badge badge : BadgeCatalog.badgeMap().values()) {
+            if (!handlesBadge(badge)) continue;
+            if (badgeIds.contains(badge.id())) continue;
+
+            if (random.nextDouble() < badge.dropRate()) {
+                badgeIds.add(badge.id());
+            }
+        }
+    }
+
+    private static boolean handlesBadge(Badge badge) {
+        var types = badge.types();
+        return types.contains(BadgeType.THREE_POINT)
+                || types.contains(BadgeType.TWO_POINT)
+                || types.contains(BadgeType.DRIVE);
     }
 
     private static int applyDelta(int currentSkill, int delta) {
@@ -99,8 +136,7 @@ final class ShootingSkillProgressionManager {
     }
 
     private static double saturatingLog(int value) {
-
-        return Math.log1p(value) / Math.log1p(ShootingSkillProgressionManager.MADE_SOFT_CAP);
+        return Math.log1p(value) / Math.log1p(MADE_SOFT_CAP);
     }
 
     private static double minutesMultiplier(int minutesPlayed) {

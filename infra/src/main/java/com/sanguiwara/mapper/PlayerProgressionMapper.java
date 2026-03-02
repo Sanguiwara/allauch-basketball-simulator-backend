@@ -1,5 +1,6 @@
 package com.sanguiwara.mapper;
 
+import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.entity.PlayerProgressionEntity;
 import com.sanguiwara.progression.PlayerProgression;
@@ -7,6 +8,8 @@ import com.sanguiwara.progression.PlayerProgressionDelta;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring", imports = {com.sanguiwara.entity.PlayerProgressionId.class})
@@ -15,6 +18,7 @@ public interface PlayerProgressionMapper {
     @Mapping(target = "playerId", source = "player.id")
     @Mapping(target = "eventType", source = "id.eventType")
     @Mapping(target = "eventId", source = "id.eventId")
+    @Mapping(target = "badgeIds", expression = "java(mapBadgeIds(entity.getPlayer()))")
     @Mapping(target = "delta", expression = "java(toDelta(entity))")
     PlayerProgression toDomain(PlayerProgressionEntity entity);
 
@@ -52,6 +56,15 @@ public interface PlayerProgressionMapper {
     @Mapping(target = "leadership", source = "delta.leadership")
     @Mapping(target = "morale", source = "delta.morale")
     PlayerProgressionEntity toEntity(PlayerProgression progression);
+
+    default Set<Long> mapBadgeIds(PlayerEntity player) {
+        if (player == null || player.getBadges() == null || player.getBadges().isEmpty()) return Set.of();
+        Set<Long> ids = new HashSet<>();
+        for (BadgeEntity b : player.getBadges()) {
+            if (b != null && b.getId() != null) ids.add(b.getId());
+        }
+        return ids.isEmpty() ? Set.of() : Set.copyOf(ids);
+    }
 
     default PlayerProgressionDelta toDelta(PlayerProgressionEntity entity) {
         if (entity == null) return null;

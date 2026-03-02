@@ -11,6 +11,7 @@ import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.progression.PlayerProgression;
 import com.sanguiwara.repository.GameRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
+import com.sanguiwara.repository.PlayerRepository;
 import com.sanguiwara.result.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class GameExecutor {
     private final GameRepository gameRepository;
     private final PostGameManager postGameManager;
     private final PlayerProgressionRepository playerProgressionRepository;
+    private final PlayerRepository playerRepository;
 
 
     @Transactional
@@ -40,6 +43,12 @@ public class GameExecutor {
         BoxScore awayStats = boxScore.awayScore();
         printGame(game, homeStats, awayStats);
         List<PlayerProgression> progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
+        List<InGamePlayer> playersFromGame =
+                Stream.concat(
+                        game.getHomeGamePlan().getActivePlayers().stream(),
+                        game.getAwayGamePlan().getActivePlayers().stream()
+                ).toList();
+        playersFromGame.forEach(player -> playerRepository.save(player.getPlayer()));
         gameRepository.save(game);
         playerProgressionRepository.saveAll(progressions);
     }

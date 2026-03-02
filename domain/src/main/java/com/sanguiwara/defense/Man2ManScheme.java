@@ -3,8 +3,16 @@ package com.sanguiwara.defense;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
+import lombok.RequiredArgsConstructor;
 
+
+@RequiredArgsConstructor
 public abstract class Man2ManScheme implements DefensiveScheme {
+
 
     protected static final double OFF_SPEED_WEIGHT = 0.15;
     protected static final double OFF_SIZE_WEIGHT = 0.05;
@@ -27,6 +35,8 @@ public abstract class Man2ManScheme implements DefensiveScheme {
     protected static final double MAX_INDIVIDUAL_ADVANTAGE = 20.0;
 
     protected static final int TOTAL_MINUTES_FOR_TEAM = 200;
+
+    private final BadgeEngine badgeEngine;
 
 
     @Override
@@ -57,6 +67,8 @@ public abstract class Man2ManScheme implements DefensiveScheme {
         double advantage = Math.clamp(adv, MIN_INDIVIDUAL_ADVANTAGE, MAX_INDIVIDUAL_ADVANTAGE);
         double minutesShare = (double) inGameOff.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
         double individualPlayMakingScore = offScore * minutesShare;
+        individualPlayMakingScore = badgeEngine.apply(off, BadgeType.ASSIST, Target.PLAYMAKING_CONTRIBUTION,
+                individualPlayMakingScore, ShotContext.empty());
         inGameOff.setPlaymakingContribution(individualPlayMakingScore);
 
         return advantage;

@@ -1,6 +1,7 @@
 package com.sanguiwara.controller;
 
 import com.sanguiwara.dto.GameDTO;
+import com.sanguiwara.dto.SimplifiedGameDTO;
 import com.sanguiwara.mapper.GameDTOMapper;
 import com.sanguiwara.service.GameService;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +37,9 @@ public class GameController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<GameDTO>> getAllTeams() {
+    public ResponseEntity<List<SimplifiedGameDTO>> getAllGames() {
 
-        return ResponseEntity.of(Optional.of(gameService.getAllGames().stream().map(gameDTOMapper::toDto).toList()));
+        return ResponseEntity.of(Optional.of(gameService.getAllGames().stream().map(gameDTOMapper::toSimplifiedDto).toList()));
 
     }
 

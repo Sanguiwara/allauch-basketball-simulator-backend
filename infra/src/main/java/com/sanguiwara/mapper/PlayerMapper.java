@@ -1,6 +1,7 @@
 package com.sanguiwara.mapper;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.ClubEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.entity.TeamEntity;
@@ -19,11 +20,13 @@ public interface PlayerMapper {
 
     @Mapping(target = "teamsID", expression = "java(mapTeamIds(entity.getTeams()))")
     @Mapping(target = "clubID", source = "club.id")
+    @Mapping(target = "badgeIds", expression = "java(mapBadgeIds(entity.getBadges()))")
     Player toDomain(PlayerEntity entity);
 
 
     @Mapping(target = "teams", ignore = true)
     @Mapping(target = "club", ignore = true)
+    @Mapping(target = "badges", ignore = true)
     PlayerEntity toEntity(Player player);
 
 
@@ -59,6 +62,15 @@ public interface PlayerMapper {
         Set<UUID> ids = new HashSet<>();
         for (TeamEntity t : teams) {
             if (t != null && t.getId() != null) ids.add(t.getId());
+        }
+        return ids;
+    }
+
+    default Set<Long> mapBadgeIds(Set<BadgeEntity> badges) {
+        if (badges == null || badges.isEmpty()) return new HashSet<>();
+        Set<Long> ids = new HashSet<>();
+        for (BadgeEntity b : badges) {
+            if (b != null && b.getId() != null) ids.add(b.getId());
         }
         return ids;
     }

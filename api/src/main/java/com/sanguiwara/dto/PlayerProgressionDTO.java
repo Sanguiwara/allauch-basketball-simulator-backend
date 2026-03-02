@@ -2,12 +2,14 @@ package com.sanguiwara.dto;
 
 import com.sanguiwara.progression.ProgressionEventType;
 
+import java.util.List;
 import java.util.UUID;
 
 public record PlayerProgressionDTO(
         UUID playerId,
         ProgressionEventType eventType,
         UUID eventId,
+        List<BadgeDTO> badges,
         Integer tir3Pts,
         Integer tir2Pts,
         Integer lancerFranc,

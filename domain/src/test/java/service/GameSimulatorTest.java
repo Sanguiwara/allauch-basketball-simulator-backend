@@ -2,8 +2,9 @@ package service;
 
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.calculator.*;
+import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.defense.*;
-import com.sanguiwara.factory.PlayerFactory;
+import com.sanguiwara.factory.PlayerGenerator;
 import com.sanguiwara.result.*;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
@@ -24,39 +25,40 @@ class GameSimulatorTest {
 
     private static final long SEED = 123456789L;
     private static Random random;
-    private static PlayerFactory playerFactory;
+    private static PlayerGenerator playerFactory;
 
     @BeforeAll
     static void setUp() {
         random = new Random();
-        playerFactory = new PlayerFactory(random);
+        playerFactory = new PlayerGenerator(random);
     }
 
     private record GamePlans(GamePlan home, GamePlan away) {}
 
     private static GameSimulator getGameCalculator() {
+        BadgeEngine badgeEngine = new BadgeEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(),
-                new Zone23Scheme(),
-                new Zone212Scheme(),
-                new Zone32Scheme()
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
         AssistCalculator assistCalculator = new AssistCalculator(defenseSchemeResolver);
         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
-                new ShotSimulator<>( random, new ThreePointSpecification(random), defenseSchemeResolver);
+                new ShotSimulator<>( random, new ThreePointSpecification(random, badgeEngine), defenseSchemeResolver);
         ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator =
-                new ShotSimulator<>( random, new TwoPointSpecification(random), defenseSchemeResolver);
+                new ShotSimulator<>( random, new TwoPointSpecification(random, badgeEngine), defenseSchemeResolver);
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
-                new ShotSimulator<>( random, new DriveSpecification(random), defenseSchemeResolver);
-        ReboundCalculator reboundCalculator = new ReboundCalculator(random);
+                new ShotSimulator<>( random, new DriveSpecification(random, badgeEngine), defenseSchemeResolver);
+        ReboundCalculator reboundCalculator = new ReboundCalculator(random, badgeEngine);
         BlockCalculator blockCalculator = new BlockCalculator();
-        StealSimulator stealSimulator = new StealSimulator(random);
+        StealSimulator stealSimulator = new StealSimulator(random, badgeEngine);
 
         return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, assistCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
-    private static GamePlans makePlans(PlayerFactory factory) {
+    private static GamePlans makePlans(PlayerGenerator factory) {
         Map<Position, InGamePlayer> homePos = createPositionMap(factory, "HOME");
         Map<Position, InGamePlayer> awayPos = createPositionMap(factory, "AWAY");
 
@@ -102,13 +104,13 @@ class GameSimulatorTest {
         return new GamePlans(homePlan, awayPlan);
     }
 
-    private static Map<Position, InGamePlayer> createPositionMap(PlayerFactory factory, String prefix) {
+    private static Map<Position, InGamePlayer> createPositionMap(PlayerGenerator factory, String prefix) {
         Map<Position, InGamePlayer> pos = new EnumMap<>(Position.class);
-        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( prefix + "_PG")));
-        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( prefix + "_SG")));
-        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(prefix + "_SF")));
-        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( prefix + "_PF")));
-        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( prefix + "_C")));
+        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( prefix + "_PG"),null));
+        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( prefix + "_SG"),null));
+        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(prefix + "_SF"),null));
+        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( prefix + "_PF"),null));
+        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( prefix + "_C"),null));
         return pos;
     }
 

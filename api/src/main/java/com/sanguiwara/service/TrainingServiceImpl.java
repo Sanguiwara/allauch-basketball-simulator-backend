@@ -1,9 +1,11 @@
 package com.sanguiwara.service;
 
+import com.sanguiwara.baserecords.Club;
 import com.sanguiwara.baserecords.Training;
 import com.sanguiwara.baserecords.TrainingType;
 import com.sanguiwara.executor.TrainingExecutor;
 import com.sanguiwara.progression.ProgressionEventType;
+import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.repository.TeamRepository;
 import com.sanguiwara.repository.TrainingRepository;
@@ -17,6 +19,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +27,7 @@ public class TrainingServiceImpl implements TrainingService {
 
     private final TrainingRepository trainingRepository;
     private final TeamRepository teamRepository;
+    private final ClubRepository clubRepository;
     private final PlayerProgressionRepository playerProgressionRepository;
     private final TrainingTimeEventRepository trainingTimeEventRepository;
     private final TrainingExecutor trainingExecutor;
@@ -67,6 +71,21 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public Optional<Training> getNextTrainingForATeam(UUID teamId) {
         return trainingRepository.findNextByTeamId(teamId, Instant.now());
+    }
+
+    @Override
+    public Optional<Training> getNextTrainingForAClub(UUID clubId) {
+        return clubRepository.findById(clubId)
+                .map(Club::getTeams)
+                .filter(teams -> !teams.isEmpty())
+                .map(teams -> teams.get(ThreadLocalRandom.current().nextInt(teams.size())))
+                .flatMap(team -> getNextTrainingForATeam(team.getId()));
+    }
+
+    @Override
+    public Optional<Training> getNextTrainingForAUserSub(String sub) {
+        return clubRepository.findByUserSub(sub)
+                .flatMap(club -> getNextTrainingForAClub(club.getId()));
     }
 
     @Override

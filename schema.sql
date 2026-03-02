@@ -35,10 +35,10 @@ CREATE TABLE teams (
 );
 
 CREATE TABLE players (
-                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                         name TEXT NOT NULL,
-                         team_id UUID,
-                         club_id UUID,
+                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                          name TEXT NOT NULL,
+                          team_id UUID,
+                          club_id UUID,
                          birth_date INTEGER NOT NULL,
                          injured BOOLEAN NOT NULL DEFAULT FALSE,
                          tir_3_pts INTEGER NOT NULL,
@@ -74,9 +74,27 @@ CREATE TABLE players (
                          morale INTEGER NOT NULL DEFAULT 50,
                          CONSTRAINT fk_players_team
                              FOREIGN KEY (team_id) REFERENCES teams (id),
-                         CONSTRAINT fk_players_club
-                             FOREIGN KEY (club_id) REFERENCES clubs (id)
+                          CONSTRAINT fk_players_club
+                              FOREIGN KEY (club_id) REFERENCES clubs (id)
+ );
+
+CREATE TABLE badges (
+                        id BIGINT PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        drop_rate DOUBLE PRECISION NOT NULL DEFAULT 0
 );
+
+-- Player badges (present/absent, unique per player)
+CREATE TABLE player_badges (
+                               player_id UUID NOT NULL,
+                               badge_id BIGINT NOT NULL,
+                               CONSTRAINT pk_player_badges PRIMARY KEY (player_id, badge_id),
+                               CONSTRAINT fk_player_badges_player
+                                   FOREIGN KEY (player_id) REFERENCES players (id) ON DELETE CASCADE,
+                                CONSTRAINT fk_player_badges_badge
+                                    FOREIGN KEY (badge_id) REFERENCES badges (id)
+);
+CREATE INDEX idx_player_badges_badge_id ON player_badges(badge_id);
 
 CREATE TABLE leagues (
                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

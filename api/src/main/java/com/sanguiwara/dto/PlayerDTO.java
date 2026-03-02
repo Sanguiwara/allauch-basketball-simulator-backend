@@ -1,5 +1,6 @@
 package com.sanguiwara.dto;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public record PlayerDTO(
         int ego,
         int softSkills,
         int leadership,
+        List<BadgeDTO> badges,
         UUID clubId,
         Set<UUID> teamIds
 ) {

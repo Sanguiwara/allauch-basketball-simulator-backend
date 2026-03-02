@@ -1,9 +1,12 @@
-package com.sanguiwara;
+package com.sanguiwara.progression.manager;
 
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import lombok.RequiredArgsConstructor;
 
-final class InactivityProgressionManager {
+@RequiredArgsConstructor
+public final class InactivityProgressionManager {
+
 
     private static final int MIN_SKILL_VALUE = 1;
     private static final int MAX_SKILL_VALUE = 99;
@@ -11,7 +14,7 @@ final class InactivityProgressionManager {
     private static final int MINUTES_OK_THRESHOLD = 10;
     private static final int MAX_INACTIVITY_SKILL_DECAY = 1;
 
-    void apply(InGamePlayer inGamePlayer) {
+    public void apply(InGamePlayer inGamePlayer) {
         int minutesPlayed = inGamePlayer.getMinutesPlayed();
         if (minutesPlayed >= MINUTES_OK_THRESHOLD) {
             return;

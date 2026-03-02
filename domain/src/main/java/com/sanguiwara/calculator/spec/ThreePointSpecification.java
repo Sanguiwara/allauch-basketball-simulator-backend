@@ -3,6 +3,10 @@ package com.sanguiwara.calculator.spec;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.type.ShotType;
@@ -41,6 +45,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     private static final double SCORE_IQ_WEIGHT_DEF = 0.10;
     private static final double ASSIST_BONUS_PCT = 0.15;
     private final Random random;
+    private final BadgeEngine badgeEngine;
 
 
     @Override
@@ -73,7 +78,10 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         double assistBonusPct = isAssistedShot ? ASSIST_BONUS_PCT : 0.0;
         double basePct = (shooter.getPlayer().getTir3Pts() / RATING_NORMALIZATION_DIVISOR) * BASE_THREE_POINT_PROBABILITY_COEFFICIENT;
         double advantagePct = (advantage / ADVANTAGE_NORMALIZATION_DIVISOR) * ADVANTAGE_THREE_POINT_COEFFICIENT;
-        return basePct + advantagePct + assistBonusPct;
+        double pct = basePct + advantagePct + assistBonusPct;
+        pct = badgeEngine.apply(shooter.getPlayer(), BadgeType.THREE_POINT, Target.SHOT_PCT, pct,
+                ShotContext.forShot(ShotType.THREE_POINT, isAssistedShot, advantage));
+        return Math.clamp(pct, 0.0, 0.95);
     }
 
     @Override

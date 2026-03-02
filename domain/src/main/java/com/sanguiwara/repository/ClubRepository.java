@@ -11,6 +11,9 @@ public interface ClubRepository {
     @NonNull
     Optional<Club> findById(UUID id);
 
+    @NonNull
+    Optional<Club> findByUserSub(@NonNull String sub);
+
     List<UUID> findAllIdsWithoutUser();
 
     List<Club> findAll();

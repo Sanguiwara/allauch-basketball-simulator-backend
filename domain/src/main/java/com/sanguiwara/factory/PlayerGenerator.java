@@ -1,4 +1,4 @@
-package com.sanguiwara;
+package com.sanguiwara.factory;
 
 import com.sanguiwara.baserecords.Player;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 @RequiredArgsConstructor
-public final class PlayerFactory {
+public final class PlayerGenerator {
 
     private final Random rng;
 
@@ -69,6 +69,18 @@ public final class PlayerFactory {
 
         // Avoid null collections when using Lombok builders (field initializers are overridden).
         player.setTeamsID(new HashSet<>());
+
+        player.setBadgeIds(new HashSet<>());
+//        player.getBadgeIds().add(0L);
+//        player.getBadgeIds().add(1L);
+//        player.getBadgeIds().add(2L);
+//        player.getBadgeIds().add(3L);
+//        player.getBadgeIds().add(4L);
+//        player.getBadgeIds().add(5L);
+//        player.getBadgeIds().add(6L);
+//        player.getBadgeIds().add(7L);
+//        player.getBadgeIds().add(8L);
+
         return player;
     }
 

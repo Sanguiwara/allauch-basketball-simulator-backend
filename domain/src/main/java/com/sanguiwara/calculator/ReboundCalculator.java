@@ -3,6 +3,10 @@ package com.sanguiwara.calculator;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ReboundContext;
+import com.sanguiwara.badges.Target;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +33,7 @@ public class ReboundCalculator {
     private static final double REB_ENDURANCE_COEFF = 0.06;
 
     private final java.util.Random random;
+    private final BadgeEngine badgeEngine;
 
     public int evaluateOffensiveReboundForTeam(GamePlan offenseGamePlan, GamePlan defenseGamePlan) {
         double reboundAdvantage = evaluateReboundAdvantage(offenseGamePlan, defenseGamePlan);
@@ -53,6 +58,9 @@ public class ReboundCalculator {
                 if (log.isDebugEnabled() && rebounder.getPlayer() != null) {
                     log.debug("Offensive rebound credited to: {}", rebounder.getPlayer().getName());
                 }
+            } else {
+                InGamePlayer rebounder = pickRebounder(defenseGamePlan.getActivePlayers());
+                if (rebounder != null) rebounder.addDefensiveRebound();
             }
         }
 
@@ -63,18 +71,18 @@ public class ReboundCalculator {
     }
 
     private double evaluateReboundAdvantage(GamePlan home, GamePlan visitor) {
-        double homeReboundScore = getHomeReboundScore(home);
-        double visitorReboundScore = getHomeReboundScore(visitor);
+        double homeReboundScore = populateTeamReboundScore(home, ReboundContext.offensive());
+        double visitorReboundScore = populateTeamReboundScore(visitor, ReboundContext.defensive());
 
         return (homeReboundScore - visitorReboundScore) / (homeReboundScore + visitorReboundScore);
     }
 
-    private double getHomeReboundScore(GamePlan gamePlan) {
+    private double populateTeamReboundScore(GamePlan gamePlan, ReboundContext context) {
         double homeReboundScore = 0.0;
 
         for (InGamePlayer inGamePlayer : gamePlan.getActivePlayers()) {
             double minutesShare = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
-            double playerReboundScore = getPlayerReboundScore(inGamePlayer) * minutesShare;
+            double playerReboundScore = getPlayerReboundScore(inGamePlayer, context) * minutesShare;
             inGamePlayer.setReboundContribution(playerReboundScore);
             homeReboundScore += playerReboundScore;
         }
@@ -84,9 +92,9 @@ public class ReboundCalculator {
         return homeReboundScore;
     }
 
-    private static double getPlayerReboundScore(InGamePlayer inGamePlayer) {
+    private double getPlayerReboundScore(InGamePlayer inGamePlayer, ReboundContext context) {
         Player player = inGamePlayer.getPlayer();
-        return REB_SIZE_COEFF * player.getSize()
+        double score = REB_SIZE_COEFF * player.getSize()
                 + REB_WEIGHT_COEFF * player.getWeight()
                 + REB_AGGR_COEFF * player.getAgressivite()
                 + REB_AGGR_REB_COEFF * player.getAgressiviteRebond()
@@ -94,6 +102,7 @@ public class ReboundCalculator {
                 + REB_PHYSIQUE_COEFF * player.getPhysique()
                 + REB_IQ_COEFF * player.getIq()
                 + REB_ENDURANCE_COEFF * player.getEndurance();
+        return badgeEngine.apply(player, BadgeType.REBOUND, Target.REBOUND_SCORE, score, context);
     }
 
     private InGamePlayer pickRebounder(List<InGamePlayer> potentialRebounders) {

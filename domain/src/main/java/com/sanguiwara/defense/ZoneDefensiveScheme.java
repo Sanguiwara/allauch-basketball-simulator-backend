@@ -3,6 +3,10 @@ package com.sanguiwara.defense;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
 import com.sanguiwara.calculator.spec.ShotSpec;
 import com.sanguiwara.type.ShotType;
 
@@ -11,6 +15,12 @@ import java.util.List;
 
 public abstract class ZoneDefensiveScheme implements DefensiveScheme {
     protected static final int TOTAL_MINUTES_FOR_TEAM = 200;
+
+    protected final BadgeEngine badgeEngine;
+
+    protected ZoneDefensiveScheme(BadgeEngine badgeEngine) {
+        this.badgeEngine = badgeEngine;
+    }
 
     protected static final double DEF_SPEED_WEIGHT_ZONE = 0.05;
     protected static final double DEF_SIZE_WEIGHT_ZONE = 0.10;
@@ -54,11 +64,13 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
         for (InGamePlayer inGamePlayer : offenseTeam.getActivePlayers()) {
             double minutesShare = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
             double individualPlayMakingScore = getOffensivePlayerPlaymakingScore(inGamePlayer) * minutesShare;
+            individualPlayMakingScore = badgeEngine.apply(inGamePlayer.getPlayer(), BadgeType.ASSIST, Target.PLAYMAKING_CONTRIBUTION,
+                    individualPlayMakingScore, ShotContext.empty());
             inGamePlayer.setPlaymakingContribution(individualPlayMakingScore);
             playmakingScore += individualPlayMakingScore;
         }
         for (InGamePlayer inGamePlayer : offenseTeam.getActivePlayers()) {
-            inGamePlayer.setAssistWeight(inGamePlayer.getReboundContribution() / playmakingScore);
+            inGamePlayer.setAssistWeight(inGamePlayer.getPlaymakingContribution() / playmakingScore);
         }
         double defenseScore = getDefensiveTeamPlaymakingScore(defenseTeam);
         playmakingScore -= defenseScore;

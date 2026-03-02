@@ -1,5 +1,6 @@
 package com.sanguiwara.progression;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -10,6 +11,7 @@ public record PlayerProgression(
         UUID playerId,
         ProgressionEventType eventType,
         UUID eventId,
+        Set<Long> badgeIds,
         PlayerProgressionDelta delta
 ) {
 }

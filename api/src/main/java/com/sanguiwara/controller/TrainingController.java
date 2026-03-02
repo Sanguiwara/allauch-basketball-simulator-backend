@@ -42,6 +42,16 @@ public class TrainingController {
         return ResponseEntity.of(trainingService.getNextTrainingForATeam(teamId).map(trainingDTOMapper::toDto));
     }
 
+    @GetMapping("/clubID/{clubId}/next")
+    public ResponseEntity<TrainingDTO> getNextTrainingForAClub(@PathVariable UUID clubId) {
+        return ResponseEntity.of(trainingService.getNextTrainingForAClub(clubId).map(trainingDTOMapper::toDto));
+    }
+
+    @GetMapping("/userSub/{sub}/next")
+    public ResponseEntity<TrainingDTO> getNextTrainingForAUserSub(@PathVariable String sub) {
+        return ResponseEntity.of(trainingService.getNextTrainingForAUserSub(sub).map(trainingDTOMapper::toDto));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TrainingDTO> getTraining(@PathVariable UUID id) {
         return ResponseEntity.of(Optional.of(trainingDTOMapper.toDto(trainingService.getTrainingById(id))));

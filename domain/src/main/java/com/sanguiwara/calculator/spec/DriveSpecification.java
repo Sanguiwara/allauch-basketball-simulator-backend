@@ -3,6 +3,10 @@ package com.sanguiwara.calculator.spec;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
 import com.sanguiwara.gameevent.DriveEvent;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.type.ShotType;
@@ -50,6 +54,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     private static final double DEF_STEAL_WEIGHT = 0.10;
     private static final double DEF_POSTE_WEIGHT = 0.10;
     private final Random random;
+    private final BadgeEngine badgeEngine;
 
 
     @Override
@@ -85,7 +90,10 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
 
         double advPct = (advantage / ADVANTAGE_DIVISOR) * ADVANTAGE_IMPACT_COEFFICIENT;
 
-        return clamp(base + advPct + assistBonusPct);
+        double pct = base + advPct + assistBonusPct;
+        pct = badgeEngine.apply(attacker, BadgeType.DRIVE, Target.SHOT_PCT, pct,
+                ShotContext.forShot(ShotType.DRIVE, isAssistedShot, advantage));
+        return clamp(pct);
 
     }
 

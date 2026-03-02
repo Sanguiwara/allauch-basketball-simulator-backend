@@ -1,10 +1,15 @@
-package com.sanguiwara;
+package com.sanguiwara.progression.manager;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import lombok.RequiredArgsConstructor;
 
-final class MoraleProgressionManager {
+import java.util.Random;
 
+@RequiredArgsConstructor
+public final class MoraleProgressionManager {
+
+    private final Random random;
     private static final int MAX_EGO_FOR_IMPACT = 99;
     private static final int MAX_MORALE_IMPACT = 20;
     private static final int MIN_MORALE = 1;
@@ -45,7 +50,7 @@ final class MoraleProgressionManager {
     private static final double RATING_ASSISTS_PER_MIN_NEUTRAL = 0.12;
     private static final double RATING_ASSISTS_PER_MIN_SCALE = 0.12;
 
-    void applyMoraleFromPerformance(InGamePlayer inGamePlayer) {
+    public void applyMoraleFromPerformance(InGamePlayer inGamePlayer) {
         double matchRating = computeMatchRating(inGamePlayer);
 
         var player = inGamePlayer.getPlayer();
@@ -53,11 +58,11 @@ final class MoraleProgressionManager {
         double egoVolatility = egoVolatilityMultiplier(player.getEgo());
         int minutesPenalty = computeMinutesPenalty(inGamePlayer.getMinutesPlayed(), egoVolatility);
         int ratingDelta = computeMoraleDeltaFromRating(matchRating, egoVolatility);
-        player.setMorale(applyDelta(player.getMorale() , minutesPenalty + ratingDelta));
+        player.setMorale(applyDelta(player.getMorale(), minutesPenalty + ratingDelta));
         inGamePlayer.setMatchRating(matchRating);
     }
 
-    void applyWinningEffect(GamePlan winningGamePlan) {
+    public void applyWinningEffect(GamePlan winningGamePlan) {
         for (InGamePlayer inGamePlayer : winningGamePlan.getActivePlayers()) {
             var player = inGamePlayer.getPlayer();
             int impact = moraleImpactFromEgo(player.getEgo());
@@ -65,7 +70,7 @@ final class MoraleProgressionManager {
         }
     }
 
-    void applyLosingEffect(GamePlan losingGamePlan) {
+    public void applyLosingEffect(GamePlan losingGamePlan) {
         for (InGamePlayer inGamePlayer : losingGamePlan.getActivePlayers()) {
             var player = inGamePlayer.getPlayer();
             int impact = moraleImpactFromEgo(player.getEgo());
@@ -111,7 +116,10 @@ final class MoraleProgressionManager {
         // If no attempts, we don't punish efficiency; volume already captured by points.
         double fgPct = (fga == 0) ? FG_PCT_NEUTRAL : (fgm / (double) fga);
 
-        int usageIntensity = p.getUsageShoot() + p.getUsageDrive() + p.getUsagePost() / MAX_USAGE_PER_CATEGORY * USAGE_CATEGORIES_COUNT;
+        int usageIntensity =
+                p.getUsageShoot()
+                        + p.getUsageDrive()
+                        + p.getUsagePost() / MAX_USAGE_PER_CATEGORY * USAGE_CATEGORIES_COUNT;
 
         double usageNeutral = usageIntensityNeutral();
         double rating = MATCH_RATING_NEUTRAL;
@@ -129,7 +137,9 @@ final class MoraleProgressionManager {
     }
 
     private static int usageIntensityNeutral() {
-        return (DEFAULT_USAGE_PER_CATEGORY * USAGE_CATEGORIES_COUNT) / MAX_USAGE_PER_CATEGORY * USAGE_CATEGORIES_COUNT;
+        return (DEFAULT_USAGE_PER_CATEGORY * USAGE_CATEGORIES_COUNT)
+                / MAX_USAGE_PER_CATEGORY
+                * USAGE_CATEGORIES_COUNT;
     }
 
     private static double egoVolatilityMultiplier(int ego0to99) {
@@ -146,6 +156,5 @@ final class MoraleProgressionManager {
     private static int applyDelta(int currentSkill, int delta) {
         return Math.clamp(currentSkill + delta, MIN_MORALE, MAX_MORALE);
     }
-
 }
 

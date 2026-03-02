@@ -20,6 +20,10 @@ public interface TrainingService {
 
     Optional<Training> getNextTrainingForATeam(UUID teamId);
 
+    Optional<Training> getNextTrainingForAClub(UUID clubId);
+
+    Optional<Training> getNextTrainingForAUserSub(String sub);
+
     Training updateTraining(UUID trainingId, TrainingType trainingType);
 
     void executeTraining(UUID trainingId);

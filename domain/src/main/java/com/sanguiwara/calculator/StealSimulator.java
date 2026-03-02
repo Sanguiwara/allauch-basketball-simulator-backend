@@ -4,6 +4,10 @@ package com.sanguiwara.calculator;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +20,6 @@ import static com.sanguiwara.calculator.AssistCalculator.MIN_ASSIST_PROBABILITY;
 @Slf4j
 @RequiredArgsConstructor
 public class StealSimulator {
-
     // Minutes totales d'une équipe sur un match (5 joueurs * 40 minutes)
     public static final int TOTAL_MINUTES_FOR_TEAM = 200;
 
@@ -40,6 +43,7 @@ public class StealSimulator {
     private static final double PLAYMAKING_IMPACT_SCALE = 0.90; // impact max ~30%
 
     private final Random random;
+    private final BadgeEngine badgeEngine;
 
     public int calculateSteals(GamePlan offensiveTeam, GamePlan defensiveTeam, double assistProbability) {
 
@@ -93,14 +97,15 @@ public class StealSimulator {
         return teamStealScore;
     }
 
-    private static double getPlayerStealScore(InGamePlayer inGamePlayer) {
+    private double getPlayerStealScore(InGamePlayer inGamePlayer) {
         Player p = inGamePlayer.getPlayer();
-        return STL_SPEED_WEIGHT * p.getSpeed()
+        double score = STL_SPEED_WEIGHT * p.getSpeed()
                 + STL_DEF_EXT_WEIGHT * p.getDefExterieur()
                 + STL_STEAL_WEIGHT * p.getSteal()
                 + STL_BBIQ_DEF_WEIGHT * p.getBasketballIqDef()
                 + STL_ENDURANCE_WEIGHT * p.getEndurance()
                 + STL_PHYSIQUE_WEIGHT * p.getPhysique();
+        return badgeEngine.apply(p, BadgeType.STEAL, Target.STEAL_SCORE, score, ShotContext.empty());
     }
 
     private static double scoreToProbability(double score) {

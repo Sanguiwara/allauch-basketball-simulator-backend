@@ -17,6 +17,8 @@ public class Player {
     private Set<UUID> teamsID;
     @Setter
     private UUID clubID;
+    @Setter
+    private Set<Long> badgeIds;
 
     private final UUID id;
     private final String name;
@@ -105,10 +107,12 @@ public class Player {
      */
     public Player snapshotPlayer() {
         Set<UUID> teamsCopy = (teamsID == null) ? new HashSet<>() : new HashSet<>(teamsID);
+        Set<Long> badgeIdsCopy = (badgeIds == null) ? new HashSet<>() : new HashSet<>(badgeIds);
 
         return Player.builder()
                 .teamsID(teamsCopy)
                 .clubID(clubID)
+                .badgeIds(badgeIdsCopy)
                 .id(id)
                 .name(name)
                 .birthDate(birthDate)

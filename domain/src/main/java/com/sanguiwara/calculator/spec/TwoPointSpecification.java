@@ -3,6 +3,10 @@ package com.sanguiwara.calculator.spec;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.Target;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.TwoPointShootingResult;
 import com.sanguiwara.type.ShotType;
@@ -48,6 +52,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     public static final double MAX_MATCHUP_ADVANTAGE = 50.0;
     public static final double AGGRESSIVENESS_DIVISOR = 100.0;
     private final Random random;
+    private final BadgeEngine badgeEngine;
 
 
     @Override
@@ -80,7 +85,10 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         double base = BASE_SHOT_PCT + (shooter.getPlayer().getTir2Pts() / 100.0) * TWO_POINT_SHOT_COEFF
                 + (shooter.getPlayer().getSize() / 100.0) * SIZE_PCT_COEFF;
         double scaledMatchupAdvantageImpact = (matchupAdvantage / MAX_MATCHUP_ADVANTAGE) * MATCHUP_COEFFICIENT;
-        return Math.clamp(base + scaledMatchupAdvantageImpact + assistBonusPct, MIN_SHOT_PCT, MAX_SHOT_PCT);
+        double pct = base + scaledMatchupAdvantageImpact + assistBonusPct;
+        pct = badgeEngine.apply(shooter.getPlayer(), BadgeType.TWO_POINT, Target.SHOT_PCT, pct,
+                ShotContext.forShot(ShotType.TWO_POINT, isAssistedShot, matchupAdvantage));
+        return Math.clamp(pct, MIN_SHOT_PCT, MAX_SHOT_PCT);
 
     }
 

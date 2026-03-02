@@ -5,6 +5,7 @@ import com.sanguiwara.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -16,6 +17,11 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team getTeam(UUID uuid) {
         return teamRepository.findById(uuid).orElseThrow();
+    }
+
+    @Override
+    public List<Team> getAllTeams() {
+        return teamRepository.findAll();
     }
 
     @Override

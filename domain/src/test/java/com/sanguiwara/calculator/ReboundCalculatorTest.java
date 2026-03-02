@@ -1,5 +1,6 @@
 package com.sanguiwara.calculator;
 
+import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.*;
 class ReboundCalculatorTest {
 
     private static final Logger log = LoggerFactory.getLogger(ReboundCalculatorTest.class);
+    private final BadgeEngine badgeEngine = new BadgeEngine();
 
     /**
      * Random déterministe + logs : on voit exactement quelles valeurs sortent et à quel moment.
@@ -101,7 +103,7 @@ class ReboundCalculatorTest {
         List<Double> pickRolls = List.of(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
         Random random = new DeterministicRandom("FORCED_ALL_REB", concat(shotRolls, pickRolls));
 
-        ReboundCalculator calculator = new ReboundCalculator(random);
+        ReboundCalculator calculator = new ReboundCalculator(random, badgeEngine);
 
         GamePlan home = mock(GamePlan.class);
         GamePlan visitor = mock(GamePlan.class);
@@ -160,7 +162,7 @@ class ReboundCalculatorTest {
 
         when(home.getActivePlayers()).thenReturn(List.of(a,b,c,d,e));
         when(visitor.getActivePlayers()).thenReturn(List.of(aa,ab,ac,ad,ae));
-        ReboundCalculator calculator = new ReboundCalculator(new Random());
+        ReboundCalculator calculator = new ReboundCalculator(new Random(), badgeEngine);
         int totalShotsDom = calculator.evaluateOffensiveReboundForTeam(home, visitor);
         int totalShotsNul = calculator.evaluateOffensiveReboundForTeam(visitor, home);
 

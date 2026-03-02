@@ -1,7 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.PlayerFactory;
+import com.sanguiwara.factory.PlayerGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sanguiwara.repository.PlayerRepository;
@@ -15,7 +15,7 @@ import java.util.UUID;
 public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final PlayerFactory playerFactory;
+    private final PlayerGenerator playerGenerator;
     private final Random random ;
 
     private static final String[] FIRST_NAMES = {"LeBron", "Stephen", "Kevin", "Giannis", "Luka", "Joel", "Victor", "Kyrie", "Ja", "Jayson"};
@@ -37,7 +37,7 @@ public class PlayerServiceImpl implements PlayerService {
                 LAST_NAMES[random.nextInt(LAST_NAMES.length)];
 
         // Utilisation de votre factory existante
-        Player player = playerFactory.generatePlayer( randomName);
+        Player player = playerGenerator.generatePlayer( randomName);
         this.savePlayer(player);
         return player;
     }

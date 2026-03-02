@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ShotSpec;
+import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.defense.*;
 import com.sanguiwara.gameevent.ShotEvent;
 import com.sanguiwara.result.ShotResult;
@@ -38,15 +39,48 @@ class ShotSimulatorTest {
     private record TestShotResult(int attempts, int made, List<TestShotEvent> events) implements ShotResult<TestShotEvent> {}
 
     private static Player p(String name) {
+        return p(name, 50);
+    }
+
+    private static Player p(String name, int morale) {
         int v = 50;
-        return new Player(UUID.randomUUID(), name, 1990,
-                v, v, v, v, v, v, v, v, v, v,
-                v, v, v, v, v, v,
-                v, v, v, v, v, v,
-                v,
-                v,
-                v, v,
-                v, v, v, v);
+        return Player.builder()
+                .id(UUID.randomUUID())
+                .name(name)
+                .birthDate(1990)
+                .injured(false)
+                .tir3Pts(v)
+                .tir2Pts(v)
+                .lancerFranc(v)
+                .floater(v)
+                .finitionAuCercle(v)
+                .speed(v)
+                .ballhandling(v)
+                .size(v)
+                .weight(v)
+                .agressivite(v)
+                .defExterieur(v)
+                .defPoste(v)
+                .protectionCercle(v)
+                .timingRebond(v)
+                .agressiviteRebond(v)
+                .steal(v)
+                .timingBlock(v)
+                .physique(v)
+                .basketballIqOff(v)
+                .basketballIqDef(v)
+                .passingSkills(v)
+                .iq(v)
+                .endurance(v)
+                .solidite(v)
+                .potentielSkill(v)
+                .potentielPhysique(v)
+                .coachability(v)
+                .ego(v)
+                .softSkills(v)
+                .leadership(v)
+                .morale(morale)
+                .build();
     }
 
     private static class FakeShotSpec implements ShotSpec<TestShotEvent, TestShotResult> {
@@ -102,19 +136,20 @@ class ShotSimulatorTest {
 
     @Test
     void pickAssister_shouldRespectAssistProbability_andWeights() {
+        BadgeEngine badgeEngine = new BadgeEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(),
-                new Zone23Scheme(),
-                new Zone212Scheme(),
-                new Zone32Scheme()
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 1.0),defenseSchemeResolver);
 
-        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"));
-        InGamePlayer p1 = new InGamePlayer(p("P1"));
-        InGamePlayer p2 = new InGamePlayer(p("P2"));
+        InGamePlayer shooter = new InGamePlayer(p("SHOOTER"),null);
+        InGamePlayer p1 = new InGamePlayer(p("P1"),null);
+        InGamePlayer p2 = new InGamePlayer(p("P2"),null);
         p1.setAssistWeight(1.0);
         p2.setAssistWeight(3.0);
         List<InGamePlayer> all = List.of( p1, p2);
@@ -145,17 +180,18 @@ class ShotSimulatorTest {
 
     @Test
     void getTotalShotContribution_aggregatesAcrossPlayers() {
+        BadgeEngine badgeEngine = new BadgeEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(),
-                new Zone23Scheme(),
-                new Zone212Scheme(),
-                new Zone32Scheme()
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(5, 1.0), defenseSchemeResolver);
 
-        InGamePlayer off1 = new InGamePlayer(p("O1"));
-        InGamePlayer off2 = new InGamePlayer(p("O2"));
+        InGamePlayer off1 = new InGamePlayer(p("O1"),null);
+        InGamePlayer off2 = new InGamePlayer(p("O2"),null);
         off1.setAssistWeight(0.5);
         off2.setAssistWeight(0.5);
 
@@ -179,5 +215,35 @@ class ShotSimulatorTest {
         assertEquals(10, total.made());
         assertEquals(10, total.events().size());
         assertTrue(off1.getAssists() == 5 && off2.getAssists() == 5, "Assists should be recorded for both players");
+    }
+
+    @Test
+    void simulateShots_appliesMoraleBonus_toShotPct() {
+        BadgeEngine badgeEngine = new BadgeEngine();
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+
+        // Base pct is 0.50; morale 99 => +0.20 => 0.70 (before clamping).
+        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
+
+        InGamePlayer off1 = new InGamePlayer(p("O1", 99), null);
+        GamePlan home = new GamePlan(null, null, null);
+        home.setActivePlayers(List.of(off1));
+
+        Player d1 = p("D1");
+        Map<Player, Player> matchups = new HashMap<>();
+        matchups.put(off1.getPlayer(), d1);
+        GamePlan defense = new GamePlan(null, null, null);
+        defense.setMatchups(matchups);
+
+        TestShotResult total = sim.getTotalShotContribution(home, defense, 0.0, 0.0);
+        assertEquals(1, total.attempts());
+        assertEquals(1, total.events().size());
+        assertEquals(0.70, total.events().getFirst().successPct(), 1e-9);
     }
 }

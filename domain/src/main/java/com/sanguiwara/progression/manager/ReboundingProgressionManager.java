@@ -1,9 +1,18 @@
-package com.sanguiwara;
+package com.sanguiwara.progression.manager;
 
+import com.sanguiwara.badges.Badge;
+import com.sanguiwara.badges.BadgeCatalog;
+import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
+import lombok.RequiredArgsConstructor;
 
-final class ReboundingProgressionManager {
+import java.util.Random;
+import java.util.Set;
 
+@RequiredArgsConstructor
+public final class ReboundingProgressionManager {
+
+    private final Random random;
     private static final int MIN_SKILL_VALUE = 1;
     private static final int MAX_SKILL_VALUE = 99;
 
@@ -15,7 +24,7 @@ final class ReboundingProgressionManager {
     private static final double BASE_REBOUND_GAIN = 5;
     private static final double REBOUND_AGGRESS_DELTA_MULT = 0.85;
 
-    void applyReboundingProgression(InGamePlayer p) {
+    public void applyReboundingProgression(InGamePlayer p) {
         var player = p.getPlayer();
         int minutesPlayed = p.getMinutesPlayed();
         if (minutesPlayed == 0) {
@@ -26,6 +35,8 @@ final class ReboundingProgressionManager {
         if (rebounds == 0) {
             return;
         }
+
+        applyReboundingBadgeDrop(p);
 
         double minutesMultiplier = minutesMultiplier(minutesPlayed);
         double potentialMultiplier = potentialMultiplier(player.getPotentielSkill());
@@ -46,6 +57,23 @@ final class ReboundingProgressionManager {
         player.setAgressiviteRebond(applyDelta(player.getAgressiviteRebond(), (int) Math.round(aggressDelta)));
     }
 
+    public void applyReboundingBadgeDrop(InGamePlayer p) {
+        var player = p.getPlayer();
+
+        Set<Long> badgeIds = player.getBadgeIds();
+
+        for (Badge badge : BadgeCatalog.badgeMap().values()) {
+            if (!badge.types().contains(BadgeType.REBOUND)) continue;
+            if (badgeIds.contains(badge.id())) continue;
+
+            double rate = badge.dropRate();
+
+            if (random.nextDouble() < rate) {
+                badgeIds.add(badge.id());
+            }
+        }
+    }
+
     private static int applyDelta(int currentSkill, int delta) {
         return Math.clamp(currentSkill + delta, MIN_SKILL_VALUE, MAX_SKILL_VALUE);
     }
@@ -54,7 +82,7 @@ final class ReboundingProgressionManager {
         if (value <= 0) {
             return 0.0;
         }
-        return Math.log1p(value) / Math.log1p(ReboundingProgressionManager.REBOUNDS_SOFT_CAP);
+        return Math.log1p(value) / Math.log1p(REBOUNDS_SOFT_CAP);
     }
 
     private static double minutesMultiplier(int minutesPlayed) {
