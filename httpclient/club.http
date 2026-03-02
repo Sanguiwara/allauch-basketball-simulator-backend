@@ -1,0 +1,12 @@
+@baseUrl = {{baseUrl}}
+@token = {{token}}
+
+### List all clubs
+GET {{baseUrl}}/clubs
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get a club by id
+GET {{baseUrl}}/clubs/<clubId>
+Authorization: Bearer {{token}}
+Accept: application/json

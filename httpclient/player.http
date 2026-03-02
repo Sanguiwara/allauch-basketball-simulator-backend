@@ -1,56 +1,27 @@
-### Récupérer tous les joueurs
-GET http://localhost:8080/players
+@baseUrl = {{baseUrl}}
+@token = {{token}}
+
+### List all players
+GET {{baseUrl}}/players
+Authorization: Bearer {{token}}
 Accept: application/json
 
-### Générer 100 joueurs aléatoires
-POST http://localhost:8080/players/generate
+### Generate 100 random players
+POST {{baseUrl}}/players/generate
+Authorization: Bearer {{token}}
 Accept: application/json
 
-### Créer un nouveau joueur manuellement
-POST http://localhost:8080/players
-Content-Type: application/json
-
-{
-  "id": 1,
-  "name": "Victor Wembanyama",
-  "birthDate": 2004,
-  "tir3Pts": 85,
-  "tir2Pts": 90,
-  "lancerFranc": 82,
-  "floater": 75,
-  "finitionAuCercle": 95,
-  "speed": 88,
-  "ballhandling": 84,
-  "size": 224,
-  "weight": 95,
-  "agressivite": 80,
-  "defExterieur": 85,
-  "defPoste": 92,
-  "protectionCercle": 98,
-  "timingRebond": 90,
-  "agressiviteRebond": 85,
-  "steal": 75,
-  "physique": 90,
-  "basketballIqOff": 88,
-  "basketballIqDef": 95,
-  "passingSkills": 80,
-  "iq": 92,
-  "endurance": 85,
-  "solidite": 85,
-  "potentielSkill": 99,
-  "potentielPhysique": 99,
-  "coachability": 95,
-  "ego": 10,
-  "softSkills": 90,
-  "leadership": 85
-}
-
-### Récupérer un joueur par son ID
-GET http://localhost:8080/players/1f5f56d4-116e-4865-ae21-e243377b2a19
+### Get a player by id
+GET {{baseUrl}}/players/547d0ba9-bb95-4300-81ab-6237a838b1d2
+Authorization: Bearer {{token}}
 Accept: application/json
 
-### Supprimer un joueur par son ID
-DELETE http://localhost:8080/players/1
+### Delete a player by id
+DELETE {{baseUrl}}/players/<playerId>
+Authorization: Bearer {{token}}
+Accept: application/json
 
-### Supprimer TOUS les joueurs
-DELETE http://localhost:8080/players
+### Delete all players
+DELETE {{baseUrl}}/players
+Authorization: Bearer {{token}}
+Accept: application/json

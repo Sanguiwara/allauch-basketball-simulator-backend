@@ -1,0 +1,12 @@
+@baseUrl = {{baseUrl}}
+@token = {{token}}
+
+### List all teams
+GET {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get a team by id
+GET {{baseUrl}}/teams/<teamId>
+Authorization: Bearer {{token}}
+Accept: application/json

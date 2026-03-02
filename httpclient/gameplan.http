@@ -1,6 +1,30 @@
-###
-POST http://localhost:8080/gameplans/generate
+@baseUrl = {{baseUrl}}
+@token = {{token}}
 
-### Récupérer tous les joueurs
-GET http://localhost:8080/gameplans/56afc092-6032-47a6-b43b-e88524e0fa25
+### Init a new season (creates world + schedules)
+POST {{baseUrl}}/gameplans/init
+Authorization: Bearer {{token}}
 Accept: application/json
+
+### Get a gameplan by id
+GET {{baseUrl}}/gameplans/<gamePlanId>
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get next upcoming gameplan for a club
+GET {{baseUrl}}/gameplans/club/<clubId>
+Authorization: Bearer {{token}}
+Accept: application/json
+
+> {%
+  // Use the response as a baseline for the update request below.
+  client.global.set("gamePlanDTO", JSON.stringify(response.body, null, 2));
+%}
+
+### Update a gameplan (start from previous GET response)
+POST {{baseUrl}}/gameplans
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{{gamePlanDTO}}

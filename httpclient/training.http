@@ -1,0 +1,52 @@
+@baseUrl = {{baseUrl}}
+@token = {{token}}
+
+### List all trainings
+GET {{baseUrl}}/trainings
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get a training by id
+GET {{baseUrl}}/trainings/<trainingId>
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### List trainings for a team
+GET {{baseUrl}}/trainings/teamID/<teamId>
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get next training for a team
+GET {{baseUrl}}/trainings/teamID/<teamId>/next
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get next training for a club
+GET {{baseUrl}}/trainings/clubID/<clubId>/next
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get next training for an Auth0 user sub
+GET {{baseUrl}}/trainings/userSub/<userSub>/next
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Execute a training
+POST {{baseUrl}}/trainings/<trainingId>/execute
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Update a training type
+PUT {{baseUrl}}/trainings/<trainingId>
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "trainingType": "SHOOTING"
+}
+
+### Execute all ordered TimeEvents (dev/test)
+GET {{baseUrl}}/trainings/applyTrainings
+Authorization: Bearer {{token}}
+Accept: application/json

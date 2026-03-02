@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.UUID;
-
-@CrossOrigin(origins = "http://localhost:4201")
-
 @RestController
 @RequestMapping("/gameplans")
 
@@ -54,3 +51,4 @@ public class GamePlanController {
 
 
 }
+

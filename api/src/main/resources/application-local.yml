@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   config:
     activate:
       on-profile: local
@@ -17,12 +17,15 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # dev only (prod: validate / none)
+      ddl-auto: update # dev only (prod: validate / none)
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
+app:
+  cors:
+    allowed-origins: "http://localhost:4201,https://allauch-basketball-simulator.onrender.com"
 auth0:
   audience: https://allauch-simulator-backend/
 

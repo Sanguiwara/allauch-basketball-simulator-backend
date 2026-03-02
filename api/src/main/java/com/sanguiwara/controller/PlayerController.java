@@ -10,9 +10,6 @@ import com.sanguiwara.service.PlayerService;
 
 import java.util.List;
 import java.util.UUID;
-
-@CrossOrigin(origins = "http://localhost:4201")
-
 @RestController
 @RequestMapping("/players")
 
@@ -55,3 +52,4 @@ public class PlayerController
 
 
 }
+

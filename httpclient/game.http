@@ -1,0 +1,17 @@
+@baseUrl = {{baseUrl}}
+@token = {{token}}
+
+### List all games (simplified)
+GET {{baseUrl}}/games
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get a game by id
+GET {{baseUrl}}/games/<gameId>
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### List games for a team
+GET {{baseUrl}}/games/teamID/<teamId>
+Authorization: Bearer {{token}}
+Accept: application/json

@@ -1,7 +1,7 @@
 @baseUrl = {{baseUrl}}
 @token = {{token}}
 
-### Associate current token user to a club
-POST {{baseUrl}}/users/associate
+### List all badges
+GET {{baseUrl}}/badges
 Authorization: Bearer {{token}}
 Accept: application/json
