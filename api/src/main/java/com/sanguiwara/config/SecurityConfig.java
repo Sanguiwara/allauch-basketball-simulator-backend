@@ -14,14 +14,14 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(_ -> {
+                .cors(cors -> {
                 })
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/associate").authenticated()
                         .anyRequest().permitAll()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(_ -> {
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
                 }));
 
         return http.build();

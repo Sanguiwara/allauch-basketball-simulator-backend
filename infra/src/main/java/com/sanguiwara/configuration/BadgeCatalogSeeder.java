@@ -25,7 +25,7 @@ public class BadgeCatalogSeeder {
     @Bean
     @Order(0)
     ApplicationRunner updateBadgeDatabase() {
-        return _ -> {
+        return a -> {
             var badgeMap = BadgeCatalog.badgeMap();
             Set<Long> ids = new HashSet<>(badgeMap.keySet());
             Map<Long, BadgeEntity> existingById = badgeJpaRepository.findAllById(ids).stream()

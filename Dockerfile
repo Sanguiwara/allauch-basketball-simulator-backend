@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.6
 
-FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /workspace
 
 # Copy Gradle wrapper + root build files first to leverage Docker layer caching
@@ -20,7 +20,7 @@ COPY application-core ./application-core
 RUN --mount=type=cache,target=/root/.gradle \
     ./gradlew :api:bootJar -x test --no-daemon
 
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copie du jar généré
