@@ -1,26 +1,30 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://dev-csf1pz6vkgyyinsz.us.auth0.com/
+          issuer-uri: ${AUTH0_ISSUER_URI:}
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: password
+    url: ${SPRING_DATASOURCE_URL:}
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update   # dev only (prod: validate / none)
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
 
 auth0:
-  audience: https://allauch-simulator-backend/
+  audience: ${AUTH0_AUDIENCE:}
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:INFO}
