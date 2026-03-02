@@ -1,4 +1,4 @@
-00FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
 
 # Copy Gradle wrapper + root build files first to leverage Docker layer caching
