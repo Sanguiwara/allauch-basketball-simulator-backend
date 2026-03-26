@@ -11,11 +11,11 @@ public interface GamePlanService {
 
     Optional<GamePlan> getNextUpcomingGamePlanForClub(UUID clubId);
 
+    Optional<GamePlan> getNextUpcomingGamePlanForAUserSub(String sub);
 
     GamePlan update(GamePlan gamePlan);
 
 
-    void delete(UUID id);
 
 
     GamePlan generateGamePlan(Team t1, Team t2);

@@ -15,15 +15,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.TwoPointSpecification;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class GameSimulatorTest {
 
-    private static final long SEED = 123456789L;
+    private static final long SEED = 1L;
     private static Random random;
     private static PlayerGenerator playerFactory;
 
@@ -52,15 +56,15 @@ class GameSimulatorTest {
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
                 new ShotSimulator<>( random, new DriveSpecification(random, badgeEngine), defenseSchemeResolver);
         ReboundCalculator reboundCalculator = new ReboundCalculator(random, badgeEngine);
-        BlockCalculator blockCalculator = new BlockCalculator();
+        BlockCalculator blockCalculator = new BlockCalculator(badgeEngine);
         StealSimulator stealSimulator = new StealSimulator(random, badgeEngine);
 
         return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, assistCalculator, reboundCalculator, blockCalculator, stealSimulator);
     }
 
     private static GamePlans makePlans(PlayerGenerator factory) {
-        Map<Position, InGamePlayer> homePos = createPositionMap(factory, "HOME");
-        Map<Position, InGamePlayer> awayPos = createPositionMap(factory, "AWAY");
+        Map<Position, InGamePlayer> homePos = createPositionMap(factory);
+        Map<Position, InGamePlayer> awayPos = createPositionMap(factory);
 
         GamePlan homePlan = new GamePlan(null, null, null);
         GamePlan awayPlan = new GamePlan(null, null, null); //A changer
@@ -104,16 +108,184 @@ class GameSimulatorTest {
         return new GamePlans(homePlan, awayPlan);
     }
 
-    private static Map<Position, InGamePlayer> createPositionMap(PlayerGenerator factory, String prefix) {
+    private static Map<Position, InGamePlayer> createPositionMap(PlayerGenerator factory) {
         Map<Position, InGamePlayer> pos = new EnumMap<>(Position.class);
-        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( prefix + "_PG"),null));
-        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( prefix + "_SG"),null));
-        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(prefix + "_SF"),null));
-        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( prefix + "_PF"),null));
-        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( prefix + "_C"),null));
+        pos.put(Position.PG, new InGamePlayer(factory.generatePlayer( ),null));
+        pos.put(Position.SG, new InGamePlayer(factory.generatePlayer( ),null));
+        pos.put(Position.SF, new InGamePlayer(factory.generatePlayer(),null));
+        pos.put(Position.PF, new InGamePlayer(factory.generatePlayer( ),null));
+        pos.put(Position.C, new InGamePlayer(factory.generatePlayer( ),null));
         return pos;
     }
 
+    @Test
+    void calculateGame_shouldDistributeShotsWith10Players_seeded_usageAndMinutes() {
+        // Requirement: run 50 matches and evolve the seed from 1 to 50 (inclusive).
+        // Also silence noisy simulation logs: only final score + winner should be printed.
+        org.slf4j.Logger rootSlf4j = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        Level previousRootLevel = null;
+        boolean changedRootLevel = false;
+        if (rootSlf4j instanceof Logger rootLogback) {
+            previousRootLevel = rootLogback.getLevel();
+            rootLogback.setLevel(Level.ERROR);
+            changedRootLevel = true;
+        }
+
+        try {
+            for (long seed = 1; seed <= 50; seed++) {
+                Random matchRandom = new Random(seed);
+                GameSimulator simulator = createGameCalculator(matchRandom);
+
+            // HOME: 10 joueurs, dont 2 "80 partout" avec gros usage + minutes,
+            //       et 8 "50 partout" avec faible usage + faible minutes.
+            List<InGamePlayer> homePlayers = new ArrayList<>();
+            // Minutes sum to 200: 2*36 + 8*16 = 200.
+            for (int i = 1; i <= 2; i++) {
+                homePlayers.add(makePlayer("HOME_80_" + i, 80, 36, 27));
+            }
+            for (int i = 1; i <= 8; i++) {
+                homePlayers.add(makePlayer("HOME_50_" + i, 50, 16, 6));
+            }
+
+            // AWAY: 10 joueurs, 2 "80 partout" et 8 "50 partout",
+            //       mais tous le meme usage et tous 20 minutes.
+            List<InGamePlayer> awayPlayers = new ArrayList<>();
+            for (int i = 1; i <= 2; i++) {
+                awayPlayers.add(makePlayer("AWAY_80_" + i, 80, 20, 10));
+            }
+            for (int i = 1; i <= 8; i++) {
+                awayPlayers.add(makePlayer("AWAY_50_" + i, 50, 20, 10));
+            }
+
+            GamePlan homePlan = new GamePlan(UUID.fromString("00000000-0000-0000-0000-000000000001"), null, null);
+            GamePlan awayPlan = new GamePlan(UUID.fromString("00000000-0000-0000-0000-000000000002"), null, null);
+
+            homePlan.setActivePlayers(homePlayers);
+            awayPlan.setActivePlayers(awayPlayers);
+
+            // Keep it simple/deterministic: same attempt shares, same defense types, fixed possessions.
+            homePlan.setTotalShotNumber(90);
+            awayPlan.setTotalShotNumber(90);
+
+            homePlan.setDriveAttemptShare(1.0 / 3.0);
+            homePlan.setMidRangeAttemptShare(1.0 / 3.0);
+            homePlan.setThreePointAttemptShare(1.0 / 3.0);
+
+            awayPlan.setDriveAttemptShare(1.0 / 3.0);
+            awayPlan.setMidRangeAttemptShare(1.0 / 3.0);
+            awayPlan.setThreePointAttemptShare(1.0 / 3.0);
+
+            homePlan.setDefenseType(DefenseType.ZONE_2_3);
+            awayPlan.setDefenseType(DefenseType.ZONE_2_3);
+
+            GameResult result = simulator.calculateGame(homePlan, awayPlan);
+            assertNotNull(result);
+
+            assertEquals(10, homePlan.getActivePlayers().size());
+            assertEquals(10, awayPlan.getActivePlayers().size());
+
+            assertEquals(2, homePlan.getActivePlayers().stream().filter(p -> p.getPlayer().getTir3Pts() == 80).count());
+            assertEquals(8, homePlan.getActivePlayers().stream().filter(p -> p.getPlayer().getTir3Pts() == 50).count());
+            assertEquals(2, awayPlan.getActivePlayers().stream().filter(p -> p.getPlayer().getTir3Pts() == 80).count());
+            assertEquals(8, awayPlan.getActivePlayers().stream().filter(p -> p.getPlayer().getTir3Pts() == 50).count());
+
+            assertTrue(awayPlan.getActivePlayers().stream().allMatch(p -> p.getMinutesPlayed() == 20));
+            assertTrue(awayPlan.getActivePlayers().stream().allMatch(p -> p.getUsageShoot() == 10));
+            assertTrue(awayPlan.getActivePlayers().stream().allMatch(p -> p.getUsageDrive() == 10));
+            assertTrue(awayPlan.getActivePlayers().stream().allMatch(p -> p.getUsagePost() == 10));
+
+            int homeTotal = calculateScoreForTeamTotalPoints(result.homeScore());
+            int awayTotal = calculateScoreForTeamTotalPoints(result.awayScore());
+            String winner = homeTotal > awayTotal ? "HOME" : (awayTotal > homeTotal ? "AWAY" : "TIE");
+
+            // Only print final score + winner per match.
+            System.out.printf("seed=%d FINAL SCORE: HOME %d - %d AWAY | winner=%s%n", seed, homeTotal, awayTotal, winner);
+            }
+        } finally {
+            if (changedRootLevel && rootSlf4j instanceof Logger rootLogback) {
+                rootLogback.setLevel(previousRootLevel); // may be null (inherit)
+            }
+        }
+    }
+
+    private static GameSimulator createGameCalculator(Random random) {
+        BadgeEngine badgeEngine = new BadgeEngine();
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+        AssistCalculator assistCalculator = new AssistCalculator(defenseSchemeResolver);
+        ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
+                new ShotSimulator<>(random, new ThreePointSpecification(random, badgeEngine), defenseSchemeResolver);
+        ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator =
+                new ShotSimulator<>(random, new TwoPointSpecification(random, badgeEngine), defenseSchemeResolver);
+        ShotSimulator<DriveEvent, DriveResult> driveSimulator =
+                new ShotSimulator<>(random, new DriveSpecification(random, badgeEngine), defenseSchemeResolver);
+        ReboundCalculator reboundCalculator = new ReboundCalculator(random, badgeEngine);
+        BlockCalculator blockCalculator = new BlockCalculator(badgeEngine);
+        StealSimulator stealSimulator = new StealSimulator(random, badgeEngine);
+
+        return new GameSimulator(threePointSimulator, twoPointSimulator, driveSimulator, assistCalculator, reboundCalculator, blockCalculator, stealSimulator);
+    }
+
+    private static InGamePlayer makePlayer(String name, int ratingEverywhere, int minutes, int usageEverywhere) {
+        UUID id = UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
+        Player player = Player.builder()
+                .teamsID(new HashSet<>())
+                .clubID(null)
+                .badgeIds(new HashSet<>())
+                .id(id)
+                .name(name)
+                .birthDate(0)
+                .injured(false)
+                // Shooting / finishing
+                .tir3Pts(ratingEverywhere)
+                .tir2Pts(ratingEverywhere)
+                .lancerFranc(ratingEverywhere)
+                .floater(ratingEverywhere)
+                .finitionAuCercle(ratingEverywhere)
+                .speed(ratingEverywhere)
+                .ballhandling(ratingEverywhere)
+                .size(ratingEverywhere)
+                .weight(ratingEverywhere)
+                .agressivite(ratingEverywhere)
+                // Defense / rebound
+                .defExterieur(ratingEverywhere)
+                .defPoste(ratingEverywhere)
+                .protectionCercle(ratingEverywhere)
+                .timingRebond(ratingEverywhere)
+                .agressiviteRebond(ratingEverywhere)
+                .steal(ratingEverywhere)
+                .timingBlock(ratingEverywhere)
+                // Physical / mental
+                .physique(ratingEverywhere)
+                .basketballIqOff(ratingEverywhere)
+                .basketballIqDef(ratingEverywhere)
+                .passingSkills(ratingEverywhere)
+                .iq(ratingEverywhere)
+                .endurance(ratingEverywhere)
+                .solidite(ratingEverywhere)
+                // Potential
+                .potentielSkill(ratingEverywhere)
+                .potentielPhysique(ratingEverywhere)
+                // Attitude
+                .coachability(ratingEverywhere)
+                .ego(ratingEverywhere)
+                .softSkills(ratingEverywhere)
+                .leadership(ratingEverywhere)
+                .morale(ratingEverywhere)
+                .build();
+
+        InGamePlayer inGamePlayer = new InGamePlayer(player, null);
+        inGamePlayer.setMinutesPlayed(minutes);
+        inGamePlayer.setUsageShoot(usageEverywhere);
+        inGamePlayer.setUsageDrive(usageEverywhere);
+        inGamePlayer.setUsagePost(usageEverywhere);
+        return inGamePlayer;
+    }
 
 
 

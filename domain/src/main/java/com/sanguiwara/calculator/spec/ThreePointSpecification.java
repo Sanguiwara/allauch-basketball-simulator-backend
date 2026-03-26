@@ -19,57 +19,43 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, ThreePointShootingResult> {
-    private static final double BASE_THREE_POINT_PROBABILITY_COEFFICIENT = 0.35;
+    private static final double BASE_THREE_POINT_PROBABILITY_COEFFICIENT = 0.15;
     private static final double ADVANTAGE_THREE_POINT_COEFFICIENT = 0.30;
-    private static final double RATING_NORMALIZATION_DIVISOR = 100.0;
+    private static final double RATING_NORMALIZATION_DIVISOR = 99.0;
     private static final double ADVANTAGE_NORMALIZATION_DIVISOR = 50.0;
 
-    private static final int USAGE_MIN_THRESHOLD = 10;
-    private static final double USAGE_NORMALIZATION_DIVISOR = 20.0;
-    private static final double AGGRESSIVENESS_NORMALIZATION_DIVISOR = 100.0;
-
-    private static final double NORMALIZED_USAGE_COEFFICIENT = 0.70;
-    private static final double NORMALIZED_AGGRESSIVENESS_COEFFICIENT = 0.30;
+    // Intensity distribution is handled by ShotAttemptDistributor with shared constants across ShotSpec.
 
 
-    private static final double SCORE_SPEED_WEIGHT_OFF = 0.05;
-    private static final double SCORE_SIZE_WEIGHT_OFF = 0.05;
+    private static final double SCORE_SPEED_WEIGHT_OFF = 0.10;
+    private static final double SCORE_SIZE_WEIGHT_OFF = 0.15;
     private static final double SCORE_ENDURANCE_WEIGHT_OFF = 0.10;
-    private static final double SCORE_RATING_WEIGHT_OFF = 0.80;
+    private static final double SCORE_RATING_WEIGHT_OFF = 0.50;
     private static final double SCORE_IQ_WEIGHT_OFF = 0.15;
 
     private static final double SCORE_SPEED_WEIGHT_DEF = 0.10;
     private static final double SCORE_SIZE_WEIGHT_DEF = 0.10;
-    private static final double SCORE_DEF_EXT_WEIGHT = 0.55;
+    private static final double SCORE_DEF_EXT_WEIGHT = 0.65;
     private static final double SCORE_ENDURANCE_WEIGHT_DEF = 0.05;
     private static final double SCORE_IQ_WEIGHT_DEF = 0.10;
     private static final double ASSIST_BONUS_PCT = 0.15;
     private final Random random;
     private final BadgeEngine badgeEngine;
 
-
     @Override
     public void distributeShotAttempts(GamePlan team) {
-        double totalWeight = 0.0;
-        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
-            double usage01 = (inGamePlayer.getUsageShoot() - USAGE_MIN_THRESHOLD) / USAGE_NORMALIZATION_DIVISOR;
-            double aggr01 = inGamePlayer.getPlayer().getAgressivite() / AGGRESSIVENESS_NORMALIZATION_DIVISOR;
-            double intensity = NORMALIZED_USAGE_COEFFICIENT * usage01 + NORMALIZED_AGGRESSIVENESS_COEFFICIENT * aggr01;
-            totalWeight += intensity;
-            inGamePlayer.setThreePointContribution(intensity);
-        }
-        for (InGamePlayer inGamePlayer : team.getActivePlayers()) {
-            double threePointWeight = inGamePlayer.getThreePointContribution() / totalWeight;
-            inGamePlayer.setThreePointWeight(
-                    threePointWeight);
-        }
-
-        for (int i = 0; i < team.getThreePointAttempts(); i++) {
-            InGamePlayer shooter = pickShooter(team.getActivePlayers());
-            shooter.addThreePointShot();
-        }
-        //TODO Bug possible: Si un joueur joue 1 minutes il peut quand même avoir un gros usage+ aggressiveness et avoir trop de tirs
-
+        ShotAttemptDistributor.distributeAttempts(
+                team,
+                team.getThreePointAttempts(),
+                InGamePlayer::getUsageShoot,
+                InGamePlayer::setThreePointContribution,
+                InGamePlayer::getThreePointContribution,
+                InGamePlayer::setThreePointWeight,
+                InGamePlayer::getThreePointWeight,
+                InGamePlayer::addThreePointShot,
+                random
+        );
+        //TODO Bug possible: Si un joueur joue 1 minutes il peut quand meme avoir un gros usage+ aggressiveness et avoir trop de tirs
     }
 
 
@@ -81,16 +67,17 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         double pct = basePct + advantagePct + assistBonusPct;
         pct = badgeEngine.apply(shooter.getPlayer(), BadgeType.THREE_POINT, Target.SHOT_PCT, pct,
                 ShotContext.forShot(ShotType.THREE_POINT, isAssistedShot, advantage));
-        return Math.clamp(pct, 0.0, 0.95);
+        return Math.clamp(pct, 0.075, 0.95);
     }
 
     @Override
     public double getDefensiveScoreForAShot(Player defender) {
-        return SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
+        double score = SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
                 SCORE_SIZE_WEIGHT_DEF * defender.getSize() +
                 SCORE_DEF_EXT_WEIGHT * defender.getDefExterieur()
                 + SCORE_ENDURANCE_WEIGHT_DEF * defender.getEndurance() +
                 SCORE_IQ_WEIGHT_DEF * defender.getBasketballIqDef();
+        return badgeEngine.apply(defender, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
     }
 
 
@@ -140,24 +127,6 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         return 0.2;
     }
 
-    public InGamePlayer pickShooter(List<InGamePlayer> potentialShooters) {
-        double total = 0.0;
-        for (InGamePlayer p : potentialShooters) {
-            total += p.getThreePointWeight();
-        }
-        InGamePlayer playerToReturn = null;
-
-        double r = random.nextDouble() * total;
-        for (InGamePlayer p : potentialShooters) {
-            r -= p.getThreePointWeight();
-            if (r <= 0.0) {
-                playerToReturn = p;
-                return playerToReturn;
-            }
-        }
-        return playerToReturn;
-
-    }
 
 
 }

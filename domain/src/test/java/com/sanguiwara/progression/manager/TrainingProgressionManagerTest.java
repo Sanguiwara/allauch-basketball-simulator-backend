@@ -82,7 +82,10 @@ class TrainingProgressionManagerTest {
             if (badge.types().contains(BadgeType.THREE_POINT)
                     || badge.types().contains(BadgeType.TWO_POINT)
                     || badge.types().contains(BadgeType.DRIVE)) {
-                expected.add(badge.id());
+                // Training unlocks by drop rate; auto-skill badges have dropRate=0 and should not unlock here.
+                if (badge.dropRate() > 0.0) {
+                    expected.add(badge.id());
+                }
             }
         }
 
@@ -100,7 +103,10 @@ class TrainingProgressionManagerTest {
         Set<Long> expected = new HashSet<>();
         for (var badge : BadgeCatalog.badgeMap().values()) {
             if (badge.types().contains(BadgeType.STEAL)) {
-                expected.add(badge.id());
+                // Training unlocks by drop rate; auto-skill badges have dropRate=0 and should not unlock here.
+                if (badge.dropRate() > 0.0) {
+                    expected.add(badge.id());
+                }
             }
         }
 

@@ -2,20 +2,19 @@ package com.sanguiwara.controller;
 
 import com.sanguiwara.dto.PlayerDTO;
 import com.sanguiwara.mapper.PlayerDTOMapper;
+import com.sanguiwara.service.PlayerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.sanguiwara.service.PlayerService;
 
 import java.util.List;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/players")
 
 @RequiredArgsConstructor
-public class PlayerController
-{
+public class PlayerController {
     private final PlayerService playerService;
     private final PlayerDTOMapper playerDTOMapper;
 
@@ -24,11 +23,7 @@ public class PlayerController
         return playerDTOMapper.toDto(playerService.getPlayer(id));
     }
 
-    @PostMapping("/generate")
-    public ResponseEntity<Void> generatePlayers() {
-        playerService.generate100Players();
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
+
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers().stream().map(playerDTOMapper::toDto).toList();
@@ -41,14 +36,11 @@ public class PlayerController
     }
 
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlayer(@PathVariable UUID id) {
         playerService.deletePlayer(id);
         return ResponseEntity.noContent().build();
     }
-
-
 
 
 }

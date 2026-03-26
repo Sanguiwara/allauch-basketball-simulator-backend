@@ -207,8 +207,12 @@ class ShotSimulatorTest {
 
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
+        defense.setActivePlayers(List.of(
+                new InGamePlayer(d1, null),
+                new InGamePlayer(d2, null)
+        ));
 
-        TestShotResult total = sim.getTotalShotContribution(home, defense, 1.0, 0.1);
+        TestShotResult total = sim.getTotalShotContribution(home, defense, 1.0, 0.0);
         // Each of the two players attempts 5 -> total 10, all made due to pct=1.0
         log.info("Aggregated result -> attempts: {}, made: {}, events: {}", total.attempts(), total.made(), total.events().size());
         assertEquals(10, total.attempts());
@@ -240,10 +244,52 @@ class ShotSimulatorTest {
         matchups.put(off1.getPlayer(), d1);
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
+        defense.setActivePlayers(List.of(new InGamePlayer(d1, null)));
 
         TestShotResult total = sim.getTotalShotContribution(home, defense, 0.0, 0.0);
         assertEquals(1, total.attempts());
         assertEquals(1, total.events().size());
         assertEquals(0.70, total.events().getFirst().successPct(), 1e-9);
+    }
+
+    @Test
+    void simulateShots_usesAverageTeamMorale_shooterPlusPotentialPassers() {
+        BadgeEngine badgeEngine = new BadgeEngine();
+        List<DefensiveScheme> schemes = List.of(
+                new RegularMan2ManScheme(badgeEngine),
+                new Zone23Scheme(badgeEngine),
+                new Zone212Scheme(badgeEngine),
+                new Zone32Scheme(badgeEngine)
+        );
+        DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
+
+        // Base pct is 0.50. Team morale is avg(shooter, teammate) = round((99 + 0)/2) = 50.
+        ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
+
+        InGamePlayer hi = new InGamePlayer(p("HI", 99), null);
+        InGamePlayer lo = new InGamePlayer(p("LO", 0), null);
+        GamePlan home = new GamePlan(null, null, null);
+        home.setActivePlayers(List.of(hi, lo));
+
+        Player d1 = p("D1");
+        Player d2 = p("D2");
+        Map<Player, Player> matchups = new HashMap<>();
+        matchups.put(hi.getPlayer(), d1);
+        matchups.put(lo.getPlayer(), d2);
+
+        GamePlan defense = new GamePlan(null, null, null);
+        defense.setMatchups(matchups);
+        defense.setActivePlayers(List.of(
+                new InGamePlayer(d1, null),
+                new InGamePlayer(d2, null)
+        ));
+
+        TestShotResult total = sim.getTotalShotContribution(home, defense, 0.0, 0.0);
+        assertEquals(2, total.attempts());
+        assertEquals(2, total.events().size());
+
+        double expected = 0.50 + ((50 / 99.0) * 0.40 - 0.20);
+        assertEquals(expected, total.events().get(0).successPct(), 1e-9);
+        assertEquals(expected, total.events().get(1).successPct(), 1e-9);
     }
 }

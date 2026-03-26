@@ -20,8 +20,8 @@ public final class ReboundingProgressionManager {
     private static final double POTENTIAL_MULT_BASE = 0.6;
     private static final double POTENTIAL_MULT_RANGE = 1.2;
 
-    private static final int REBOUNDS_SOFT_CAP = 12;
-    private static final double BASE_REBOUND_GAIN = 5;
+    private static final int REBOUNDS_SOFT_CAP = 5;
+    private static final double BASE_REBOUND_GAIN = 1;
     private static final double REBOUND_AGGRESS_DELTA_MULT = 0.85;
 
     public void applyReboundingProgression(InGamePlayer p) {

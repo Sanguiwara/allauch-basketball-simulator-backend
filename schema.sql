@@ -1,12 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 4) Enums
-CREATE TYPE age_category AS ENUM ('U11', 'U13', 'U15', 'U18', 'U21', 'SENIOR');
-CREATE TYPE gender AS ENUM ('MALE', 'FEMALE');
-CREATE TYPE position_enum AS ENUM ('PG', 'SG', 'SF', 'PF', 'C');
-CREATE TYPE defense_type AS ENUM ('MAN_TO_MAN', 'ZONE_2_1_2', 'ZONE_2_3', 'ZONE_3_2');
-CREATE TYPE training_type AS ENUM ('SHOOTING', 'DEFENSE', 'PHYSICAL', 'PLAYMAKING', 'MORALE', 'TACTICAL');
-CREATE TYPE progression_event_type AS ENUM ('GAME', 'TRAINING');
+-- Note: enums are stored as VARCHAR for Hibernate compatibility (schema-first, no runtime DDL drift).
+-- If you want native Postgres enums later, reintroduce CREATE TYPE + column types and keep ddl-auto=validate.
 
 -- 5) Tables
 CREATE TABLE app_user (
@@ -18,7 +14,7 @@ CREATE TABLE app_user (
 
 CREATE TABLE clubs (
                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                       name TEXT NOT NULL,
+                       name VARCHAR(255) NOT NULL,
                        user_id BIGINT UNIQUE,
                        CONSTRAINT fk_clubs_user
                            FOREIGN KEY (user_id) REFERENCES app_user(id)
@@ -26,9 +22,9 @@ CREATE TABLE clubs (
 
 CREATE TABLE teams (
                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                       name TEXT,
-                       age_category age_category NOT NULL,
-                       gender gender NOT NULL,
+                       name VARCHAR(255),
+                       age_category VARCHAR(255) NOT NULL,
+                       gender VARCHAR(255) NOT NULL,
                        club_id UUID,
                        CONSTRAINT fk_teams_club
                            FOREIGN KEY (club_id) REFERENCES clubs (id)
@@ -36,7 +32,7 @@ CREATE TABLE teams (
 
 CREATE TABLE players (
                           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                          name TEXT NOT NULL,
+                          name VARCHAR(255) NOT NULL,
                           team_id UUID,
                           club_id UUID,
                          birth_date INTEGER NOT NULL,
@@ -80,7 +76,7 @@ CREATE TABLE players (
 
 CREATE TABLE badges (
                         id BIGINT PRIMARY KEY,
-                        name TEXT NOT NULL,
+                        name VARCHAR(255) NOT NULL,
                         drop_rate DOUBLE PRECISION NOT NULL DEFAULT 0
 );
 
@@ -98,8 +94,8 @@ CREATE INDEX idx_player_badges_badge_id ON player_badges(badge_id);
 
 CREATE TABLE leagues (
                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                         age_category age_category NOT NULL,
-                         gender gender NOT NULL
+                         age_category VARCHAR(255) NOT NULL,
+                         gender VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE league_seasons (
@@ -125,7 +121,7 @@ CREATE TABLE gameplans (
                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                            team_home_id UUID NOT NULL,
                            team_visitor_id UUID NOT NULL,
-                           defense_type defense_type NOT NULL DEFAULT 'MAN_TO_MAN',
+                           defense_type VARCHAR(255) NOT NULL DEFAULT 'MAN_TO_MAN',
                            three_pt_attempt_share DOUBLE PRECISION NOT NULL,
                            mid_range_attempt_share DOUBLE PRECISION NOT NULL,
                            drive_attempt_share DOUBLE PRECISION NOT NULL,
@@ -233,7 +229,7 @@ CREATE TABLE trainings (
                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                            execute_at TIMESTAMPTZ NOT NULL,
                            team_id UUID NOT NULL,
-                           training_type training_type NOT NULL,
+                           training_type VARCHAR(255) NOT NULL,
                            CONSTRAINT fk_trainings_team
                                FOREIGN KEY (team_id) REFERENCES teams (id),
                            CONSTRAINT uq_trainings_team_execute_at UNIQUE (team_id, execute_at)
@@ -250,7 +246,7 @@ CREATE TABLE training_time_events (
 -- Player progression deltas (1 row per player per event). event_type+event_id identify the triggering event.
 CREATE TABLE player_progressions (
                                     player_id UUID NOT NULL,
-                                    event_type progression_event_type NOT NULL DEFAULT 'GAME',
+                                    event_type VARCHAR(255) NOT NULL DEFAULT 'GAME',
                                     event_id  UUID NOT NULL,
 
                                     tir_3_pts INTEGER NULL,
@@ -298,6 +294,21 @@ CREATE INDEX idx_player_progressions_player_id ON player_progressions(player_id)
 CREATE INDEX idx_player_progressions_event_id  ON player_progressions(event_id);
 CREATE INDEX idx_player_progressions_event_type_id ON player_progressions(event_type, event_id);
 
+-- Badges earned during a given progression event (snapshot of "badgesAdded").
+CREATE TABLE player_progression_badges (
+                                           player_id UUID NOT NULL,
+                                           event_type VARCHAR(255) NOT NULL,
+                                           event_id UUID NOT NULL,
+                                           badge_id BIGINT NOT NULL,
+                                           CONSTRAINT pk_player_progression_badges PRIMARY KEY (player_id, event_type, event_id, badge_id),
+                                           CONSTRAINT fk_player_progression_badges_progression
+                                               FOREIGN KEY (player_id, event_type, event_id)
+                                                   REFERENCES player_progressions (player_id, event_type, event_id) ON DELETE CASCADE,
+                                           CONSTRAINT fk_player_progression_badges_badge
+                                               FOREIGN KEY (badge_id) REFERENCES badges (id)
+);
+CREATE INDEX idx_player_progression_badges_badge_id ON player_progression_badges(badge_id);
+
 CREATE TABLE team_players (
                               team_id UUID NOT NULL,
                               player_id UUID NOT NULL,
@@ -323,7 +334,7 @@ CREATE TABLE game_matchups (
 
 CREATE TABLE game_positions (
                                 game_id UUID NOT NULL,
-                                position_code position_enum NOT NULL,
+                                position_code VARCHAR(255) NOT NULL,
                                 in_game_player_id UUID NOT NULL,
                                 PRIMARY KEY (game_id, position_code),
                                 CONSTRAINT fk_game_positions_game

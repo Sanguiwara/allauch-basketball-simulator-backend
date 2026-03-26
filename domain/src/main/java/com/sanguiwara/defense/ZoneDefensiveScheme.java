@@ -22,23 +22,28 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
         this.badgeEngine = badgeEngine;
     }
 
-    protected static final double DEF_SPEED_WEIGHT_ZONE = 0.05;
-    protected static final double DEF_SIZE_WEIGHT_ZONE = 0.10;
-    protected static final double DEF_EXTERIOR_WEIGHT_ZONE = 0.15;
-    protected static final double DEF_ENDURANCE_WEIGHT_ZONE = 0.05;
-    protected static final double DEF_IQ_WEIGHT_ZONE = 0.10;
-    protected static final double DEF_STEAL_WEIGHT_ZONE = 0.05;
+    protected static final double DEF_SPEED_WEIGHT_ZONE = 0.10;
+    protected static final double DEF_SIZE_WEIGHT_ZONE = 0.15;
+    protected static final double DEF_EXTERIOR_WEIGHT_ZONE = 0.30;
+    protected static final double DEF_ENDURANCE_WEIGHT_ZONE = 0.10;
+    protected static final double DEF_IQ_WEIGHT_ZONE = 0.20;
+    protected static final double DEF_STEAL_WEIGHT_ZONE = 0.15;
 
-    protected static final double OFF_PASSING_WEIGHT_ZONE = 0.20;
+    protected static final double OFF_PASSING_WEIGHT_ZONE = 0.30;
     protected static final double OFF_IQ_WEIGHT_ZONE = 0.35;
-    protected static final double OFF_BALLHANDLING_WEIGHT_ZONE = 0.05;
-    protected static final double OFF_COACHABILITY_WEIGHT_ZONE = 0.10;
-    protected static final double OFF_SPEED_WEIGHT_ZONE = 0.05;
+    protected static final double OFF_BALLHANDLING_WEIGHT_ZONE = 0.10;
+    protected static final double OFF_COACHABILITY_WEIGHT_ZONE = 0.15;
+    protected static final double OFF_SPEED_WEIGHT_ZONE = 0.10;
 
 
     @Override
-    public double calculateAdvantageForAPlayer(Player player, GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
-        return shotSpec.getPlayerScoreForAShot(player) * shotCoefficients().get(shotSpec.getShotType()) - calculateShootDefenseScore(defensiveGamePlan);
+    public double calculateAdvantageForAPlayer(InGamePlayer attacker, GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
+        Player player = attacker.getPlayer();
+        return Math.clamp(
+                shotSpec.getPlayerScoreForAShot(player) * shotCoefficients().get(shotSpec.getShotType()) - calculateShootDefenseScore(defensiveGamePlan),
+                -50,
+                50
+        );
     }
 
     public abstract double getPlayerDefensiveScoreAgainstShooting(Player player);
@@ -50,7 +55,10 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
         double score = 0.0;
         for (InGamePlayer inGamePlayer : activePlayers) {
             double minutesWeight = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
-            score += minutesWeight * getPlayerDefensiveScoreAgainstShooting(inGamePlayer.getPlayer());
+            Player player = inGamePlayer.getPlayer();
+            double playerScore = getPlayerDefensiveScoreAgainstShooting(player);
+            playerScore = badgeEngine.apply(player, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, playerScore, ShotContext.empty());
+            score += minutesWeight * playerScore;
         }
         return score;
         //TODO Trouver un moyen propre pour ne pas recalculer a chaque fois

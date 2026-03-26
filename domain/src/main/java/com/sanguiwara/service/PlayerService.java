@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PlayerService {
-    void generate100Players();
 
-    Player generatePlayer();
 
     Player getPlayer(UUID id);
 

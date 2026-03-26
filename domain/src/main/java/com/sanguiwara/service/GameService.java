@@ -12,6 +12,7 @@ public interface GameService {
 
 
 
+
     List<Game> getAllGamesForATeam(UUID teamId);
 
     List<Game> getAllGames();

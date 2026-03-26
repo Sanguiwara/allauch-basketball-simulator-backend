@@ -1,14 +1,13 @@
 package com.sanguiwara.defense;
 
+import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ShotContext;
+import com.sanguiwara.badges.Target;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.badges.ShotContext;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
-import com.sanguiwara.badges.Target;
 import lombok.RequiredArgsConstructor;
-
 
 @RequiredArgsConstructor
 public abstract class Man2ManScheme implements DefensiveScheme {
@@ -17,20 +16,20 @@ public abstract class Man2ManScheme implements DefensiveScheme {
     protected static final double OFF_SPEED_WEIGHT = 0.15;
     protected static final double OFF_SIZE_WEIGHT = 0.05;
     protected static final double OFF_ENDURANCE_WEIGHT = 0.05;
-    protected static final double OFF_PASSING_WEIGHT = 0.10;
-    protected static final double OFF_IQ_WEIGHT = 0.23;
-    protected static final double OFF_HANDLING_WEIGHT = 0.10;
+    protected static final double OFF_PASSING_WEIGHT = 0.20;
+    protected static final double OFF_IQ_WEIGHT = 0.25;
+    protected static final double OFF_HANDLING_WEIGHT = 0.15;
     protected static final double OFF_3PT_WEIGHT = 0.05;
     protected static final double OFF_2PT_WEIGHT = 0.05;
-    protected static final double OFF_FINISH_WEIGHT = 0.05;
-    protected static final double OFF_FLOATER_WEIGHT = 0.025;
+    protected static final double OFF_FINISH_WEIGHT = 0.03;
+    protected static final double OFF_FLOATER_WEIGHT = 0.02;
     protected static final double DEFAULT_CONTRIBUTION = 10.0;
     protected static final double DEF_SPEED_WEIGHT_INDIV = 0.15;
-    protected static final double DEF_SIZE_WEIGHT_INDIV = 0.05;
-    protected static final double DEF_EXTERIOR_WEIGHT_INDIV = 0.35;
+    protected static final double DEF_SIZE_WEIGHT_INDIV = 0.08;
+    protected static final double DEF_EXTERIOR_WEIGHT_INDIV = 0.42;
     protected static final double DEF_ENDURANCE_WEIGHT_INDIV = 0.05;
-    protected static final double DEF_IQ_WEIGHT_INDIV = 0.10;
-    protected static final double DEF_STEAL_WEIGHT_INDIV = 0.10;
+    protected static final double DEF_IQ_WEIGHT_INDIV = 0.15;
+    protected static final double DEF_STEAL_WEIGHT_INDIV = 0.15;
     protected static final double MIN_INDIVIDUAL_ADVANTAGE = -5.0;
     protected static final double MAX_INDIVIDUAL_ADVANTAGE = 20.0;
 

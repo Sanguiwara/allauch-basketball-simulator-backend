@@ -17,7 +17,9 @@
 
   jpa:
     hibernate:
-      ddl-auto: update # dev only (prod: validate / none)
+      # schema-first: keep Hibernate in validate mode to avoid accidental schema drift (ex: CREATE TYPE for enums).
+      # If you really need it, override with SPRING_JPA_HIBERNATE_DDL_AUTO=update.
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

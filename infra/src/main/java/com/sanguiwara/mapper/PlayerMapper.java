@@ -26,8 +26,14 @@ public interface PlayerMapper {
 
     @Mapping(target = "teams", ignore = true)
     @Mapping(target = "club", ignore = true)
-    @Mapping(target = "badges", ignore = true)
+    @Mapping(target = "badges", expression = "java(mapBadges(player.getBadgeIds()))")
     PlayerEntity toEntity(Player player);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "teams", ignore = true)
+    @Mapping(target = "club", ignore = true)
+    @Mapping(target = "badges", ignore = true)
+    void updateEntity(Player player, @MappingTarget PlayerEntity entity);
 
 
     @AfterMapping
@@ -75,5 +81,16 @@ public interface PlayerMapper {
         return ids;
     }
 
+    default Set<BadgeEntity> mapBadges(Set<Long> badgeIds) {
+        if (badgeIds == null || badgeIds.isEmpty()) return new HashSet<>();
+        Set<BadgeEntity> badges = new HashSet<>();
+        for (Long id : badgeIds) {
+            if (id == null) continue;
+            BadgeEntity b = new BadgeEntity();
+            b.setId(id);
+            badges.add(b);
+        }
+        return badges;
+    }
 
 }

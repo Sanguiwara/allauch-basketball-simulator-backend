@@ -3,6 +3,7 @@ package com.sanguiwara.service;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Team;
+import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.GamePlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class GamePlanServiceImpl implements GamePlanService {
 
     private final GamePlanRepository gamePlanRepository;
+    private final ClubRepository clubRepository;
 
 
     @Override
@@ -29,16 +31,15 @@ public class GamePlanServiceImpl implements GamePlanService {
         return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId);
     }
 
+    @Override
+    public Optional<GamePlan> getNextUpcomingGamePlanForAUserSub(String sub) {
+        return clubRepository.findByUserSub(sub)
+                .flatMap(club -> getNextUpcomingGamePlanForClub(club.getId()));
+    }
 
     @Override
     public GamePlan update(GamePlan gamePlan) {
         return gamePlanRepository.update(gamePlan);
-    }
-
-
-    @Override
-    public void delete(UUID id) {
-        gamePlanRepository.deleteById(id);
     }
 
 

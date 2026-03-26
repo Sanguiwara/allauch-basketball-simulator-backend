@@ -50,7 +50,8 @@ public class PostGameManager {
             Player playerAfterProgress = inGamePlayer.getPlayer();
             Player playerBeforeProgress = beforeByPlayerId.get(playerAfterProgress.getId());
             PlayerProgressionDelta delta = PlayerProgressionDelta.between(playerBeforeProgress, playerAfterProgress);
-            var badgeIds = playerAfterProgress.getBadgeIds();
+            // Store only badges earned during this event (not the full post-event badge set).
+            var badgeIds = delta.badgesAdded();
             progressionList.add(new PlayerProgression(playerAfterProgress.getId(), ProgressionEventType.GAME, game.getId(), badgeIds, delta));
         }
 

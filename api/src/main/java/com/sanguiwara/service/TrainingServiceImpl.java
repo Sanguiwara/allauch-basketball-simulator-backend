@@ -3,6 +3,7 @@ package com.sanguiwara.service;
 import com.sanguiwara.baserecords.Club;
 import com.sanguiwara.baserecords.Training;
 import com.sanguiwara.baserecords.TrainingType;
+import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.executor.TrainingExecutor;
 import com.sanguiwara.progression.ProgressionEventType;
 import com.sanguiwara.repository.ClubRepository;
@@ -16,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -43,6 +46,24 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public List<Training> getAllTrainingsForATeam(UUID teamId) {
         return trainingRepository.findAllByTeamId(teamId);
+    }
+
+    @Override
+    public Optional<List<Training>> getAllTrainingsForAUserSub(String sub) {
+        // Keep the same data-loading strategy as getNextTrainingForAUserSub: resolve sub -> clubId,
+        // then load the club by id before reading teams (JPA could lazy-load teams behind the repository).
+        return clubRepository.findByUserSub(sub)
+                .flatMap(club -> {
+                    UUID clubId = Objects.requireNonNull(club.getId(), "club.id");
+                    return clubRepository.findById(clubId);
+                })
+                .map(Club::getTeams)
+                .filter(teams -> !teams.isEmpty())
+                .map(teams -> teams.stream()
+                        .map(Team::getId)
+                        .flatMap(teamId -> trainingRepository.findAllByTeamId(teamId).stream())
+                        .sorted(Comparator.comparing(Training::getExecuteAt))
+                        .toList());
     }
 
     @Override

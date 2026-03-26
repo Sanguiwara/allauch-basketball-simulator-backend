@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class GameServiceImpl implements GameService{
+public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final PlayerProgressionRepository playerProgressionRepository;
 
@@ -23,8 +23,9 @@ public class GameServiceImpl implements GameService{
         return game;
     }
 
+
     @Override
-    public List<Game>getAllGamesForATeam(UUID teamId){
+    public List<Game> getAllGamesForATeam(UUID teamId) {
         return gameRepository.findAllGamesForAteam(teamId);
     }
 

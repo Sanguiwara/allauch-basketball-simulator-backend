@@ -61,9 +61,9 @@ class BadgeEngineTest {
         double shotPct = 0.30;
         double score = 10.0;
         return Stream.of(
-                Arguments.of("Three Point Specialist", Set.of(BadgeCatalog.THREE_POINT_SPECIALIST_ID), BadgeType.THREE_POINT, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.33),
-                Arguments.of("Two Point Specialist", Set.of(BadgeCatalog.TWO_POINT_SPECIALIST_ID), BadgeType.TWO_POINT, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.32),
-                Arguments.of("Drive Finisher", Set.of(BadgeCatalog.DRIVE_FINISHER_ID), BadgeType.DRIVE, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.32),
+                Arguments.of("Three Point Specialist", Set.of(BadgeCatalog.THREE_POINT_SPECIALIST_ID), BadgeType.THREE_POINT, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.40),
+                Arguments.of("Two Point Specialist", Set.of(BadgeCatalog.TWO_POINT_SPECIALIST_ID), BadgeType.TWO_POINT, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.40),
+                Arguments.of("Drive Finisher", Set.of(BadgeCatalog.DRIVE_FINISHER_ID), BadgeType.DRIVE, Target.SHOT_PCT, shotPct, ShotContext.empty(), 0.40),
 
                 Arguments.of("Rebound Hunter", Set.of(BadgeCatalog.REBOUND_HUNTER_ID), BadgeType.REBOUND, Target.REBOUND_SCORE, score, ReboundContext.offensive(), 11.0),
                 Arguments.of("Thief", Set.of(BadgeCatalog.THIEF_ID), BadgeType.STEAL, Target.STEAL_SCORE, score, ShotContext.empty(), 11.0),
@@ -120,10 +120,10 @@ class BadgeEngineTest {
         ));
 
         double v = engine.apply(p, BadgeType.THREE_POINT, Target.SHOT_PCT, 0.30, ShotContext.empty());
-        assertEquals(0.33, v, 1e-9);
+        assertEquals(0.40, v, 1e-9);
 
         double v2 = engine.apply(p, BadgeType.TWO_POINT, Target.SHOT_PCT, 0.30, ShotContext.empty());
-        assertEquals(0.32, v2, 1e-9);
+        assertEquals(0.40, v2, 1e-9);
     }
 
     @Test
@@ -142,6 +142,6 @@ class BadgeEngineTest {
                 0.30,
                 ShotContext.forShot(ShotType.THREE_POINT, true, 0.0)
         );
-        assertEquals(0.37, v, 1e-9);
+        assertEquals(0.44, v, 1e-9);
     }
 }
