@@ -1,9 +1,12 @@
 package com.sanguiwara.repository.pgsql;
 
 import com.sanguiwara.baserecords.Game;
+import com.sanguiwara.baserecords.GameResultSummary;
+import com.sanguiwara.baserecords.GameSummary;
 import com.sanguiwara.mapper.GameMapper;
 import com.sanguiwara.repository.jpa.GameJpaRepository;
 import com.sanguiwara.repository.GameRepository;
+import com.sanguiwara.repository.jpa.projection.GameSummaryJPAProjection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -47,6 +50,13 @@ public class GameRepositoryPGSQL implements GameRepository {
     }
 
     @Override
+    public List<GameSummary> findAllSummaries() {
+        return gameJpaRepository.findAllSummaryRows().stream()
+                .map(GameRepositoryPGSQL::toDomainSummary)
+                .toList();
+    }
+
+    @Override
     public Game save(Game game) {
         var entity = gameMapper.toEntity(game);
         var saved = gameJpaRepository.save(entity);
@@ -61,5 +71,45 @@ public class GameRepositoryPGSQL implements GameRepository {
     @Override
     public void deleteAll() {
 
+    }
+
+    private static GameSummary toDomainSummary(GameSummaryJPAProjection row) {
+        return new GameSummary(
+                row.id(),
+                row.executeAt(),
+                row.homeGamePlanId(),
+                row.awayGamePlanId(),
+                row.homeTeamId(),
+                row.homeTeamName(),
+                row.awayTeamId(),
+                row.awayTeamName(),
+                row.homeClubID(),
+                row.awayClubID(),
+                toDomainGameResult(row)
+        );
+    }
+
+    private static GameResultSummary toDomainGameResult(GameSummaryJPAProjection row) {
+        if (row.gameResultId() == null) {
+            return null;
+        }
+        return new GameResultSummary(
+                nvl(row.homeThreePtAttempts()),
+                nvl(row.homeThreePtMade()),
+                nvl(row.homeDriveAttempts()),
+                nvl(row.homeDriveMade()),
+                nvl(row.homeTwoPtAttempts()),
+                nvl(row.homeTwoPtMade()),
+                nvl(row.awayThreePtAttempts()),
+                nvl(row.awayThreePtMade()),
+                nvl(row.awayDriveAttempts()),
+                nvl(row.awayDriveMade()),
+                nvl(row.awayTwoPtAttempts()),
+                nvl(row.awayTwoPtMade())
+        );
+    }
+
+    private static int nvl(Integer value) {
+        return value == null ? 0 : value;
     }
 }

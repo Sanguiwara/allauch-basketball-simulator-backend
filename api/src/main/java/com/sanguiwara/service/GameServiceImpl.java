@@ -1,6 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Game;
+import com.sanguiwara.baserecords.GameSummary;
 import com.sanguiwara.progression.ProgressionEventType;
 import com.sanguiwara.repository.GameRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
@@ -30,7 +31,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> getAllGames() {
-        return gameRepository.findAll();
+    public List<GameSummary> getAllGameSummaries() {
+        return gameRepository.findAllSummaries();
     }
 }
