@@ -7,8 +7,10 @@ import com.sanguiwara.repository.jpa.TeamJpaRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +39,16 @@ public class TeamRepositoryPGSQL implements TeamRepository {
         var entity = teamMapper.toEntity(team);
         var saved = teamJpaRepository.save(entity);
         return teamMapper.toDomain(saved);
+    }
+
+    @Override
+    @Transactional
+    public Team updateName(UUID id, String name) {
+        int updated = teamJpaRepository.updateName(id, name);
+        if (updated == 0) {
+            throw new NoSuchElementException("Team not found");
+        }
+        return teamJpaRepository.findById(id).map(teamMapper::toDomain).orElseThrow(NoSuchElementException::new);
     }
 
     @Override

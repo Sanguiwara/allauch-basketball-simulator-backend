@@ -9,6 +9,7 @@ import com.sanguiwara.repository.jpa.ClubJpaRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -66,6 +67,16 @@ public class ClubRepositoryPGSQL implements ClubRepository {
         var entity = clubMapper.toEntity(club);
         var saved = clubJpaRepository.save(entity);
         return clubMapper.toDomain(saved);
+    }
+
+    @Override
+    @Transactional
+    public Club updateName(UUID id, String name) {
+        int updated = clubJpaRepository.updateName(id, name);
+        if (updated == 0) {
+            throw new NoSuchElementException("Club not found");
+        }
+        return clubJpaRepository.findById(id).map(clubMapper::toDomain).orElseThrow(NoSuchElementException::new);
     }
 
     @Override

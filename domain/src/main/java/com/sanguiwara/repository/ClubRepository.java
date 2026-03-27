@@ -22,6 +22,8 @@ public interface ClubRepository {
 
     Club save(Club club);
 
+    Club updateName(UUID id, String name);
+
     void deleteById(UUID id);
 
     void deleteAll();

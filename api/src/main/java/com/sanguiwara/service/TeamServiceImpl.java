@@ -29,4 +29,9 @@ public class TeamServiceImpl implements TeamService {
         return teamRepository.save(team);
     }
 
+    @Override
+    public Team updateName(UUID id, String name) {
+        return teamRepository.updateName(id, name);
+    }
+
 }

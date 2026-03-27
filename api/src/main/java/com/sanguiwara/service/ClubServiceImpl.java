@@ -23,5 +23,9 @@ public class ClubServiceImpl implements ClubService {
     public List<Club> getAllClubs() {
         return clubRepository.findAll();
     }
-}
 
+    @Override
+    public Club updateName(UUID id, String name) {
+        return clubRepository.updateName(id, name);
+    }
+}
