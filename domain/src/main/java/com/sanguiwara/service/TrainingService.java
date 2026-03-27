@@ -14,6 +14,12 @@ public interface TrainingService {
 
     List<Training> getAllTrainingsForATeam(UUID teamId);
 
+    /**
+     * Resolve an Auth0 user sub to the user's club/team(s) and return the trainings.
+     * Returns empty when the sub is not associated to any club or when no team can be resolved.
+     */
+    Optional<List<Training>> getAllTrainingsForAUserSub(String sub);
+
     List<Training> getAllTrainings();
 
     Training createTraining(UUID teamId, Instant executeAt, TrainingType trainingType);

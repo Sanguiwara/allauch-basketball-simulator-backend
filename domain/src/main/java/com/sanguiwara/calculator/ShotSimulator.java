@@ -30,7 +30,7 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
         List<InGamePlayer> offenseTeamActivePlayers = offenseTeamGamePlan.getActivePlayers();
         return offenseTeamActivePlayers.stream().map(offensivePlayer -> {
             DefensiveScheme defensiveScheme = defensiveSchemeResolver.resolve(defenseTeamGamePlan.getDefenseType());
-            double advantageForAPlayer = defensiveScheme.calculateAdvantageForAPlayer(offensivePlayer.getPlayer(), defenseTeamGamePlan, spec);
+            double advantageForAPlayer = defensiveScheme.calculateAdvantageForAPlayer(offensivePlayer, defenseTeamGamePlan, spec);
             return simulateShots(
                     defenseTeamGamePlan,
                     offensivePlayer,
@@ -92,7 +92,8 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
                         matchupAdvantage,
                         isAssistedShot
                 );
-                shotPct = applyMoraleBonus(shotPct, shooter.getPlayer().getMorale());
+                int teamMorale = averageTeamMorale(shooter, passersWithoutShooter);
+                shotPct = applyMoraleBonus(shotPct, teamMorale);
                 boolean made = random.nextDouble() < shotPct;
 
 
@@ -121,7 +122,21 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
 
     private static double applyMoraleBonus(double baseShotPct, int morale) {
         double moraleBonus = (morale / 99.0) * 0.40 - 0.20;
-        return baseShotPct + moraleBonus;
+        return Math.clamp(baseShotPct + moraleBonus, 0.0, 0.90);
+    }
+
+    /**
+     * Team morale is approximated by the average of the shooter's morale and the morale of potential passers.
+     * We exclude the shooter from {@code potentialPassersWithoutShooter} to avoid double-counting.
+     */
+    private static int averageTeamMorale(InGamePlayer shooter, List<InGamePlayer> potentialPassersWithoutShooter) {
+        long sum = shooter.getPlayer().getMorale();
+        int count = 1;
+        for (InGamePlayer p : potentialPassersWithoutShooter) {
+            sum += p.getPlayer().getMorale();
+            count++;
+        }
+        return (int) Math.round(sum / (double) count);
     }
 
 
@@ -131,21 +146,19 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
         boolean assisted = random.nextDouble() < assistedShotPercentage;
         InGamePlayer assister = null;
         if (assisted) {
-            InGamePlayer result = null;
             double total = 0.0;
             for (InGamePlayer p : potentialPassers) {
-                total += Math.max(0.0, p.getAssistWeight());
+                total += p.getAssistWeight();
             }
 
             double r = random.nextDouble() * total;
-            for (InGamePlayer p : potentialPassers) {
-                r -= Math.max(0.0, p.getAssistWeight());
+            for (var potentialPasser : potentialPassers) {
+                r -= potentialPasser.getAssistWeight();
                 if (r <= 0.0) {
-                    result = p;
+                    assister = potentialPasser;
                     break;
                 }
             }
-            assister = result;
         }
         return assister;
     }

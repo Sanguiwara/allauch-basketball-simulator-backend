@@ -20,6 +20,8 @@ spring:
 
   jpa:
     hibernate:
+      # schema-first: Hibernate must not mutate the DB schema at runtime.
+      # Override with SPRING_JPA_HIBERNATE_DDL_AUTO=update only for local experiments.
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     properties:
       hibernate:

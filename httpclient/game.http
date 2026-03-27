@@ -15,3 +15,9 @@ Accept: application/json
 GET {{baseUrl}}/games/teamID/<teamId>
 Authorization: Bearer {{token}}
 Accept: application/json
+
+### Play a game (simplified)
+POST {{baseUrl}}/games/0d1fdbf8-a758-4620-9d90-41cee85579c7/play
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json

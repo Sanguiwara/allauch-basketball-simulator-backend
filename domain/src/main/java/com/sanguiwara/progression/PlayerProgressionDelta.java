@@ -2,9 +2,14 @@ package com.sanguiwara.progression;
 
 import com.sanguiwara.baserecords.Player;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * Deltas only, aligned with the SQL table {@code player_progressions}.
+ * Deltas only, aligned with the SQL table {@code player_progressions} for numeric attributes.
  * Null means "no change" for that attribute.
+ * Badges are handled as set deltas (added/removed) and are not persisted in {@code player_progressions}.
+ * When needed, the "badges earned during an event" snapshot is stored separately (see {@code player_progression_badges}).
  */
 public record PlayerProgressionDelta(
         Integer tir3Pts,
@@ -37,9 +42,16 @@ public record PlayerProgressionDelta(
         Integer ego,
         Integer softSkills,
         Integer leadership,
-        Integer morale
+        Integer morale,
+        Set<Long> badgesAdded,
+        Set<Long> badgesRemoved
 ) {
     public static PlayerProgressionDelta between(Player before, Player after) {
+        Set<Long> beforeBadges = before.getBadgeIds() == null ? Set.of() : before.getBadgeIds();
+        Set<Long> afterBadges = after.getBadgeIds() == null ? Set.of() : after.getBadgeIds();
+        Set<Long> badgesAdded = diff(afterBadges, beforeBadges);
+        Set<Long> badgesRemoved = diff(beforeBadges, afterBadges);
+
         return new PlayerProgressionDelta(
                 deltaOrNull(after.getTir3Pts() - before.getTir3Pts()),
                 deltaOrNull(after.getTir2Pts() - before.getTir2Pts()),
@@ -71,11 +83,19 @@ public record PlayerProgressionDelta(
                 deltaOrNull(after.getEgo() - before.getEgo()),
                 deltaOrNull(after.getSoftSkills() - before.getSoftSkills()),
                 deltaOrNull(after.getLeadership() - before.getLeadership()),
-                deltaOrNull(after.getMorale() - before.getMorale())
+                deltaOrNull(after.getMorale() - before.getMorale()),
+                badgesAdded,
+                badgesRemoved
         );
     }
 
     private static Integer deltaOrNull(int delta) {
         return delta == 0 ? null : delta;
+    }
+
+    private static Set<Long> diff(Set<Long> left, Set<Long> right) {
+        Set<Long> diff = new HashSet<>(left);
+        diff.removeAll(right);
+        return Set.copyOf(diff);
     }
 }

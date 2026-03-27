@@ -1,6 +1,5 @@
 package com.sanguiwara.mapper;
 
-import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.entity.PlayerProgressionEntity;
 import com.sanguiwara.progression.PlayerProgression;
@@ -8,7 +7,6 @@ import com.sanguiwara.progression.PlayerProgressionDelta;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,12 +16,13 @@ public interface PlayerProgressionMapper {
     @Mapping(target = "playerId", source = "player.id")
     @Mapping(target = "eventType", source = "id.eventType")
     @Mapping(target = "eventId", source = "id.eventId")
-    @Mapping(target = "badgeIds", expression = "java(mapBadgeIds(entity.getPlayer()))")
+    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(entity.getBadgeIds()))")
     @Mapping(target = "delta", expression = "java(toDelta(entity))")
     PlayerProgression toDomain(PlayerProgressionEntity entity);
 
     @Mapping(target = "id", expression = "java(new PlayerProgressionId(progression.playerId(), progression.eventType(), progression.eventId()))")
     @Mapping(target = "player", expression = "java(playerRef(progression.playerId()))")
+    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(progression.badgeIds()))")
     @Mapping(target = "tir3Pts", source = "delta.tir3Pts")
     @Mapping(target = "tir2Pts", source = "delta.tir2Pts")
     @Mapping(target = "lancerFranc", source = "delta.lancerFranc")
@@ -57,13 +56,9 @@ public interface PlayerProgressionMapper {
     @Mapping(target = "morale", source = "delta.morale")
     PlayerProgressionEntity toEntity(PlayerProgression progression);
 
-    default Set<Long> mapBadgeIds(PlayerEntity player) {
-        if (player == null || player.getBadges() == null || player.getBadges().isEmpty()) return Set.of();
-        Set<Long> ids = new HashSet<>();
-        for (BadgeEntity b : player.getBadges()) {
-            if (b != null && b.getId() != null) ids.add(b.getId());
-        }
-        return ids.isEmpty() ? Set.of() : Set.copyOf(ids);
+    default Set<Long> copyBadgeIds(Set<Long> badgeIds) {
+        if (badgeIds == null || badgeIds.isEmpty()) return Set.of();
+        return Set.copyOf(badgeIds);
     }
 
     default PlayerProgressionDelta toDelta(PlayerProgressionEntity entity) {
@@ -99,7 +94,9 @@ public interface PlayerProgressionMapper {
                 entity.getEgo(),
                 entity.getSoftSkills(),
                 entity.getLeadership(),
-                entity.getMorale()
+                entity.getMorale(),
+                null,
+                null
         );
     }
 

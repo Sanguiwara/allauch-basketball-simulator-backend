@@ -49,6 +49,11 @@ public class GamePlanController {
         return ResponseEntity.of(gamePlanService.getNextUpcomingGamePlanForClub(clubId).map(gamePlanDTOMapper::toDTO));
     }
 
+    @GetMapping("/userSub/{sub}/next")
+    public ResponseEntity<GamePlanDTO> getNextGameForAUser(@PathVariable String sub) {
+        return ResponseEntity.of(gamePlanService.getNextUpcomingGamePlanForAUserSub(sub).map(gamePlanDTOMapper::toDTO));
+    }
+
 
 }
 

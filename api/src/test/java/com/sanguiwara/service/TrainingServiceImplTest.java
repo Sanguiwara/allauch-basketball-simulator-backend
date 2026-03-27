@@ -29,6 +29,71 @@ import static org.mockito.Mockito.when;
 class TrainingServiceImplTest {
 
     @Test
+    void getAllTrainingsForAUserSub_returnsTrainingsForTheUsersClubTeams() {
+        TrainingRepository trainingRepository = mock(TrainingRepository.class);
+        TeamRepository teamRepository = mock(TeamRepository.class);
+        ClubRepository clubRepository = mock(ClubRepository.class);
+        PlayerProgressionRepository playerProgressionRepository = mock(PlayerProgressionRepository.class);
+        TrainingTimeEventRepository trainingTimeEventRepository = mock(TrainingTimeEventRepository.class);
+        TrainingExecutor trainingExecutor = mock(TrainingExecutor.class);
+        EventManager eventManager = mock(EventManager.class);
+
+        TrainingServiceImpl service = new TrainingServiceImpl(
+                trainingRepository,
+                teamRepository,
+                clubRepository,
+                playerProgressionRepository,
+                trainingTimeEventRepository,
+                trainingExecutor,
+                eventManager
+        );
+
+        String sub = "auth0|user-42";
+        UUID clubId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+
+        Club club = new Club("club");
+        Team team = new Team(teamId, AgeCategory.U18, Gender.MALE, "team");
+        club.setId(clubId);
+        club.setTeams(List.of(team));
+
+        Training training1 = new Training(UUID.randomUUID(), Instant.parse("2026-02-27T10:00:00Z"), team, TrainingType.SHOOTING);
+        Training training2 = new Training(UUID.randomUUID(), Instant.parse("2026-02-27T11:00:00Z"), team, TrainingType.PHYSICAL);
+
+        when(clubRepository.findByUserSub(eq(sub))).thenReturn(Optional.of(club));
+        when(clubRepository.findById(eq(clubId))).thenReturn(Optional.of(club));
+        when(trainingRepository.findAllByTeamId(eq(teamId))).thenReturn(List.of(training2, training1));
+
+        assertThat(service.getAllTrainingsForAUserSub(sub)).contains(List.of(training1, training2));
+    }
+
+    @Test
+    void getAllTrainingsForAUserSub_returnsEmptyWhenUserHasNoClub() {
+        TrainingRepository trainingRepository = mock(TrainingRepository.class);
+        TeamRepository teamRepository = mock(TeamRepository.class);
+        ClubRepository clubRepository = mock(ClubRepository.class);
+        PlayerProgressionRepository playerProgressionRepository = mock(PlayerProgressionRepository.class);
+        TrainingTimeEventRepository trainingTimeEventRepository = mock(TrainingTimeEventRepository.class);
+        TrainingExecutor trainingExecutor = mock(TrainingExecutor.class);
+        EventManager eventManager = mock(EventManager.class);
+
+        TrainingServiceImpl service = new TrainingServiceImpl(
+                trainingRepository,
+                teamRepository,
+                clubRepository,
+                playerProgressionRepository,
+                trainingTimeEventRepository,
+                trainingExecutor,
+                eventManager
+        );
+
+        String sub = "auth0|missing";
+        when(clubRepository.findByUserSub(eq(sub))).thenReturn(Optional.empty());
+
+        assertThat(service.getAllTrainingsForAUserSub(sub)).isEmpty();
+    }
+
+    @Test
     void getNextTrainingForAClub_returnsNextTrainingForAChosenTeam() {
         TrainingRepository trainingRepository = mock(TrainingRepository.class);
         TeamRepository teamRepository = mock(TeamRepository.class);

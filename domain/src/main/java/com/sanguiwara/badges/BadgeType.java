@@ -6,6 +6,7 @@ public enum BadgeType {
     DRIVE,
     REBOUND,
     STEAL,
-    ASSIST
+    ASSIST,
+    BLOCK,
+    DEF_EXTER
 }
-

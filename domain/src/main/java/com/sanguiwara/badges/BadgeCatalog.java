@@ -2,6 +2,7 @@ package com.sanguiwara.badges;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,40 +18,44 @@ public final class BadgeCatalog {
     static final long ASSISTED_SHOT_BOOST_ID = 7L;
     static final long CRAZY_SHOOTER_ID = 8L;
 
-    private static final double DEFAULT_DROP_RATE = 0.3;
+    private static final double DEFAULT_DROP_RATE = 0.01;
 
 
     public static Map<Long, Badge> badgeMap () {
-        return Map.of(
-                // Stable IDs for persistence (start at 0)
-                THREE_POINT_SPECIALIST_ID, threePointSpecialist(),
-                TWO_POINT_SPECIALIST_ID, twoPointSpecialist(),
-                DRIVE_FINISHER_ID, driveFinisher(),
-                REBOUND_HUNTER_ID, reboundHunter(),
-                THIEF_ID, thief(),
-                PLAYMAKER_ID, playmaker(),
-                DEF_REBOUND_SPECIALIST_ID, defensiveReboundSpecialist(),
-                ASSISTED_SHOT_BOOST_ID, assistedShotBoost(),
-                CRAZY_SHOOTER_ID, crazyShooter()
-        );
+        // Keep stable IDs for persistence (start at 0).
+        Map<Long, Badge> m = new HashMap<>();
+        m.put(THREE_POINT_SPECIALIST_ID, threePointSpecialist());
+        m.put(TWO_POINT_SPECIALIST_ID, twoPointSpecialist());
+        m.put(DRIVE_FINISHER_ID, driveFinisher());
+        m.put(REBOUND_HUNTER_ID, reboundHunter());
+        m.put(THIEF_ID, thief());
+        m.put(PLAYMAKER_ID, playmaker());
+        m.put(DEF_REBOUND_SPECIALIST_ID, defensiveReboundSpecialist());
+        m.put(ASSISTED_SHOT_BOOST_ID, assistedShotBoost());
+        m.put(CRAZY_SHOOTER_ID, crazyShooter());
+
+        // Auto-awarded skill badges (drop rate = 0, based on stat thresholds).
+        m.putAll(AutoSkillBadges.badgeMap());
+
+        return Map.copyOf(m);
     }
 
 
     private static Badge threePointSpecialist() {
         EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.03)));
+        mods.put(BadgeType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
         return new StandardBadge(THREE_POINT_SPECIALIST_ID, "Three Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.THREE_POINT), mods);
     }
 
     private static Badge twoPointSpecialist() {
         EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
+        mods.put(BadgeType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
         return new StandardBadge(TWO_POINT_SPECIALIST_ID, "Two Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.TWO_POINT), mods);
     }
 
     private static Badge driveFinisher() {
         EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
+        mods.put(BadgeType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
         return new StandardBadge(DRIVE_FINISHER_ID, "Drive Finisher", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.DRIVE), mods);
     }
 

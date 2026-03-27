@@ -1,6 +1,7 @@
 package com.sanguiwara.baserecords;
 
 
+import com.sanguiwara.badges.AutoSkillBadges;
 import lombok.*;
 
 import java.util.HashSet;
@@ -28,15 +29,13 @@ public class Player {
     private boolean injured;
 
     // Tirs / finition
-    @Setter
     private  int tir3Pts;
-    @Setter
     private  int tir2Pts;
     @Setter
     private  int lancerFranc;
     @Setter
     private  int floater;
-    @Setter
+
     private  int finitionAuCercle;
     @Setter
     private  int speed;
@@ -50,25 +49,20 @@ public class Player {
     private  int agressivite;
 
     // Défense / rebond
-    @Setter
     private  int defExterieur;
     @Setter
     private  int defPoste;
     @Setter
     private  int protectionCercle;
-    @Setter
     private  int timingRebond;
     @Setter
     private  int agressiviteRebond;
-    @Setter
     private  int steal;
-    @Setter
     private  int timingBlock;
 
     // Physique / mental / skills
     @Setter
     private  int physique;
-    @Setter
     private  int basketballIqOff;
     @Setter
     private  int basketballIqDef;
@@ -100,6 +94,49 @@ public class Player {
     @Setter
     private  int morale;
 
+    // Custom setters (override Lombok-generated ones) to keep auto-badges in sync with stats.
+    public void setTir3Pts(int tir3Pts) {
+        this.tir3Pts = tir3Pts;
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.PRECISION_3PTS, tir3Pts);
+    }
+
+    public void setTir2Pts(int tir2Pts) {
+        this.tir2Pts = tir2Pts;
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.PRECISION_2PTS, tir2Pts);
+    }
+
+    public void setFinitionAuCercle(int finitionAuCercle) {
+        this.finitionAuCercle = finitionAuCercle;
+        // Current mapping: Drive badge depends on finitionAuCercle.
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.DRIVE, finitionAuCercle);
+    }
+
+    public void setTimingRebond(int timingRebond) {
+        this.timingRebond = timingRebond;
+        // Current mapping: Rebond badge depends on timingRebond.
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.REBOND, timingRebond);
+    }
+
+    public void setSteal(int steal) {
+        this.steal = steal;
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.INTERCEPTION, steal);
+    }
+
+    public void setTimingBlock(int timingBlock) {
+        this.timingBlock = timingBlock;
+        // Current mapping: Contre badge depends on timingBlock.
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.CONTRE, timingBlock);
+    }
+
+    public void setBasketballIqOff(int basketballIqOff) {
+        this.basketballIqOff = basketballIqOff;
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.QI_BASKET_OFF, basketballIqOff);
+    }
+
+    public void setDefExterieur(int defExterieur) {
+        this.defExterieur = defExterieur;
+        AutoSkillBadges.sync(this, AutoSkillBadges.Skill.DEF_EXTER, defExterieur);
+    }
 
     /**
      * Deep snapshot of this Player at the current instant (copies mutable collections).

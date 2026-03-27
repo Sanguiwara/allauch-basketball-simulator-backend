@@ -105,7 +105,7 @@ public class GameConfig {
     public ReboundCalculator reboundCalculator(Random random, BadgeEngine badgeEngine) { return new ReboundCalculator(random, badgeEngine);}
 
     @Bean
-    public BlockCalculator blockCalculator(){ return new BlockCalculator();}
+    public BlockCalculator blockCalculator(BadgeEngine badgeEngine){ return new BlockCalculator(badgeEngine);}
 
     @Bean
     public GameSimulator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
@@ -140,8 +140,8 @@ public class GameConfig {
     }
 
     @Bean
-    public MoraleProgressionManager moraleProgressionManager(Random random) {
-        return new MoraleProgressionManager(random);
+    public MoraleProgressionManager moraleProgressionManager() {
+        return new MoraleProgressionManager();
     }
 
     @Bean

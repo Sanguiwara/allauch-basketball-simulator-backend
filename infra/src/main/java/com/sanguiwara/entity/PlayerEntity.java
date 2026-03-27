@@ -20,7 +20,7 @@ public class PlayerEntity {
 
     @Id
     @UuidGenerator
-    @Column(nullable = false, updatable = false)
+    @Column(columnDefinition = "uuid", nullable = false, updatable = false)
     private UUID id;
 
     @Column(nullable = false)
@@ -143,7 +143,9 @@ public class PlayerEntity {
     @Column(name = "morale", nullable = false)
     private int morale;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    // MVP: keep badges always loaded to avoid accidental "empty badgeIds" snapshots
+    // and unintended clears when persisting a partially loaded Player.
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "player_badges",
             joinColumns = @JoinColumn(name = "player_id"),

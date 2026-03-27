@@ -1,7 +1,9 @@
 package com.sanguiwara.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -11,6 +13,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,6 +31,22 @@ public class PlayerProgressionEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerEntity player;
+
+    /**
+     * Snapshot of badges earned during this progression event (aligned with {@code player_progression_badges}).
+     * This is intentionally not the player's full current badge set.
+     */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "player_progression_badges",
+            joinColumns = {
+                    @JoinColumn(name = "player_id", referencedColumnName = "player_id"),
+                    @JoinColumn(name = "event_type", referencedColumnName = "event_type"),
+                    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+            }
+    )
+    @Column(name = "badge_id", nullable = false)
+    private Set<Long> badgeIds = new HashSet<>();
 
     @Column(name = "tir_3_pts")
     private Integer tir3Pts;
@@ -120,4 +141,3 @@ public class PlayerProgressionEntity {
     @Column(name = "morale")
     private Integer morale;
 }
-

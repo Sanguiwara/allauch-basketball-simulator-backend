@@ -1,13 +1,11 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.factory.PlayerGenerator;
+import com.sanguiwara.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.sanguiwara.repository.PlayerRepository;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -15,32 +13,6 @@ import java.util.UUID;
 public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
-    private final PlayerGenerator playerGenerator;
-    private final Random random ;
-
-    private static final String[] FIRST_NAMES = {"LeBron", "Stephen", "Kevin", "Giannis", "Luka", "Joel", "Victor", "Kyrie", "Ja", "Jayson"};
-    private static final String[] LAST_NAMES = {"James", "Curry", "Durant", "Antetokounmpo", "Doncic", "Embiid", "Wembanyama", "Irving", "Morant", "Tatum"};
-
-
-    @Override
-    public void generate100Players() {
-
-        for (int i = 0; i < 100; i++) {
-         generatePlayer();
-        }
-
-    }
-
-    @Override
-    public Player generatePlayer() {
-        String randomName = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)] + " " +
-                LAST_NAMES[random.nextInt(LAST_NAMES.length)];
-
-        // Utilisation de votre factory existante
-        Player player = playerGenerator.generatePlayer( randomName);
-        this.savePlayer(player);
-        return player;
-    }
 
 
     @Override
@@ -66,7 +38,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public void deletePlayer(UUID id) {
-         playerRepository.deleteById(id);
+        playerRepository.deleteById(id);
     }
 
 

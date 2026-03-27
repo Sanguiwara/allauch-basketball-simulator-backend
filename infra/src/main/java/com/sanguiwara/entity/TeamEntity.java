@@ -21,7 +21,7 @@ public class TeamEntity {
 
     @Id
     @UuidGenerator
-    @Column(nullable = false, updatable = false)
+    @Column(columnDefinition = "uuid", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "name")

@@ -22,7 +22,7 @@ public final class StocksProgressionManager {
     private static final double POTENTIAL_MULT_RANGE = 1.2;
 
     private static final int STOCKS_SOFT_CAP = 6;
-    private static final double BASE_STEAL_GAIN = 5;
+    private static final double BASE_STEAL_GAIN = 3;
     private static final double BASE_BLOCK_GAIN = 1.9;
     private static final double PROTECT_RIM_DELTA_MULT = 0.75;
 

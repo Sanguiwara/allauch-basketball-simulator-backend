@@ -1,7 +1,10 @@
 package com.sanguiwara.timeevent;
 
 
+import com.sanguiwara.repository.GameTimeEventRepository;
+import com.sanguiwara.repository.TrainingTimeEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,15 +21,23 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class EventManager {
 
+    private final GameTimeEventRepository gameTimeEventRepository;
+    private final TrainingTimeEventRepository trainingTimeEventRepository;
 
-    // Next events first
+
+    public void loadEventsFromDatabase() {
+        gameTimeEventRepository.findAll().forEach(this::schedule);
+        trainingTimeEventRepository.findAll().forEach(this::schedule);
+    }
+
+
     private final PriorityQueue<TimeEvent> queue = new PriorityQueue<>(
             Comparator.comparing(TimeEvent::getExecuteAt).thenComparing(TimeEvent::getId)
     );
 
-    // For fast cancel / lookup
     private final Map<UUID, TimeEvent> eventById = new HashMap<>();
 
     /**
@@ -43,13 +54,10 @@ public class EventManager {
     /**
      * Cancel a scheduled event by id. Returns true if it existed.
      */
-    public boolean cancel(UUID eventId) {
+    public void cancel(UUID eventId) {
         TimeEvent existing = eventById.remove(eventId);
-        if (existing == null) return false;
-
-        // PriorityQueue has no O(1) removal; this is acceptable for moderate sizes.
-        // If you have tons of events, we can optimize with a "cancelled set" strategy.
-        return queue.remove(existing);
+        if (existing == null) return;
+        queue.remove(existing);
     }
 
     /**
@@ -99,11 +107,25 @@ public class EventManager {
 
             try {
                 next.execute();
+                switch (next) {
+                    case GameTimeEvent e -> gameTimeEventRepository.deleteById(e.getId());
+                    case TrainingTimeEvent e -> trainingTimeEventRepository.deleteById(e.getId());
+                    default -> {
+                        // If you have other event types, handle their persistence here.
+                    }
+                }
             } catch (Exception e) {
                 // Decide your policy:
                 // - swallow and continue (game keeps running)
                 // - or rethrow to stop everything
                 // For a simulation, continuing is often better.
+                log.error(
+                        "Error while executing time event id={} type={} executeAt={}",
+                        next.getId(),
+                        next.getClass().getSimpleName(),
+                        next.getExecuteAt(),
+                        e
+                );
             }
 
             executed++;

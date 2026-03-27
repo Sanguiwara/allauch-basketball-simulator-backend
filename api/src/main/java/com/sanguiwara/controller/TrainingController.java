@@ -49,6 +49,12 @@ public class TrainingController {
         return ResponseEntity.of(trainingService.getNextTrainingForAUserSub(sub).map(trainingDTOMapper::toDto));
     }
 
+    @GetMapping("/userSub/{sub}")
+    public ResponseEntity<List<TrainingDTO>> getTrainingsForAUserSub(@PathVariable String sub) {
+        return ResponseEntity.of(trainingService.getAllTrainingsForAUserSub(sub)
+                .map(list -> list.stream().map(trainingDTOMapper::toDto).toList()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TrainingDTO> getTraining(@PathVariable UUID id) {
         return ResponseEntity.of(Optional.of(trainingDTOMapper.toDto(trainingService.getTrainingById(id))));

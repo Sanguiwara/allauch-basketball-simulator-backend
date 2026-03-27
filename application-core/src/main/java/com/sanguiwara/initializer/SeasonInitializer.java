@@ -1,11 +1,12 @@
 package com.sanguiwara.initializer;
 
-import com.sanguiwara.factory.ClubNameFactory;
-import com.sanguiwara.factory.PlayerGenerator;
-import com.sanguiwara.factory.TeamFactory;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.executor.GameExecutor;
 import com.sanguiwara.executor.TrainingExecutor;
+import com.sanguiwara.factory.ClubNameFactory;
+import com.sanguiwara.factory.PlayerArchetype;
+import com.sanguiwara.factory.PlayerGenerator;
+import com.sanguiwara.factory.TeamFactory;
 import com.sanguiwara.repository.*;
 import com.sanguiwara.service.GamePlanService;
 import com.sanguiwara.service.PlayerService;
@@ -21,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class SeasonInitializer {
     private final static int NB_PLAYERS_PER_TEAM = 12;
     private final static int NB_TEAMS_PER_CATEGORY = 1;
     private final static int NB_CATEGORIES = 1; //for now only senior
-//TODO Supprimer tous les repository et utiliser des services à la place
+    //TODO Supprimer tous les repository et utiliser des services à la place
     private final PlayerGenerator playerGenerator;
     private final TeamFactory teamFactory;
     private final GamePlanService gamePlanService;
@@ -48,9 +50,10 @@ public class SeasonInitializer {
     private final TrainingRepository trainingRepository;
     private final TrainingTimeEventRepository trainingTimeEventRepository;
 
-    // Fixed hours (relative to the day start of the round date)
-    private static final long TRAINING_START_HOUR = 18;
-    private static final long GAME_START_HOUR = 20;
+    // Scheduling cadence: for fast iterations, we want a match and a training every 10 minutes.
+    private static final long ROUND_INTERVAL_MINUTES = 10;
+    private static final long TRAINING_OFFSET_MINUTES = 0;
+    private static final long GAME_OFFSET_MINUTES = 2;
 
     public void createSeason(Instant startDate) {
 
@@ -73,15 +76,15 @@ public class SeasonInitializer {
             team = teamRepository.save(team);
 
             List<Player> players = new ArrayList<>();
-            for (int k = 0; k < NB_PLAYERS_PER_TEAM; k++) {
-                Player player = playerGenerator.generatePlayer("");
+
+
+            while (players.size() < NB_PLAYERS_PER_TEAM) {
+                PlayerArchetype archetype = playerGenerator.randomArchetype();
+                Player player = playerGenerator.generatePlayer(archetype);
                 player.setClubID(club.getId());
-
-                player = playerService.savePlayer(player);
-                players.add(player);
-
-
+                players.add(playerService.savePlayer(player));
             }
+
             team.setPlayers(players);
             club.getTeams().add(team);
             team = teamRepository.save(team);
@@ -105,7 +108,7 @@ public class SeasonInitializer {
     }
 
 
-    private void createGamesForSeason(Instant startDate, LeagueSeason leagueSeason) {
+    void createGamesForSeason(Instant startDate, LeagueSeason leagueSeason) {
         List<TeamSeason> teams = leagueSeason.getTeamSeasons();
         int n = teams.size();
 
@@ -113,7 +116,7 @@ public class SeasonInitializer {
 
         if (n % 2 != 0) {
             throw new IllegalArgumentException(
-                    "Nombre d'équipes impair: impossible que toutes les équipes jouent tous les jours."
+                    "Nombre d'équipes impair: impossible que toutes les équipes jouent à chaque round."
             );
         }
 
@@ -121,27 +124,27 @@ public class SeasonInitializer {
         TeamSeason fixed = teams.getFirst();
         List<TeamSeason> rotating = new ArrayList<>(teams.subList(1, n));
 
-        Instant day = startDate;
+        Instant roundStart = startDate;
         int rounds = n - 1;
 
         // ALLER
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, day, false);
-            day = day.plus(1, ChronoUnit.DAYS);
+            createRoundGames(fixed, rotating, leagueSeason, roundStart, false);
+            roundStart = roundStart.plus(ROUND_INTERVAL_MINUTES, ChronoUnit.MINUTES);
             rotate(rotating);
         }
 
         // RETOUR (home/away inversés) — on repart de la rotation initiale
         rotating = new ArrayList<>(teams.subList(1, n));
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, day, true);
-            day = day.plus(1, ChronoUnit.DAYS);
+            createRoundGames(fixed, rotating, leagueSeason, roundStart, true);
+            roundStart = roundStart.plus(ROUND_INTERVAL_MINUTES, ChronoUnit.MINUTES);
             rotate(rotating);
         }
     }
 
     /**
-     * Crée les matchs d'une "journée" :
+     * Crée les matchs d'un "round" :
      * - n/2 matchs
      * - chaque équipe apparaît exactement une fois
      * - reverse=true => home/away inversés pour le retour
@@ -151,7 +154,7 @@ public class SeasonInitializer {
             TeamSeason fixed,
             List<TeamSeason> rotating,
             LeagueSeason leagueSeason,
-            Instant day,
+            Instant roundStart,
             boolean reverse
     ) {
         int n = rotating.size() + 1;
@@ -172,9 +175,8 @@ public class SeasonInitializer {
             GamePlan visitorGamePlan = gamePlanService.generateGamePlan(visitorTeam.team(), homeTeam.team());
             // =========================
 
-            Instant dayStart = day.truncatedTo(ChronoUnit.DAYS);
-            Instant trainingExecuteAt = dayStart.plus(TRAINING_START_HOUR, ChronoUnit.HOURS);
-            Instant gameExecuteAt = dayStart.plus(GAME_START_HOUR, ChronoUnit.HOURS);
+            Instant trainingExecuteAt = roundStart.plus(TRAINING_OFFSET_MINUTES, ChronoUnit.MINUTES);
+            Instant gameExecuteAt = roundStart.plus(GAME_OFFSET_MINUTES, ChronoUnit.MINUTES);
 
             createAndScheduleTraining(homeTeam.team(), trainingExecuteAt);
             createAndScheduleTraining(visitorTeam.team(), trainingExecuteAt);
@@ -203,9 +205,12 @@ public class SeasonInitializer {
     }
 
     private void createAndScheduleTraining(Team team, Instant executeAt) {
+
+        //TODO Utiliser TrainingService.createTraining
         Objects.requireNonNull(team, "team");
 
-        TrainingType trainingType = TrainingType.PHYSICAL;
+        TrainingType[] trainingTypes = TrainingType.values();
+        TrainingType trainingType = trainingTypes[ThreadLocalRandom.current().nextInt(trainingTypes.length)];
         Training training = new Training(null, executeAt, team, trainingType);
         Training saved = trainingRepository.save(training);
 

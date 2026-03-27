@@ -27,7 +27,7 @@ public final class ShootingSkillProgressionManager {
     // --- Shooting volume curve calibration (PATCH) ---
     private static final int SHOOTING_VOLUME_NO_REGRESSION_FROM = 4;   // >=4 : no negative volume delta
     private static final double SHOOTING_VOLUME_REGRESSION_TAU = 1.2;  // how fast regression vanishes
-    private static final double SHOOTING_VOLUME_MAX_AT_15 = 10;       // target at 15 attempts (tune 2.0..3.0)
+    private static final double SHOOTING_VOLUME_MAX_AT_15 = 5;       // target at 15 attempts (tune 2.0..3.0)
     private static final double SHOOTING_VOLUME_EXPONENT = 2.2;        // tuned so at 8 attempts ~ +1
 
     public void applyShootingSkillProgression(InGamePlayer p) {

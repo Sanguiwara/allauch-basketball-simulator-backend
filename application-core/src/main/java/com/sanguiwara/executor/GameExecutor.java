@@ -14,6 +14,7 @@ import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.repository.PlayerRepository;
 import com.sanguiwara.result.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GameExecutor {
 
     private final GameSimulator gameSimulator;
