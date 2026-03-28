@@ -1,6 +1,7 @@
 package com.sanguiwara.repository.pgsql;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.mapper.PlayerMapper;
 import com.sanguiwara.repository.PlayerRepository;
@@ -58,18 +59,33 @@ public class PlayerRepositoryPGSQL implements PlayerRepository {
             }
         }
 
-        // Ensure we attach managed BadgeEntity instances (and enforce FK integrity).
-        if (player.getBadgeIds() != null && !player.getBadgeIds().isEmpty()) {
-            Set<Long> badgeIds = new HashSet<>(player.getBadgeIds());
-            var badges = badgeJpaRepository.findAllById(badgeIds);
-            entity.getBadges().clear();
-            entity.getBadges().addAll(badges); // managed instances
-        } else {
-            entity.getBadges().clear();
-        }
+        // Sync join table (player_badges) without "clear + re-add everything". Clearing forces Hibernate to delete
+        // and re-insert all links, which can trigger duplicate PK errors depending on flush ordering.
+        syncBadges(player, entity);
 
         var savedEntity = playerJpaRepository.save(entity);
         return playerMapper.toDomain(savedEntity);
+    }
+
+    private void syncBadges(Player player, PlayerEntity playerEntity) {
+        Objects.requireNonNull(playerEntity, "playerEntity");
+
+        Set<Long> desiredIds =  player.getBadgeIds();
+        if (player.getBadgeIds().isEmpty()) {
+            playerEntity.getBadges().clear();
+            return;
+        }
+
+        List<BadgeEntity> managedBadges = badgeJpaRepository.findAllById(desiredIds);
+        playerEntity.getBadges().removeIf(badge ->  !managedBadges.contains(badge));
+
+
+
+        managedBadges.forEach(badge -> {
+            if (playerEntity.getBadges().contains(badge)) return; // already linked
+            playerEntity.getBadges().add(badge); // managed instance
+        });
+
     }
 
 

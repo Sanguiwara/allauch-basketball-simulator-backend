@@ -26,7 +26,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    show-sql: false
 
 auth0:
   audience: ${AUTH0_AUDIENCE:}

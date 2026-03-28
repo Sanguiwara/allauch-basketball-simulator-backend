@@ -98,4 +98,44 @@ class PlayerRepositoryPGSQLTest {
         PlayerEntity persisted = playerJpaRepository.findById(created.getId()).orElseThrow();
         assertThat(persisted.getBadges()).extracting(BadgeEntity::getId).containsExactly(badgeId);
     }
+
+    @Test
+    void save_canRevokeAndReawardSameBadge() {
+        long badgeId = 12L;
+        BadgeEntity badge = new BadgeEntity();
+        badge.setId(badgeId);
+        badge.setName("Test badge");
+        badge.setDropRate(0.1);
+        badgeJpaRepository.save(badge);
+
+        Player player = Player.builder()
+                .id(null)
+                .name("P")
+                .birthDate(20000101)
+                .badgeIds(Set.of(badgeId))
+                .build();
+
+        Player created = playerRepository.save(player);
+
+        // Revoke
+        Player revoked = Player.builder()
+                .id(created.getId())
+                .name(created.getName())
+                .birthDate(created.getBirthDate())
+                .badgeIds(Set.of())
+                .build();
+        playerRepository.save(revoked);
+
+        // Re-award
+        Player reawarded = Player.builder()
+                .id(created.getId())
+                .name(created.getName())
+                .birthDate(created.getBirthDate())
+                .badgeIds(Set.of(badgeId))
+                .build();
+        playerRepository.save(reawarded);
+
+        PlayerEntity persisted = playerJpaRepository.findById(created.getId()).orElseThrow();
+        assertThat(persisted.getBadges()).extracting(BadgeEntity::getId).containsExactly(badgeId);
+    }
 }
