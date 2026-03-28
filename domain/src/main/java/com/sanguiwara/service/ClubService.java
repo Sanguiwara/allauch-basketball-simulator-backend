@@ -9,5 +9,6 @@ public interface ClubService {
     Club getClub(UUID id);
 
     List<Club> getAllClubs();
-}
 
+    Club updateName(UUID id, String name);
+}

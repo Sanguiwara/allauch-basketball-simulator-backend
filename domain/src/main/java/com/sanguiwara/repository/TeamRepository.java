@@ -16,6 +16,8 @@ public interface TeamRepository {
 
     Team save(Team team);
 
+    Team updateName(UUID id, String name);
+
     void deleteById(UUID id);
 
     void deleteAll();

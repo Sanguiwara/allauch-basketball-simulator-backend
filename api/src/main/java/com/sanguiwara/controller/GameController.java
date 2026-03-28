@@ -37,7 +37,11 @@ public class GameController {
     @GetMapping()
     public ResponseEntity<List<SimplifiedGameDTO>> getAllGames() {
 
-        return ResponseEntity.of(Optional.of(gameService.getAllGames().stream().map(gameDTOMapper::toSimplifiedDto).toList()));
+        return ResponseEntity.of(Optional.of(
+                gameService.getAllGameSummaries().stream()
+                        .map(gameDTOMapper::toSimplifiedDto)
+                        .toList()
+        ));
 
     }
 

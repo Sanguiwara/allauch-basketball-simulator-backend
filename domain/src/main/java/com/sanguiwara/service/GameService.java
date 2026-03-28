@@ -1,6 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Game;
+import com.sanguiwara.baserecords.GameSummary;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,5 +16,5 @@ public interface GameService {
 
     List<Game> getAllGamesForATeam(UUID teamId);
 
-    List<Game> getAllGames();
+    List<GameSummary> getAllGameSummaries();
 }

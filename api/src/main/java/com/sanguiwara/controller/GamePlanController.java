@@ -1,8 +1,9 @@
 package com.sanguiwara.controller;
 
 
-import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.dto.GamePlanDTO;
+import com.sanguiwara.dto.SeasonInitMode;
+import com.sanguiwara.dto.SeasonInitRequest;
 import com.sanguiwara.initializer.SeasonInitializer;
 import com.sanguiwara.mapper.GamePlanDTOMapper;
 import com.sanguiwara.service.GamePlanService;
@@ -10,9 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/gameplans")
 
@@ -31,8 +35,28 @@ public class GamePlanController {
 
 
     @PostMapping("/init")
-    public ResponseEntity<GamePlan> init() {
-        seasonInitializer.createSeason(Instant.now());
+    public ResponseEntity<Void> init(@RequestBody(required = false) SeasonInitRequest request) {
+        SeasonInitMode mode = request == null || request.mode() == null
+                ? SeasonInitMode.TEN_MINUTES_FROM_NOW
+                : request.mode();
+
+        Instant now = Instant.now();
+
+        switch (mode) {
+            case DAILY_MATCH_AND_TRAINING_FROM_DAY -> {
+                LocalDate startDay = request.startDay();
+                if (startDay == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "startDay is required for mode=DAILY_MATCH_AND_TRAINING_FROM_DAY"
+                    );
+                }
+                seasonInitializer.createSeasonDailyMatchAndTrainingFromDay(startDay);
+            }
+            case TEN_MINUTES_FROM_NOW -> seasonInitializer.createSeasonEvery10MinutesFromNow(now);
+            case DAILY_FROM_MONTH_AGO_REPLAY -> seasonInitializer.createSeasonDailyFromMonthAgoAndReplay(now);
+        }
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 

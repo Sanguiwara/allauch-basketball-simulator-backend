@@ -1,10 +1,41 @@
 @baseUrl = {{baseUrl}}
 @token = {{token}}
 
-### Init a new season (creates world + schedules)
+### Init a new season (default mode: TEN_MINUTES_FROM_NOW)
 POST {{baseUrl}}/gameplans/init
 Authorization: Bearer {{token}}
 Accept: application/json
+
+### Init season: 1 round per day (trainings + game) starting from a France day, game at 20:00 Europe/Paris
+POST {{baseUrl}}/gameplans/init
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mode": "DAILY_MATCH_AND_TRAINING_FROM_DAY",
+  "startDay": "2026-03-27"
+}
+
+### Init season: 1 round every 10 minutes starting now
+POST {{baseUrl}}/gameplans/init
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mode": "TEN_MINUTES_FROM_NOW"
+}
+
+### Init season: 1 round per day starting a month ago, then replay all events immediately
+POST {{baseUrl}}/gameplans/init
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "mode": "DAILY_FROM_MONTH_AGO_REPLAY"
+}
 
 ### Get a gameplan by id
 GET {{baseUrl}}/gameplans/<gamePlanId>

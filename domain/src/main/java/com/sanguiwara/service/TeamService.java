@@ -12,4 +12,6 @@ public interface TeamService {
 
     Team save(Team team);
 
+    Team updateName(UUID id, String name);
+
 }
