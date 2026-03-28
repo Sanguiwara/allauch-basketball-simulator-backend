@@ -12,7 +12,6 @@ import com.sanguiwara.service.GamePlanService;
 import com.sanguiwara.service.PlayerService;
 import com.sanguiwara.timeevent.EventManager;
 import com.sanguiwara.timeevent.GameTimeEvent;
-import com.sanguiwara.timeevent.TimeEvent;
 import com.sanguiwara.timeevent.TrainingTimeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -167,7 +166,8 @@ public class SeasonInitializer {
         createGamesForSeason(leagueSeason, scheduler, scheduleTrainings);
 
         if (replayAllScheduledEvents) {
-            eventManager.listAllOrdered().forEach(TimeEvent::execute);
+            // Dev/test mode: "replay everything now" and clean up persisted events as they execute.
+            eventManager.runDueEvents(Instant.MAX);
         }
     }
 

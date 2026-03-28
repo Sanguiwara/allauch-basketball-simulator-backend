@@ -5,7 +5,6 @@ import com.sanguiwara.dto.UpdateTrainingRequestDTO;
 import com.sanguiwara.mapper.TrainingDTOMapper;
 import com.sanguiwara.service.TrainingService;
 import com.sanguiwara.timeevent.EventManager;
-import com.sanguiwara.timeevent.TimeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,7 +81,8 @@ public class TrainingController {
 
     @GetMapping("/applyTrainings")
     public ResponseEntity<Void> testAllTrainingsEffects() {
-        eventManager.listAllOrdered().forEach(TimeEvent::execute);
+        // Execute all due events now (and delete them from DB via EventManager policy).
+        eventManager.runDueEvents(Instant.now());
         return ResponseEntity.ok().build();
     }
 }
