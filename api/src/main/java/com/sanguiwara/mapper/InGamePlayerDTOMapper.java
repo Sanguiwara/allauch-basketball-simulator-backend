@@ -23,8 +23,8 @@ public interface InGamePlayerDTOMapper {
     double TWO_OFF_SPEED_COEFF = 0.08;
     double TWO_OFF_SIZE_COEFF = 0.22;
     double TWO_OFF_ENDURANCE_COEFF = 0.12;
-    double TWO_OFF_BALLHANDLING_COEFF = 0.15;
-    double TWO_OFF_FINISH_AT_RIM_COEFF = 0.28;
+    double TWO_OFF_FINISH_AT_RIM_COEFF = 0.15;
+    double TWO_OFF_TIR_2_PTS_COEFF = 0.28;
     double TWO_OFF_IQ_COEFF = 0.15;
 
     // From DriveSpecification#getPlayerScoreForAShot
@@ -57,8 +57,8 @@ public interface InGamePlayerDTOMapper {
         return TWO_OFF_SPEED_COEFF * attacker.getSpeed()
                 + TWO_OFF_SIZE_COEFF * attacker.getSize()
                 + TWO_OFF_ENDURANCE_COEFF * attacker.getEndurance()
-                + TWO_OFF_BALLHANDLING_COEFF * attacker.getBallhandling()
                 + TWO_OFF_FINISH_AT_RIM_COEFF * attacker.getFinitionAuCercle()
+                + TWO_OFF_TIR_2_PTS_COEFF * attacker.getTir2Pts()
                 + TWO_OFF_IQ_COEFF * attacker.getBasketballIqOff();
     }
 

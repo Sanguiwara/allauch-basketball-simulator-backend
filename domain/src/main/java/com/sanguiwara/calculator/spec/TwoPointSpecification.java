@@ -30,8 +30,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     private static final double OFF_SPEED_COEFF = 0.08;
     private static final double OFF_SIZE_COEFF = 0.22;
     private static final double OFF_ENDURANCE_COEFF = 0.12;
-    private static final double OFF_BALLHANDLING_COEFF = 0.15;
-    private static final double OFF_FINISH_AT_RIM_COEFF = 0.28;
+    private static final double OFF_FINITION_AU_CERCLE = 0.15;
+    private static final double OFF_2PTS_COEFF = 0.28;
     private static final double OFF_IQ_COEFF = 0.15;
 
     // Constants for Defensive Score
@@ -94,8 +94,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         return OFF_SPEED_COEFF * attacker.getSpeed()
                 + OFF_SIZE_COEFF * attacker.getSize()
                 + OFF_ENDURANCE_COEFF * attacker.getEndurance()
-                + OFF_BALLHANDLING_COEFF * attacker.getBallhandling()
-                + OFF_FINISH_AT_RIM_COEFF * attacker.getFinitionAuCercle()
+                + OFF_FINITION_AU_CERCLE * attacker.getFinitionAuCercle()
+                + OFF_2PTS_COEFF * attacker.getTir2Pts()
                 + OFF_IQ_COEFF * attacker.getBasketballIqOff();
     }
 
