@@ -92,8 +92,8 @@ public class ShotSimulator<E extends ShotEvent, R extends ShotResult<E>> {
                         matchupAdvantage,
                         isAssistedShot
                 );
-                int teamMorale = averageTeamMorale(shooter, passersWithoutShooter);
-                shotPct = applyMoraleBonus(shotPct, teamMorale);
+                //int teamMorale = averageTeamMorale(shooter, passersWithoutShooter);
+                //shotPct = applyMoraleBonus(shotPct, teamMorale);
                 boolean made = random.nextDouble() < shotPct;
 
 

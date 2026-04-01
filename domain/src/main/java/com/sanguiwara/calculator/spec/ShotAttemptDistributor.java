@@ -22,8 +22,8 @@ final class ShotAttemptDistributor {
     // Shared intensity constants: same values as the ones historically used by ThreePointSpecification.
     private static final double USAGE_NORMALIZATION_DIVISOR = 30.0;
     private static final double AGGRESSIVENESS_NORMALIZATION_DIVISOR = 99.0;
-    private static final double NORMALIZED_USAGE_COEFFICIENT = 0.70;
-    private static final double NORMALIZED_AGGRESSIVENESS_COEFFICIENT = 0.30;
+    private static final double NORMALIZED_USAGE_COEFFICIENT = 0.90;
+    private static final double NORMALIZED_AGGRESSIVENESS_COEFFICIENT = 0.10;
     private static final int TOTAL_MINUTES_FOR_A_PLAYER = 40;
 
     static void distributeAttempts(

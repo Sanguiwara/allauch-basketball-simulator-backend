@@ -38,6 +38,7 @@ public record PlayerDTO(
         int ego,
         int softSkills,
         int leadership,
+        int morale,
         List<BadgeDTO> badges,
         UUID clubId,
         Set<UUID> teamIds
