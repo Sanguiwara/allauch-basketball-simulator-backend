@@ -19,8 +19,8 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, ThreePointShootingResult> {
-    private static final double BASE_THREE_POINT_PROBABILITY_COEFFICIENT = 0.15;
-    private static final double ADVANTAGE_THREE_POINT_COEFFICIENT = 0.30;
+    private static final double BASE_THREE_POINT_PROBABILITY_COEFFICIENT = 0.10;
+    private static final double ADVANTAGE_THREE_POINT_COEFFICIENT = 0.35;
     private static final double RATING_NORMALIZATION_DIVISOR = 99.0;
     private static final double ADVANTAGE_NORMALIZATION_DIVISOR = 50.0;
 

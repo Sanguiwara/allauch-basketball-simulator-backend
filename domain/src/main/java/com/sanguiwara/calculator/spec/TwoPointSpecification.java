@@ -21,8 +21,8 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     private static final double ASSIST_BONUS_PCT = 0.15;
 
     // Constants for Shot Percentage Calculation
-    private static final double TWO_POINT_SHOT_COEFF = 0.25;
-    private static final double MATCHUP_COEFFICIENT = 0.30;
+    private static final double TWO_POINT_SHOT_COEFF = 0.15;
+    private static final double MATCHUP_COEFFICIENT = 0.40;
     private static final double MIN_SHOT_PCT = 0.10;
     private static final double MAX_SHOT_PCT = 0.85;
 
