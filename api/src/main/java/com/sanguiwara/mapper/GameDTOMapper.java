@@ -7,7 +7,7 @@ import com.sanguiwara.dto.SimplifiedGameDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class, PlayerProgressionDTOMapper.class})
+@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class, PlayerProgressionDTOMapper.class, PlayerIdMapper.class})
 public interface GameDTOMapper {
 
 
@@ -26,6 +26,10 @@ public interface GameDTOMapper {
     @Mapping(target = "awayTeamName", source = "awayGamePlan.ownerTeam.name")
     @Mapping(target = "homeClubID", source = "homeGamePlan.ownerTeam.clubID")
     @Mapping(target = "awayClubID", source = "awayGamePlan.ownerTeam.clubID")
+    @Mapping(target = "homeDefenseType", source = "homeGamePlan.defenseType")
+    @Mapping(target = "awayDefenseType", source = "awayGamePlan.defenseType")
+    @Mapping(target = "homeMatchups", source = "homeGamePlan.matchups")
+    @Mapping(target = "awayMatchups", source = "awayGamePlan.matchups")
     @Mapping(target = "gameResult", source = "gameResult")
     @Mapping(target = "homeActivePlayers", source = "homeGamePlan.activePlayers")
     @Mapping(target = "awayActivePlayers", source = "awayGamePlan.activePlayers")
