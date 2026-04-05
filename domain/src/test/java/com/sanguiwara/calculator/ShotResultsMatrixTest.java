@@ -98,20 +98,40 @@ class ShotResultsMatrixTest {
         return allCombinations().filter(args -> args.get()[0] == ShotKind.DRIVE);
     }
 
+    private static Stream<Arguments> onlyManToMan(Stream<Arguments> source) {
+        return source.filter(args -> args.get()[3] == DefenseType.MAN_TO_MAN);
+    }
+
+    /**
+     * MethodSource helper to run the matrix only for MAN_TO_MAN (useful for local / fast runs).
+     * Swap existing @MethodSource to these methods when you want to focus on man-to-man only.
+     */
+    private static Stream<Arguments> threePointCombinationsManToMan() {
+        return onlyManToMan(threePointCombinations());
+    }
+
+    private static Stream<Arguments> twoPointCombinationsManToMan() {
+        return onlyManToMan(twoPointCombinations());
+    }
+
+    private static Stream<Arguments> driveCombinationsManToMan() {
+        return onlyManToMan(driveCombinations());
+    }
+
     @ParameterizedTest(name = "{0} off={1} def={2} scheme={3} badge={4} assisted={5}")
-    @MethodSource("threePointCombinations")
+    @MethodSource("threePointCombinationsManToMan")
     void simulate100Shots_threePoint(ShotKind shotKind, Caliber offensiveCaliber, Caliber defensiveCaliber, DefenseType defenseType, BadgeMode badgeMode, boolean assisted) {
         simulate100Shots(shotKind, offensiveCaliber, defensiveCaliber, defenseType, badgeMode, assisted);
     }
 
     @ParameterizedTest(name = "{0} off={1} def={2} scheme={3} badge={4} assisted={5}")
-    @MethodSource("twoPointCombinations")
+    @MethodSource("twoPointCombinationsManToMan")
     void simulate100Shots_twoPoint(ShotKind shotKind, Caliber offensiveCaliber, Caliber defensiveCaliber, DefenseType defenseType, BadgeMode badgeMode, boolean assisted) {
         simulate100Shots(shotKind, offensiveCaliber, defensiveCaliber, defenseType, badgeMode, assisted);
     }
 
     @ParameterizedTest(name = "{0} off={1} def={2} scheme={3} badge={4} assisted={5}")
-    @MethodSource("driveCombinations")
+    @MethodSource("driveCombinationsManToMan")
     void simulate100Shots_drive(ShotKind shotKind, Caliber offensiveCaliber, Caliber defensiveCaliber, DefenseType defenseType, BadgeMode badgeMode, boolean assisted) {
         simulate100Shots(shotKind, offensiveCaliber, defensiveCaliber, defenseType, badgeMode, assisted);
     }
@@ -157,8 +177,10 @@ class ShotResultsMatrixTest {
         double advantage = scheme.calculateAdvantageForAPlayer(shooter, defensivePlan, spec);
 
         double pctBeforeMoraleBonus = spec.computePct(shooter, advantage, assisted);
-        double moraleBonus = moraleBonus(attacker.getMorale());
-        double shotPct = pctBeforeMoraleBonus + moraleBonus;
+        // Morale bonus is disabled for this test matrix: we want to isolate computePct + scheme advantage.
+        // double moraleBonus = moraleBonus(attacker.getMorale());
+        // double shotPct = pctBeforeMoraleBonus + moraleBonus;
+        double shotPct = pctBeforeMoraleBonus;
 
         Random random = new Random(seed(shotKind, offensiveCaliber, defensiveCaliber, defenseType, badgeMode, assisted));
         int made = 0;
@@ -169,7 +191,7 @@ class ShotResultsMatrixTest {
         }
 
         log.info(
-                "shot={} off={}({}) def={}({}) scheme={} badge={} assisted={} adv={} pctBeforeMoraleBonus={} moraleBonus={} pct={} made={}/{}",
+                "shot={} off={}({}) def={}({}) scheme={} badge={} assisted={} adv={} pctBeforeMoraleBonus={} pct={} made={}/{}",
                 shotKind,
                 offensiveCaliber, offensiveCaliber.v,
                 defensiveCaliber, defensiveCaliber.v,
@@ -178,7 +200,6 @@ class ShotResultsMatrixTest {
                 assisted,
                 String.format("%.4f", advantage),
                 String.format("%.4f", pctBeforeMoraleBonus),
-                String.format("%.4f", moraleBonus),
                 String.format("%.4f", shotPct),
                 made,
                 attempts
@@ -193,7 +214,6 @@ class ShotResultsMatrixTest {
                 assisted,
                 advantage,
                 pctBeforeMoraleBonus,
-                moraleBonus,
                 shotPct,
                 made,
                 attempts
@@ -219,7 +239,6 @@ class ShotResultsMatrixTest {
                         "assisted",
                         "advantage",
                         "basePct",
-                        "moraleBonus",
                         "finalPct",
                         "made",
                         "attempts"
@@ -238,7 +257,6 @@ class ShotResultsMatrixTest {
             boolean assisted,
             double advantage,
             double basePct,
-            double moraleBonus,
             double finalPct,
             int made,
             int attempts
@@ -247,7 +265,7 @@ class ShotResultsMatrixTest {
         String row = String.format(
                 locale,
                 "%s" + CSV_SEP + "%s" + CSV_SEP + "%d" + CSV_SEP + "%s" + CSV_SEP + "%d" + CSV_SEP + "%s" + CSV_SEP + "%s" + CSV_SEP + "%s" + CSV_SEP
-                        + "%.6f" + CSV_SEP + "%.6f" + CSV_SEP + "%.6f" + CSV_SEP + "%.6f" + CSV_SEP + "%d" + CSV_SEP + "%d%n",
+                        + "%.6f" + CSV_SEP + "%.6f" + CSV_SEP + "%.6f" + CSV_SEP + "%d" + CSV_SEP + "%d%n",
                 shotKind,
                 off,
                 off.v,
@@ -258,7 +276,6 @@ class ShotResultsMatrixTest {
                 assisted,
                 advantage,
                 basePct,
-                moraleBonus,
                 finalPct,
                 made,
                 attempts
@@ -301,10 +318,10 @@ class ShotResultsMatrixTest {
     }
 
 
-    private static double moraleBonus(int morale) {
-        // Same logic as ShotSimulator.applyMoraleBonus (kept private in prod code).
-        return (morale / 99.0) * 0.40 - 0.20;
-    }
+//    private static double moraleBonus(int morale) {
+//        // Same logic as ShotSimulator.applyMoraleBonus (kept private in prod code).
+//        return (morale / 99.0) * 0.40 - 0.20;
+//    }
 
     private static long badgeIdFor(ShotKind kind) {
         return switch (kind) {

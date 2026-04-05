@@ -32,7 +32,7 @@ public class SeasonInitializer {
     private static final int NB_CATEGORIES = 1; // for now only senior
 
     // Scheduling cadence: for fast iterations, we want a match and a training every 10 minutes.
-    private static final long ROUND_INTERVAL_MINUTES = 10;
+    private static final long ROUND_INTERVAL_MINUTES = 5;
     private static final long TRAINING_OFFSET_MINUTES = 0;
     private static final long GAME_OFFSET_MINUTES = 2;
 
@@ -69,7 +69,6 @@ public class SeasonInitializer {
                         Duration.ofMinutes(TRAINING_OFFSET_MINUTES),
                         Duration.ofMinutes(GAME_OFFSET_MINUTES)
                 ),
-                true,
                 true
         );
     }
@@ -84,7 +83,6 @@ public class SeasonInitializer {
         Objects.requireNonNull(startDayFrance, "startDayFrance");
         createSeasonWithScheduling(
                 RoundScheduler.dailyAtTimes(startDayFrance, FRANCE_ZONE, DEFAULT_TRAINING_TIME_FR, DEFAULT_GAME_TIME_FR),
-                true,
                 false
         );
     }
@@ -101,7 +99,6 @@ public class SeasonInitializer {
                         Duration.ofMinutes(TRAINING_OFFSET_MINUTES),
                         Duration.ofMinutes(GAME_OFFSET_MINUTES)
                 ),
-                true,
                 false
         );
     }
@@ -119,12 +116,11 @@ public class SeasonInitializer {
 
         createSeasonWithScheduling(
                 RoundScheduler.dailyAtTimes(startDayFrance, FRANCE_ZONE, DEFAULT_TRAINING_TIME_FR, DEFAULT_GAME_TIME_FR),
-                true,
                 true
         );
     }
 
-    private void createSeasonWithScheduling(RoundScheduler scheduler, boolean scheduleTrainings, boolean replayAllScheduledEvents) {
+    private void createSeasonWithScheduling(RoundScheduler scheduler, boolean replayAllScheduledEvents) {
 
         int seasonYear = 2024;
         League league = new League(null, AgeCategory.SENIOR, Gender.MALE, 1);
@@ -163,7 +159,7 @@ public class SeasonInitializer {
         leagueSeason.getTeamSeasons().addAll(teamSeasonList);
         leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
-        createGamesForSeason(leagueSeason, scheduler, scheduleTrainings);
+        createGamesForSeason(leagueSeason, scheduler);
 
         if (replayAllScheduledEvents) {
             // Dev/test mode: "replay everything now" and clean up persisted events as they execute.
@@ -182,12 +178,11 @@ public class SeasonInitializer {
                         Duration.ofMinutes(ROUND_INTERVAL_MINUTES),
                         Duration.ofMinutes(TRAINING_OFFSET_MINUTES),
                         Duration.ofMinutes(GAME_OFFSET_MINUTES)
-                ),
-                true
+                )
         );
     }
 
-    private void createGamesForSeason(LeagueSeason leagueSeason, RoundScheduler scheduler, boolean scheduleTrainings) {
+    private void createGamesForSeason(LeagueSeason leagueSeason, RoundScheduler scheduler) {
         List<TeamSeason> teams = leagueSeason.getTeamSeasons();
         int n = teams.size();
 
@@ -207,14 +202,14 @@ public class SeasonInitializer {
 
         // ALLER
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(r), false, scheduleTrainings);
+            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(r), false, true);
             rotate(rotating);
         }
 
         // RETOUR (home/away inverses)
         rotating = new ArrayList<>(teams.subList(1, n));
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(rounds + r), true, scheduleTrainings);
+            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(rounds + r), true, true);
             rotate(rotating);
         }
     }

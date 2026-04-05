@@ -14,7 +14,7 @@ Accept: application/json
 
 {
   "mode": "DAILY_MATCH_AND_TRAINING_FROM_DAY",
-  "startDay": "2026-03-27"
+  "startDay": "2026-03-30"
 }
 
 ### Init season: 1 round every 10 minutes starting now
