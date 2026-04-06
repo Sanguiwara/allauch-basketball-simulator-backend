@@ -138,7 +138,7 @@ class SeasonInitializerTest {
         assertThat(gameInstants).hasSize(rounds);
 
         for (int r = 0; r < rounds; r++) {
-            Instant expectedTrainingAt = start.plus(r * 10L, ChronoUnit.MINUTES);
+            Instant expectedTrainingAt = start.plus(r * 5L, ChronoUnit.MINUTES);
             Instant expectedGameAt = expectedTrainingAt.plus(2, ChronoUnit.MINUTES);
 
             assertThat(trainingInstants.get(r)).isEqualTo(expectedTrainingAt);
@@ -152,8 +152,8 @@ class SeasonInitializerTest {
 
         // Sanity: consecutive rounds are 10 minutes apart.
         for (int r = 0; r < rounds - 1; r++) {
-            assertThat(ChronoUnit.MINUTES.between(trainingInstants.get(r), trainingInstants.get(r + 1))).isEqualTo(10);
-            assertThat(ChronoUnit.MINUTES.between(gameInstants.get(r), gameInstants.get(r + 1))).isEqualTo(10);
+            assertThat(ChronoUnit.MINUTES.between(trainingInstants.get(r), trainingInstants.get(r + 1))).isEqualTo(5);
+            assertThat(ChronoUnit.MINUTES.between(gameInstants.get(r), gameInstants.get(r + 1))).isEqualTo(5);
         }
     }
 }

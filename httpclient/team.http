@@ -10,3 +10,13 @@ Accept: application/json
 GET {{baseUrl}}/teams/<teamId>
 Authorization: Bearer {{token}}
 Accept: application/json
+
+### Create a player for a team (adds player to team_players)
+POST {{baseUrl}}/teams/6a352bb9-195c-40e5-86c5-d830fb4cdc14/players
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "archetype": "STRATEGIST"
+}

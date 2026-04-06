@@ -4,6 +4,7 @@ import com.sanguiwara.baserecords.Club;
 import com.sanguiwara.dto.ClubDTO;
 import com.sanguiwara.mapper.ClubDTOMapper;
 import com.sanguiwara.service.ClubService;
+import com.sanguiwara.timeevent.EventManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,6 +36,9 @@ class ClubControllerTest {
 
     @MockBean
     private ClubDTOMapper clubDTOMapper;
+
+    @MockBean
+    private EventManager eventManager;
 
     @Test
     void updateClubName_returnsOk() throws Exception {
