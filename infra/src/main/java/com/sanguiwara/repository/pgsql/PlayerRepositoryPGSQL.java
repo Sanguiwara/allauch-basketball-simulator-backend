@@ -3,10 +3,12 @@ package com.sanguiwara.repository.pgsql;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
+import com.sanguiwara.entity.TeamEntity;
 import com.sanguiwara.mapper.PlayerMapper;
 import com.sanguiwara.repository.PlayerRepository;
 import com.sanguiwara.repository.jpa.BadgeJpaRepository;
 import com.sanguiwara.repository.jpa.PlayerJpaRepository;
+import com.sanguiwara.repository.jpa.TeamJpaRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -21,6 +23,7 @@ public class PlayerRepositoryPGSQL implements PlayerRepository {
 
     private final PlayerJpaRepository playerJpaRepository;
     private final BadgeJpaRepository badgeJpaRepository;
+    private final TeamJpaRepository teamJpaRepository;
     private final PlayerMapper playerMapper;
 
 
@@ -63,6 +66,9 @@ public class PlayerRepositoryPGSQL implements PlayerRepository {
         // and re-insert all links, which can trigger duplicate PK errors depending on flush ordering.
         syncBadges(player, entity);
 
+        // Sync join table (team_players) using managed TeamEntity references to avoid transient instance issues.
+        syncTeams(player, entity);
+
         var savedEntity = playerJpaRepository.save(entity);
         return playerMapper.toDomain(savedEntity);
     }
@@ -86,6 +92,31 @@ public class PlayerRepositoryPGSQL implements PlayerRepository {
             playerEntity.getBadges().add(badge); // managed instance
         });
 
+    }
+
+    private void syncTeams(Player player, PlayerEntity playerEntity) {
+        Objects.requireNonNull(playerEntity, "playerEntity");
+
+        Set<UUID> desiredIds = player.getTeamsID();
+        if (desiredIds == null || desiredIds.isEmpty()) {
+            playerEntity.getTeams().clear();
+            return;
+        }
+
+        List<TeamEntity> managedTeams = teamJpaRepository.findAllById(desiredIds);
+        Set<UUID> managedIds = managedTeams.stream().map(TeamEntity::getId).collect(Collectors.toSet());
+        if (managedIds.size() != desiredIds.size()) {
+            Set<UUID> missing = new HashSet<>(desiredIds);
+            missing.removeAll(managedIds);
+            throw new NoSuchElementException("Team(s) not found: " + missing);
+        }
+
+        playerEntity.getTeams().removeIf(team -> !managedTeams.contains(team));
+
+        managedTeams.forEach(team -> {
+            if (playerEntity.getTeams().contains(team)) return; // already linked
+            playerEntity.getTeams().add(team); // managed instance
+        });
     }
 
 

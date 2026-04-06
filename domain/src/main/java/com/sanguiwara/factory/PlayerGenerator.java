@@ -166,20 +166,24 @@ public final class PlayerGenerator {
     private void applySoldier(Player.PlayerBuilder b) {
         fillAll(b, 1, 78);
 
-        b.physique(r(82, 99))
+        b.physique(r(90, 99))
                 .solidite(r(80, 99))
-                .endurance(r(78, 96))
-                .defExterieur(r(75, 95))
-                .defPoste(r(75, 95))
-                .protectionCercle(r(70, 92))
-                .timingRebond(r(75, 95))
-                .agressiviteRebond(r(78, 99))
-                .steal(r(70, 92))
-                .timingBlock(r(68, 92))
-                .size(r(65, 92))
-                .weight(r(65, 95))
-                .coachability(r(70, 95))
+                .endurance(r(78, 99))
+                .defExterieur(r(85, 99))
+                .defPoste(r(85, 99))
+                .protectionCercle(r(85, 99))
+                .timingRebond(r(88, 99))
+                .agressiviteRebond(r(90, 99))
+                .steal(r(90, 99))
+                .timingBlock(r(90, 99))
+                .size(r(88, 99))
+                .weight(r(88, 99))
+                .coachability(r(90, 99))
+                .speed(r(90,99))
+                .iq(r(85, 99))
+                .basketballIqDef(r(85, 99))
                 .ego(r(20, 60));
+
 
         // Not a priority
         b.tir3Pts(r(25, 65))
@@ -191,19 +195,18 @@ public final class PlayerGenerator {
     private void applyStrategist(Player.PlayerBuilder b) {
         fillAll(b, 1, 82);
 
-        b.basketballIqOff(r(82, 99))
-                .basketballIqDef(r(75, 95))
-                .iq(r(80, 99))
-                .passingSkills(r(80, 99))
-                .ballhandling(r(78, 97))
-                .speed(r(60, 90))
-                .coachability(r(72, 96))
-                .ego(r(20, 55));
-
-        b.physique(r(45, 75))
-                .solidite(r(50, 78))
-                .protectionCercle(r(35, 70))
-                .timingBlock(r(35, 70));
+        // Stats contributing to RegularMan2ManScheme playmaking offensive score must be elite.
+        // Everything else remains in [1..82] from fillAll().
+        b.speed(r(60, 80))
+                .size(r(60, 80))
+                .endurance(r(60, 90))
+                .passingSkills(r(90, 99))
+                .basketballIqOff(r(90, 99))
+                .ballhandling(r(90, 99))
+                .tir3Pts(r(60, 80))
+                .tir2Pts(r(60, 80))
+                .finitionAuCercle(r(60, 80))
+                .floater(r(60, 80));
     }
 
     private void applyCroqueur(Player.PlayerBuilder b) {
@@ -252,48 +255,44 @@ public final class PlayerGenerator {
     private void applyThreePointShooter(Player.PlayerBuilder b) {
         fillAll(b, 1, 82);
 
-        b.tir3Pts(r(85, 99))
-                .lancerFranc(r(78, 99))
-                .tir2Pts(r(55, 82))
-                .floater(r(45, 78))
-                .finitionAuCercle(r(50, 82))
-                .ballhandling(r(55, 85))
-                .passingSkills(r(45, 78))
-                .basketballIqOff(r(55, 85))
-                .iq(r(50, 82))
-                .ego(r(15, 65))
-                .coachability(r(60, 92));
+        // Stats contributing to ThreePointSpecification offensive score must be elite.
+        // Everything else remains in [1..82] from fillAll().
+        b.speed(r(75, 99))
+                .size(r(75, 99))
+                .endurance(r(75, 99))
+                .tir3Pts(r(90, 99))
+                .agressivite(r(70,99))
+                .basketballIqOff(r(75, 99));
     }
 
     private void applyTwoPointScorer(Player.PlayerBuilder b) {
         fillAll(b, 1, 82);
 
-        b.tir2Pts(r(85, 99))
-                .floater(r(75, 97))
-                .finitionAuCercle(r(78, 99))
-                .lancerFranc(r(70, 95))
-                .agressivite(r(70, 95))
-                .size(r(55, 90))
-                .weight(r(50, 90))
-                .tir3Pts(r(30, 70))
-                .ego(r(25, 75))
-                .coachability(r(55, 90));
+        // Stats contributing to TwoPointSpecification offensive score must be elite.
+        // Everything else remains in [1..82] from fillAll().
+        b.speed(r(75, 99))
+                .size(r(75, 99))
+                .endurance(r(75, 99))
+                .finitionAuCercle(r(65, 90))
+                .tir2Pts(r(90, 99))
+                .agressivite(r(70,99))
+                .floater(r(40,75))
+                .basketballIqOff(r(75, 90));
     }
 
     private void applyDriveSpecialist(Player.PlayerBuilder b) {
         fillAll(b, 1, 82);
 
-        b.speed(r(82, 99))
-                .ballhandling(r(75, 95))
-                .finitionAuCercle(r(82, 99))
-                .agressivite(r(82, 99))
-                .lancerFranc(r(70, 95))
-                .physique(r(60, 92))
-                .endurance(r(65, 95))
-                .tir3Pts(r(25, 70))
-                .floater(r(60, 92))
-                .ego(r(25, 75))
-                .coachability(r(50, 88));
+        // Stats contributing to DriveSpecification offensive score must be elite.
+        // Everything else remains in [1..82] from fillAll().
+        b.speed(r(80, 99))
+                .size(r(75, 99))
+                .endurance(r(75, 99))
+                .ballhandling(r(80, 99))
+                .finitionAuCercle(r(90, 99))
+                .floater(r(90, 99))
+                .agressivite(r(70,99))
+                .basketballIqOff(r(75, 99));
     }
 
     private void applyAllAround(Player.PlayerBuilder b) {

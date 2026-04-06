@@ -292,9 +292,9 @@ class RegularMan2ManSchemeTest {
         double teamPlaymakingScore = scheme.getOffensiveTeamPlaymakingScore(offensePlan, defensePlan);
 
         // eliteDefScore = 0.87*99 + 0.13*50 = 92.63
-        // raw advantage = 79.4 - 92.63 = -13.23 -> clamp MIN_INDIVIDUAL_ADVANTAGE (-5.0)
-        // weighted = -5 * 0.2 = -1.0
-        assertEquals(-1.0, teamPlaymakingScore, 1e-12);
+        // raw advantage = 79.4 - 92.63 = -13.23 (no clamp with MIN_INDIVIDUAL_ADVANTAGE=-15)
+        // weighted = -13.23 * 0.2 = -2.646
+        assertEquals(-2.646, teamPlaymakingScore, 1e-12);
     }
 
     @Test

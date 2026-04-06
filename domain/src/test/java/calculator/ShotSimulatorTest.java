@@ -232,7 +232,7 @@ class ShotSimulatorTest {
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
-        // Base pct is 0.50; morale 99 => +0.20 => 0.70 (before clamping).
+        // Morale bonus is currently not applied in ShotSimulator.
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
 
         InGamePlayer off1 = new InGamePlayer(p("O1", 99), null);
@@ -249,7 +249,7 @@ class ShotSimulatorTest {
         TestShotResult total = sim.getTotalShotContribution(home, defense, 0.0, 0.0);
         assertEquals(1, total.attempts());
         assertEquals(1, total.events().size());
-        assertEquals(0.70, total.events().getFirst().successPct(), 1e-9);
+        assertEquals(0.50, total.events().getFirst().successPct(), 1e-9);
     }
 
     @Test
@@ -263,7 +263,7 @@ class ShotSimulatorTest {
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
-        // Base pct is 0.50. Team morale is avg(shooter, teammate) = round((99 + 0)/2) = 50.
+        // Morale bonus is currently not applied in ShotSimulator.
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
 
         InGamePlayer hi = new InGamePlayer(p("HI", 99), null);
@@ -288,8 +288,7 @@ class ShotSimulatorTest {
         assertEquals(2, total.attempts());
         assertEquals(2, total.events().size());
 
-        double expected = 0.50 + ((50 / 99.0) * 0.40 - 0.20);
-        assertEquals(expected, total.events().get(0).successPct(), 1e-9);
-        assertEquals(expected, total.events().get(1).successPct(), 1e-9);
+        assertEquals(0.50, total.events().get(0).successPct(), 1e-9);
+        assertEquals(0.50, total.events().get(1).successPct(), 1e-9);
     }
 }

@@ -60,6 +60,62 @@ class PlayerGeneratorTest {
     }
 
     @Test
+    void strategist_shouldHaveElitePlaymakingStats_andOtherStatsInRange() {
+        PlayerGenerator gen = new PlayerGenerator(new Random(123L));
+        Player p = gen.generatePlayer(PlayerArchetype.STRATEGIST);
+
+        // RegularMan2ManScheme playmaking offensive score inputs
+        assertAll(
+                () -> assertBetweenInclusive(p.getSpeed(), 75, 99),
+                () -> assertBetweenInclusive(p.getSize(), 75, 99),
+                () -> assertBetweenInclusive(p.getEndurance(), 75, 99),
+                () -> assertBetweenInclusive(p.getPassingSkills(), 75, 99),
+                () -> assertBetweenInclusive(p.getBasketballIqOff(), 75, 99),
+                () -> assertBetweenInclusive(p.getBallhandling(), 75, 99),
+                () -> assertBetweenInclusive(p.getTir3Pts(), 75, 99),
+                () -> assertBetweenInclusive(p.getTir2Pts(), 75, 99),
+                () -> assertBetweenInclusive(p.getFinitionAuCercle(), 75, 99),
+                () -> assertBetweenInclusive(p.getFloater(), 75, 99)
+        );
+
+        // "Rest" stays in [1..82] (spot-check a few non-playmaking stats).
+        assertAll(
+                () -> assertBetweenInclusive(p.getDefExterieur(), 1, 82),
+                () -> assertBetweenInclusive(p.getProtectionCercle(), 1, 82),
+                () -> assertBetweenInclusive(p.getPhysique(), 1, 82),
+                () -> assertBetweenInclusive(p.getIq(), 1, 82),
+                () -> assertBetweenInclusive(p.getCoachability(), 1, 82),
+                () -> assertBetweenInclusive(p.getEgo(), 1, 82)
+        );
+    }
+
+    @Test
+    void twoPointScorer_shouldHaveEliteTwoPointOffensiveScoreStats_andOtherStatsInRange() {
+        PlayerGenerator gen = new PlayerGenerator(new Random(456L));
+        Player p = gen.generatePlayer(PlayerArchetype.TWO_POINT_SCORER);
+
+        // TwoPointSpecification#getPlayerScoreForAShot inputs
+        assertAll(
+                () -> assertBetweenInclusive(p.getSpeed(), 75, 99),
+                () -> assertBetweenInclusive(p.getSize(), 75, 99),
+                () -> assertBetweenInclusive(p.getEndurance(), 75, 99),
+                () -> assertBetweenInclusive(p.getFinitionAuCercle(), 75, 99),
+                () -> assertBetweenInclusive(p.getTir2Pts(), 75, 99),
+                () -> assertBetweenInclusive(p.getBasketballIqOff(), 75, 99)
+        );
+
+        // "Rest" stays in [1..82] (spot-check a few non-two-point-off-score stats).
+        assertAll(
+                () -> assertBetweenInclusive(p.getTir3Pts(), 1, 82),
+                () -> assertBetweenInclusive(p.getFloater(), 1, 82),
+                () -> assertBetweenInclusive(p.getWeight(), 1, 82),
+                () -> assertBetweenInclusive(p.getDefPoste(), 1, 82),
+                () -> assertBetweenInclusive(p.getPassingSkills(), 1, 82),
+                () -> assertBetweenInclusive(p.getEgo(), 1, 82)
+        );
+    }
+
+    @Test
     void allStar_shouldStayInBounds() {
         PlayerGenerator gen = new PlayerGenerator(new Random(123L));
         Player p = gen.generatePlayer( PlayerArchetype.ALL_STAR);
@@ -101,12 +157,55 @@ class PlayerGeneratorTest {
     }
 
     @Test
-    void threePointShooter_shouldHaveEliteThreePoint() {
+    void threePointShooter_shouldHaveEliteThreePointOffensiveScoreStats_andOtherStatsInRange() {
         PlayerGenerator gen = new PlayerGenerator(new Random(999L));
         Player p = gen.generatePlayer(PlayerArchetype.THREE_POINT_SHOOTER);
 
-        assertBetweenInclusive(p.getTir3Pts(), 85, 99);
-        assertBetweenInclusive(p.getLancerFranc(), 78, 99);
+        // ThreePointSpecification#getPlayerScoreForAShot inputs
+        assertAll(
+                () -> assertBetweenInclusive(p.getSpeed(), 75, 99),
+                () -> assertBetweenInclusive(p.getSize(), 75, 99),
+                () -> assertBetweenInclusive(p.getEndurance(), 75, 99),
+                () -> assertBetweenInclusive(p.getTir3Pts(), 75, 99),
+                () -> assertBetweenInclusive(p.getBasketballIqOff(), 75, 99)
+        );
+
+        // "Rest" stays in [1..82] (spot-check a few non-three-point-off-score stats).
+        assertAll(
+                () -> assertBetweenInclusive(p.getTir2Pts(), 1, 82),
+                () -> assertBetweenInclusive(p.getLancerFranc(), 1, 82),
+                () -> assertBetweenInclusive(p.getFloater(), 1, 82),
+                () -> assertBetweenInclusive(p.getFinitionAuCercle(), 1, 82),
+                () -> assertBetweenInclusive(p.getPassingSkills(), 1, 82),
+                () -> assertBetweenInclusive(p.getEgo(), 1, 82)
+        );
+    }
+
+    @Test
+    void driveSpecialist_shouldHaveEliteDriveOffensiveScoreStats_andOtherStatsInRange() {
+        PlayerGenerator gen = new PlayerGenerator(new Random(321L));
+        Player p = gen.generatePlayer(PlayerArchetype.DRIVE_SPECIALIST);
+
+        // DriveSpecification#getPlayerScoreForAShot inputs
+        assertAll(
+                () -> assertBetweenInclusive(p.getSpeed(), 75, 99),
+                () -> assertBetweenInclusive(p.getSize(), 75, 99),
+                () -> assertBetweenInclusive(p.getEndurance(), 75, 99),
+                () -> assertBetweenInclusive(p.getBallhandling(), 75, 99),
+                () -> assertBetweenInclusive(p.getFinitionAuCercle(), 75, 99),
+                () -> assertBetweenInclusive(p.getFloater(), 75, 99),
+                () -> assertBetweenInclusive(p.getBasketballIqOff(), 75, 99)
+        );
+
+        // "Rest" stays in [1..82] (spot-check a few non-drive-off-score stats).
+        assertAll(
+                () -> assertBetweenInclusive(p.getTir3Pts(), 1, 82),
+                () -> assertBetweenInclusive(p.getTir2Pts(), 1, 82),
+                () -> assertBetweenInclusive(p.getDefExterieur(), 1, 82),
+                () -> assertBetweenInclusive(p.getSteal(), 1, 82),
+                () -> assertBetweenInclusive(p.getPassingSkills(), 1, 82),
+                () -> assertBetweenInclusive(p.getEgo(), 1, 82)
+        );
     }
 
     @Test

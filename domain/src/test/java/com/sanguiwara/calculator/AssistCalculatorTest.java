@@ -27,8 +27,8 @@ class AssistCalculatorTest {
 
     @ParameterizedTest(name = "getPercentageFromScore anchors - score={0} -> expected={1}")
     @CsvSource({
-            "-50.0, 0.15",
-            "50.0, 0.50"
+            "-25.0, 0.05",
+            "25.0, 0.60"
     })
     void getPercentageFromScore_shouldMatchAnchorPoints(double score, double expected) {
         AssistCalculator calc = new AssistCalculator(null);
@@ -37,8 +37,8 @@ class AssistCalculatorTest {
 
     @ParameterizedTest(name = "getPercentageFromScore clamp - score={0} -> expected={1}")
     @CsvSource({
-            "-999.0, 0.15",
-            "999.0, 0.50"
+            "-999.0, 0.05",
+            "999.0, 0.60"
     })
     void getPercentageFromScore_shouldClampOutsideRange(double score, double expected) {
         AssistCalculator calc = new AssistCalculator(null);

@@ -6,6 +6,7 @@ import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.mapper.PlayerMapper;
 import com.sanguiwara.repository.jpa.BadgeJpaRepository;
 import com.sanguiwara.repository.jpa.PlayerJpaRepository;
+import com.sanguiwara.repository.jpa.TeamJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,8 @@ class PlayerRepositoryPGSQLTest {
     @EntityScan(basePackageClasses = PlayerEntity.class)
     @EnableJpaRepositories(basePackageClasses = {
             PlayerJpaRepository.class,
-            BadgeJpaRepository.class
+            BadgeJpaRepository.class,
+            TeamJpaRepository.class
     })
     static class TestApplication {
         // Spring Boot will scan entities from the same package as any @Entity referenced
@@ -61,9 +63,10 @@ class PlayerRepositoryPGSQLTest {
         PlayerRepositoryPGSQL playerRepositoryPGSQL(
                 PlayerJpaRepository playerJpaRepository,
                 BadgeJpaRepository badgeJpaRepository,
+                TeamJpaRepository teamJpaRepository,
                 PlayerMapper playerMapper
         ) {
-            return new PlayerRepositoryPGSQL(playerJpaRepository, badgeJpaRepository, playerMapper);
+            return new PlayerRepositoryPGSQL(playerJpaRepository, badgeJpaRepository, teamJpaRepository, playerMapper);
         }
     }
 
