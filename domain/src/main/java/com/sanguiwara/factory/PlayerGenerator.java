@@ -197,16 +197,16 @@ public final class PlayerGenerator {
 
         // Stats contributing to RegularMan2ManScheme playmaking offensive score must be elite.
         // Everything else remains in [1..82] from fillAll().
-        b.speed(r(60, 80))
-                .size(r(60, 80))
-                .endurance(r(60, 90))
-                .passingSkills(r(90, 99))
-                .basketballIqOff(r(90, 99))
-                .ballhandling(r(90, 99))
-                .tir3Pts(r(60, 80))
-                .tir2Pts(r(60, 80))
-                .finitionAuCercle(r(60, 80))
-                .floater(r(60, 80));
+        b.speed(r(75, 99))
+                .size(r(75, 99))
+                .endurance(r(75, 99))
+                .passingSkills(r(75, 99))
+                .basketballIqOff(r(75, 99))
+                .ballhandling(r(75, 99))
+                .tir3Pts(r(75, 99))
+                .tir2Pts(r(75, 99))
+                .finitionAuCercle(r(75, 99))
+                .floater(r(75, 99));
     }
 
     private void applyCroqueur(Player.PlayerBuilder b) {

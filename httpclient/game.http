@@ -21,3 +21,31 @@ POST {{baseUrl}}/games/0d1fdbf8-a758-4620-9d90-41cee85579c7/play
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
+
+### Schedule a game (creates GamePlans + Game + GameTimeEvent)
+POST {{baseUrl}}/games/schedule
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "homeTeamId": "46db2f6f-2add-41de-9df1-0521df96620d",
+  "awayTeamId": "79b4b582-d1a9-4e3c-833f-11feb4b8348a",
+  "localDateTime": "2026-04-07T22:00:00",
+  "zoneId": "Europe/Paris",
+  "leagueSeasonId": "1d12d075-96a5-4412-900f-e4e6f5cb8562"
+}
+
+### Schedule a game (today 17:00 Dallas time)
+POST {{baseUrl}}/games/schedule
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "homeTeamId": "46db2f6f-2add-41de-9df1-0521df96620d",
+  "awayTeamId": "79b4b582-d1a9-4e3c-833f-11feb4b8348a",
+  "localDateTime": "2026-04-07T17:00:00",
+  "zoneId": "America/Chicago",
+  "leagueSeasonId": "1d12d075-96a5-4412-900f-e4e6f5cb8562"
+}
