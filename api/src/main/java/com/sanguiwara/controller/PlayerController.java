@@ -5,8 +5,11 @@ import com.sanguiwara.mapper.PlayerDTOMapper;
 import com.sanguiwara.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +45,20 @@ public class PlayerController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Removes the player from all teams (free agent). This only clears team links (team_players join table).
+     */
+    @DeleteMapping("/{id}/teams")
+    public ResponseEntity<Void> removePlayerFromAllTeams(@PathVariable UUID id) {
+        var player = playerService.getPlayer(id);
+        if (player == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found");
+        }
+
+        player.setTeamsID(new HashSet<>());
+        playerService.savePlayer(player);
+        return ResponseEntity.noContent().build();
+    }
 
 }
 
