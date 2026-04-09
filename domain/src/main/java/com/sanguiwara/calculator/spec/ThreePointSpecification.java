@@ -38,7 +38,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     private static final double SCORE_DEF_EXT_WEIGHT = 0.65;
     private static final double SCORE_ENDURANCE_WEIGHT_DEF = 0.05;
     private static final double SCORE_IQ_WEIGHT_DEF = 0.10;
-    private static final double ASSIST_BONUS_PCT = 0.15;
+    private static final double ASSIST_BONUS_PCT = 0.25;
     private final Random random;
     private final BadgeEngine badgeEngine;
 

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
-    private static final double ASSIST_BONUS_PCT = 0.15;
+    private static final double ASSIST_BONUS_PCT = 0.25;
 
     // Success Pct Constants
     private static final double FINITION_CERCLE_WEIGHT = 0.15;

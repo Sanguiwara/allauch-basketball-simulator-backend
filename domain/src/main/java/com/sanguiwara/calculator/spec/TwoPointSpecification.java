@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPointShootingResult> {
-    private static final double ASSIST_BONUS_PCT = 0.15;
+    private static final double ASSIST_BONUS_PCT = 0.25;
 
     // Constants for Shot Percentage Calculation
     private static final double TWO_POINT_SHOT_COEFF = 0.15;

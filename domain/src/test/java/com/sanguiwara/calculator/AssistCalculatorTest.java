@@ -27,8 +27,8 @@ class AssistCalculatorTest {
 
     @ParameterizedTest(name = "getPercentageFromScore anchors - score={0} -> expected={1}")
     @CsvSource({
-            "-25.0, 0.05",
-            "25.0, 0.60"
+            "-20.0, 0.05",
+            "20.0, 0.70"
     })
     void getPercentageFromScore_shouldMatchAnchorPoints(double score, double expected) {
         AssistCalculator calc = new AssistCalculator(null);
@@ -38,7 +38,7 @@ class AssistCalculatorTest {
     @ParameterizedTest(name = "getPercentageFromScore clamp - score={0} -> expected={1}")
     @CsvSource({
             "-999.0, 0.05",
-            "999.0, 0.60"
+            "999.0, 0.70"
     })
     void getPercentageFromScore_shouldClampOutsideRange(double score, double expected) {
         AssistCalculator calc = new AssistCalculator(null);
@@ -80,7 +80,7 @@ class AssistCalculatorTest {
         assertFalse(Double.isNaN(teamPlaymakingScore), "teamPlaymakingScore should not be NaN");
         assertFalse(Double.isNaN(assistProb), "assistProb should not be NaN");
         assertTrue(assistProb >= AssistCalculator.MIN_ASSIST_PROBABILITY && assistProb <= AssistCalculator.MAX_ASSIST_PROBABILITY,
-                "assistProb should be clamped in [0.15..0.50], got=" + assistProb);
+                "assistProb should be clamped in [0.05..0.70], got=" + assistProb);
     }
 
     @Test
