@@ -4,6 +4,9 @@ import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
+import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.defense.*;
 import org.junit.jupiter.api.Test;
@@ -340,14 +343,17 @@ class AssistCalculatorTest {
     }
 
     private static void wireMatchupsForManToMan(GamePlan offense, GamePlan defense) {
-        // Man-to-man schemes require defense.matchups keyed by offensive Player.
+        // Man-to-man schemes require defense.matchups keyed by defensive player (defender -> attacker).
         // For zone schemes this is ignored, but wiring it doesn't hurt and keeps test uniform.
-        Map<Player, Player> matchups = new HashMap<>();
+        Matchups matchups = Matchups.empty();
         List<InGamePlayer> off = offense.getActivePlayers();
         List<InGamePlayer> def = defense.getActivePlayers();
         int n = Math.min(off.size(), def.size());
         for (int i = 0; i < n; i++) {
-            matchups.put(off.get(i).getPlayer(), def.get(i).getPlayer());
+            matchups.assign(
+                    new MatchupDefender(def.get(i).getPlayer()),
+                    new MatchupAttacker(off.get(i).getPlayer())
+            );
         }
         defense.setMatchups(matchups);
     }

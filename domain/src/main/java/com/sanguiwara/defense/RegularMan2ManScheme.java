@@ -31,7 +31,7 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
     private static final double DEF_IQ_WEIGHT_INDIV = 0.15;
     private static final double DEF_STEAL_WEIGHT_INDIV = 0.15;
     private static final double MIN_INDIVIDUAL_ADVANTAGE = -15;
-    private static final double MAX_INDIVIDUAL_ADVANTAGE = 100;
+    private static final double MAX_INDIVIDUAL_ADVANTAGE = 25;
 
     public RegularMan2ManScheme(BadgeEngine badgeEngine) {
         super(badgeEngine);
@@ -46,13 +46,13 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
     public double calculateAdvantageForAPlayer(InGamePlayer attacker, GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
 
         Player attackerPlayer = attacker.getPlayer();
-        Player defender = defensiveGamePlan.getMatchups().get(attackerPlayer);
+        Player defender = defensiveGamePlan.getMatchups().defenderFor(attackerPlayer);
 
         double defensiveScore;
         if (defender == null) {
             defensiveScore = getAverageTeamDefensiveScore(defensiveGamePlan, shotSpec);
         } else {
-            double defenderScore = shotSpec.getDefensiveScoreForAShot(defender) * 1.3;
+            double defenderScore = shotSpec.getDefensiveScoreForAShot(defender) ;
 
             int attackerMinutes = attacker.getMinutesPlayed();
             int defenderMinutes = getMinutesPlayedFor(defensiveGamePlan, defender);
@@ -99,7 +99,7 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
                         effectiveOffScoreForAdvantage = (offensiveContribution / minutesShare);
                     }
 
-                    Player defender = defenseTeam.getMatchups().get(off);
+                    Player defender = defenseTeam.getMatchups().defenderFor(off);
                     double effectiveDefensiveScore;
                     int defenderMinutes;
                     if (defender == null) {
@@ -120,7 +120,10 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
                     double rawAdv = effectiveOffScoreForAdvantage - effectiveDefensiveScore;
                     double clampedAdv = Math.clamp(rawAdv, MIN_INDIVIDUAL_ADVANTAGE, MAX_INDIVIDUAL_ADVANTAGE);
                     //log.info("{} for {} (rawAdv: {})", clampedAdv, off.getName(), (rawAdv * 1.5) * minutesShare);
-                    return clampedAdv  * minutesShare;
+                    double v = clampedAdv * minutesShare;
+                    log.info("{} for {} (rawAdv: {})", v, off.getName(), rawAdv);
+
+                    return v;
                 })
                 .sum();
     }

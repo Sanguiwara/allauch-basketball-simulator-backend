@@ -4,6 +4,8 @@ import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ShotSpec;
@@ -169,7 +171,7 @@ class ShotResultsMatrixTest {
         defensivePlan.setActivePlayers(List.of(defenderAsInGame(defender)));
 
         if (defenseType == DefenseType.MAN_TO_MAN) {
-            defensivePlan.getMatchups().put(attacker, defender);
+            defensivePlan.getMatchups().assign(new MatchupDefender(defender), new MatchupAttacker(attacker));
         }
 
         ShotSpec<?, ?> spec = specFor(shotKind, badgeEngine);

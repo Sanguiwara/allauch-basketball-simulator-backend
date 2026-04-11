@@ -41,8 +41,8 @@ public class GamePlanEntity {
     private List<InGamePlayerEntity> activePlayers = new ArrayList<>();
 
     /**
-     * Matchups Player -> Player.
-     * En JPA, une Map d'Entity vers Entity se mappe via une table de jointure.
+     * Persistence representation for matchups.
+     * Current schema stores attacker -> defender, even though domain/API use defender -> attacker.
      */
     @ManyToMany
     @JoinTable(
@@ -50,6 +50,7 @@ public class GamePlanEntity {
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "player_defender_id")
     )
+    //TODO INVERSER LA TABLE POUR QUE CA SOIT DEFENDER ATTACKER, ET QU'ON AIT LES BONS NOMS
     @MapKeyJoinColumn(name = "player_attacker_id")
     private Map<PlayerEntity, PlayerEntity> matchups = new HashMap<>();
 

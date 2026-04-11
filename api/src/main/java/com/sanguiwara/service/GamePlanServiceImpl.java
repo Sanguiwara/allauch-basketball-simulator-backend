@@ -2,6 +2,9 @@ package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
+import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Position;
 import com.sanguiwara.baserecords.Team;
@@ -124,19 +127,21 @@ public class GamePlanServiceImpl implements GamePlanService {
         }
 
         // Matchups
-        Map<Player, Player> matchups = gamePlan.getMatchups();
+        Matchups matchups = gamePlan.getMatchups();
         if (matchups == null) {
             descriptionBuilder.append("matchups=<null>\n");
         } else {
             descriptionBuilder.append("matchups(count=").append(matchups.size()).append(")=").append('\n');
-            matchups.entrySet().stream()
+            matchups.asMap().entrySet().stream()
                     .sorted(Comparator
-                            .comparing((Map.Entry<Player, Player> e) -> safeName(e.getKey()))
-                            .thenComparing(e -> safeUuid(e.getKey())))
+                            .comparing((Map.Entry<MatchupDefender, MatchupAttacker> e) -> safeName(e.getKey().player()))
+                            .thenComparing(e -> safeUuid(e.getKey().player())))
                     .forEach(entry -> descriptionBuilder.append(" - ")
-                            .append(playerLabel(entry.getKey()))
+                            .append("defender=")
+                            .append(playerLabel(entry.getKey().player()))
                             .append(" -> ")
-                            .append(playerLabel(entry.getValue()))
+                            .append("attacker=")
+                            .append(playerLabel(entry.getValue().player()))
                             .append('\n'));
         }
 

@@ -126,8 +126,8 @@ class EnduranceAdvantageSimulationTest {
 
         aPlan.setDefenseType(DefenseType.MAN_TO_MAN);
         bPlan.setDefenseType(DefenseType.MAN_TO_MAN);
-        aPlan.setMatchups(new java.util.HashMap<>()); // keep empty on purpose (see Man2ManScheme DEFAULT_CONTRIBUTION)
-        bPlan.setMatchups(new java.util.HashMap<>());
+        aPlan.setMatchups(Matchups.empty()); // keep empty on purpose (see Man2ManScheme DEFAULT_CONTRIBUTION)
+        bPlan.setMatchups(Matchups.empty());
 
         aPlan.setTotalShotNumber(75);
         bPlan.setTotalShotNumber(75);

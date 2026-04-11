@@ -7,7 +7,7 @@ import com.sanguiwara.dto.SimplifiedGameDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class, PlayerProgressionDTOMapper.class, PlayerIdMapper.class})
+@Mapper(componentModel = "spring", uses = {GameResultDTOMapper.class, InGamePlayerDTOMapper.class, PlayerProgressionDTOMapper.class, PlayerIdMapper.class, MatchupsDtoMapper.class})
 public interface GameDTOMapper {
 
 

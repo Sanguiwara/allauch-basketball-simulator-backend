@@ -74,6 +74,8 @@ public class ReboundCalculator {
         double homeReboundScore = populateTeamReboundScore(home, ReboundContext.offensive());
         double visitorReboundScore = populateTeamReboundScore(visitor, ReboundContext.defensive());
 
+        log.info("Rebound scores for home: {}, visitor: {}", homeReboundScore, visitorReboundScore);
+
         return (homeReboundScore - visitorReboundScore) / (homeReboundScore + visitorReboundScore);
     }
 

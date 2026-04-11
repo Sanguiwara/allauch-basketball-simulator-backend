@@ -4,7 +4,7 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.dto.GamePlanDTO;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring", uses = {PlayerIdMapper.class, InGamePlayerDTOMapper.class})
+@Mapper(componentModel = "spring", uses = {PlayerIdMapper.class, InGamePlayerDTOMapper.class, MatchupsDtoMapper.class})
 public interface GamePlanDTOMapper {
 
 

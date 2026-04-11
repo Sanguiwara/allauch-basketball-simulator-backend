@@ -2,6 +2,9 @@ package calculator;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
+import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ShotSpec;
@@ -201,9 +204,10 @@ class ShotSimulatorTest {
         // Build defense with matchups for both attackers
         Player d1 = p("D1");
         Player d2 = p("D2");
-        Map<Player, Player> matchups = new HashMap<>();
-        matchups.put(off1.getPlayer(), d1);
-        matchups.put(off2.getPlayer(), d2);
+        Matchups matchups = Matchups.of(Map.of(
+                new MatchupDefender(d1), new MatchupAttacker(off1.getPlayer()),
+                new MatchupDefender(d2), new MatchupAttacker(off2.getPlayer())
+        ));
 
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
@@ -240,8 +244,9 @@ class ShotSimulatorTest {
         home.setActivePlayers(List.of(off1));
 
         Player d1 = p("D1");
-        Map<Player, Player> matchups = new HashMap<>();
-        matchups.put(off1.getPlayer(), d1);
+        Matchups matchups = Matchups.of(Map.of(
+                new MatchupDefender(d1), new MatchupAttacker(off1.getPlayer())
+        ));
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
         defense.setActivePlayers(List.of(new InGamePlayer(d1, null)));
@@ -273,9 +278,10 @@ class ShotSimulatorTest {
 
         Player d1 = p("D1");
         Player d2 = p("D2");
-        Map<Player, Player> matchups = new HashMap<>();
-        matchups.put(hi.getPlayer(), d1);
-        matchups.put(lo.getPlayer(), d2);
+        Matchups matchups = Matchups.of(Map.of(
+                new MatchupDefender(d1), new MatchupAttacker(hi.getPlayer()),
+                new MatchupDefender(d2), new MatchupAttacker(lo.getPlayer())
+        ));
 
         GamePlan defense = new GamePlan(null, null, null);
         defense.setMatchups(matchups);
