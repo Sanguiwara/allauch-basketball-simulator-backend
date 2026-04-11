@@ -19,26 +19,27 @@ public class MatchupsEntityMapper {
     }
 
     public Map<PlayerEntity, PlayerEntity> toEntity(Matchups matchups) {
-        Map<PlayerEntity, PlayerEntity> attackerToDefender = new HashMap<>();
+        Map<PlayerEntity, PlayerEntity> storedMatchups = new HashMap<>();
         if (matchups == null || matchups.isEmpty()) {
-            return attackerToDefender;
+            return storedMatchups;
         }
 
-        // Domain/API convention is defender -> attacker, but the current relational schema stores attacker -> defender.
-        matchups.asMap().forEach((defender, attacker) -> attackerToDefender.put(
-                playerMapper.toEntity(attacker.player()),
-                playerMapper.toEntity(defender.player())
+        // Keep legacy rows readable by persisting the domain order as-is.
+        // The SQL column names are misleading, but runtime values remain defender -> attacker.
+        matchups.asMap().forEach((defender, attacker) -> storedMatchups.put(
+                playerMapper.toEntity(defender.player()),
+                playerMapper.toEntity(attacker.player())
         ));
-        return attackerToDefender;
+        return storedMatchups;
     }
 
-    public Matchups toDomain(Map<PlayerEntity, PlayerEntity> attackerToDefender) {
+    public Matchups toDomain(Map<PlayerEntity, PlayerEntity> storedMatchups) {
         Matchups matchups = Matchups.empty();
-        if (attackerToDefender == null || attackerToDefender.isEmpty()) {
+        if (storedMatchups == null || storedMatchups.isEmpty()) {
             return matchups;
         }
 
-        attackerToDefender.forEach((attacker, defender) -> matchups.assign(
+        storedMatchups.forEach((defender, attacker) -> matchups.assign(
                 new MatchupDefender(playerMapper.toDomain(defender)),
                 new MatchupAttacker(playerMapper.toDomain(attacker))
         ));
