@@ -108,8 +108,9 @@ class RegularMan2ManSchemeTest {
         // advantage = 60 - 37.5 = 22.5, minutesShare = 40/200 = 0.2, so teamScore = 4.5
         assertEquals(4.5, teamPlaymakingScore, 1e-12);
 
-        // contribution is computed from the offensive score and minutes share (not a default constant)
-        assertEquals(12.0, attacker.getPlaymakingContribution(), 1e-12); // 60 * (40/200)
+        // contribution stores the effective playmaking advantage contributed by the player.
+        assertEquals(4.5, attacker.getPlaymakingContribution(), 1e-12);
+        assertEquals(0.0, neutral1.getPlaymakingContribution(), 1e-12);
     }
 
     @Test
@@ -190,8 +191,9 @@ class RegularMan2ManSchemeTest {
 
         // playmaker offScore = 0.60*99 + 0.40*50 = 79.4
         // defenderScore = 50
-        // advantage = 29.4, weighted by minutesShare (0.2) => 5.88. Neutral players have advantage 0.
-        assertEquals(5.88, teamPlaymakingScore, 1e-12);
+        // raw advantage = 29.4, but MAX_INDIVIDUAL_ADVANTAGE clamps it to 25.
+        // weighted by minutesShare (0.2) => 5.0. Neutral players have advantage 0.
+        assertEquals(5.0, teamPlaymakingScore, 1e-12);
     }
 
     @Test
@@ -250,7 +252,7 @@ class RegularMan2ManSchemeTest {
         // shooter offScore = 0.15*99 + 0.85*50 = 57.35 => advantage=7.35 => weighted=1.47
         assertEquals(1.47, shooterScore, 1e-12);
         // playmaker advantage is much larger (see previous test), so score must be strictly higher.
-        assertEquals(5.88, playmakerScore, 1e-12);
+        assertEquals(5.0, playmakerScore, 1e-12);
     }
 
     @Test
@@ -308,8 +310,9 @@ class RegularMan2ManSchemeTest {
         // eliteDef vs playmaker => 79.4 - 92.63 = -13.23 => weighted -2.646
         assertEquals(-2.646, scoreEliteOnPlaymaker, 1e-12);
         // eliteDef vs neutral1 hits the -15 clamp, while playmaker now faces an average defender:
-        // playmaker => (79.4 - 50) * 0.2 = 5.88, neutral1 => -15 * 0.2 = -3.0, total = 2.88
-        assertEquals(2.88, scoreEliteOnNeutral, 1e-12);
+        // playmaker raw advantage 29.4 is clamped to 25 => 25 * 0.2 = 5.0
+        // neutral1 => -15 * 0.2 = -3.0, total = 2.0
+        assertEquals(2.0, scoreEliteOnNeutral, 1e-12);
         assertTrue(scoreEliteOnNeutral > scoreEliteOnPlaymaker);
     }
 

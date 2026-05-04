@@ -1,5 +1,6 @@
 package com.sanguiwara.baserecords;
 
+import com.sanguiwara.calculator.PlayerScoreCalculator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -9,7 +10,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class InGamePlayer {
-
     private UUID id;
     private final Player player;
     private final UUID gamePlanId;
@@ -66,6 +66,21 @@ public class InGamePlayer {
 
     // Post-game computed rating in [0..10].
     private double matchRating;
+    private double threePtScore;
+    private double threePtDefenseScore;
+    private double twoPtScore;
+    private double twoPtDefenseScore;
+    private double driveScore;
+    private double driveDefenseScore;
+    private double manToManPlaymakingOffScore;
+    private double manToManPlaymakingDefScore;
+    private double zonePlaymakingOffScore;
+    private double zonePlaymakingDefScore;
+    private double zone23DefenseScore;
+    private double zone32DefenseScore;
+    private double zone212DefenseScore;
+    private double reboundScore;
+    private double stealScore;
 
 
 
@@ -129,5 +144,7 @@ public class InGamePlayer {
         }
     }
 
-
+    public void recalculateScores() {
+        PlayerScoreCalculator.recalculateScores(this);
+    }
 }

@@ -5,6 +5,7 @@ import com.sanguiwara.baserecords.Gender;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.dto.PlayerDTO;
+import com.sanguiwara.dto.PlayerScoresDTO;
 import com.sanguiwara.dto.TeamDTO;
 import com.sanguiwara.factory.PlayerArchetype;
 import com.sanguiwara.mapper.PlayerDTOMapper;
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,19 +41,19 @@ class TeamControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private TeamService teamService;
 
-    @MockBean
+    @MockitoBean
     private TeamDTOMapper teamDTOMapper;
 
-    @MockBean
+    @MockitoBean
     private TeamRosterService teamRosterService;
 
-    @MockBean
+    @MockitoBean
     private PlayerDTOMapper playerDTOMapper;
 
-    @MockBean
+    @MockitoBean
     private EventManager eventManager;
 
     @Test
@@ -179,7 +180,8 @@ class TeamControllerTest {
                 created.getMorale(),
                 List.of(),
                 created.getClubID(),
-                created.getTeamsID()
+                created.getTeamsID(),
+                new PlayerScoresDTO(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         );
 
         when(teamRosterService.createPlayerForTeam(eq(teamId), eq(PlayerArchetype.ALL_STAR))).thenReturn(created);

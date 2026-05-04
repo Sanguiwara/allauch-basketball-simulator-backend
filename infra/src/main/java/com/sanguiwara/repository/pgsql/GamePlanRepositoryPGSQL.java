@@ -36,7 +36,7 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
 
     @Override
     public Optional<GamePlan> findNextUpcomingGamePlanForClub(UUID clubId) {
-        List<GameEntity> nextGameForClub = gameJpaRepository.findNextGameForClub(clubId, Instant.now(), PageRequest.of(0, 10));
+        List<GameEntity> nextGameForClub = gamePlanJpaRepository.findNextGameForClub(clubId, Instant.now(), PageRequest.of(0, 10));
         return nextGameForClub
                 .stream()
                 .findFirst()
@@ -45,6 +45,11 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
                     GamePlanEntity toreturn = homeClubId.equals(clubId) ? g.getHomeGamePlan() : g.getAwayGamePlan();
                     return gamePlanMapper.toDomain(toreturn);
                 });
+    }
+
+    @Override
+    public boolean isGameFinished(UUID gamePlanId) {
+        return gameJpaRepository.isGameFinished(gamePlanId);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.sanguiwara.badges.ShotContext;
 import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.badges.Target;
+import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.calculator.spec.ShotSpec;
 import com.sanguiwara.type.ShotType;
 
@@ -21,20 +22,6 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
     protected ZoneDefensiveScheme(BadgeEngine badgeEngine) {
         this.badgeEngine = badgeEngine;
     }
-
-    protected static final double DEF_SPEED_WEIGHT_ZONE = 0.10;
-    protected static final double DEF_SIZE_WEIGHT_ZONE = 0.15;
-    protected static final double DEF_EXTERIOR_WEIGHT_ZONE = 0.30;
-    protected static final double DEF_ENDURANCE_WEIGHT_ZONE = 0.10;
-    protected static final double DEF_IQ_WEIGHT_ZONE = 0.20;
-    protected static final double DEF_STEAL_WEIGHT_ZONE = 0.15;
-
-    protected static final double OFF_PASSING_WEIGHT_ZONE = 0.30;
-    protected static final double OFF_IQ_WEIGHT_ZONE = 0.35;
-    protected static final double OFF_BALLHANDLING_WEIGHT_ZONE = 0.10;
-    protected static final double OFF_COACHABILITY_WEIGHT_ZONE = 0.15;
-    protected static final double OFF_SPEED_WEIGHT_ZONE = 0.10;
-
 
     @Override
     public double calculateAdvantageForAPlayer(InGamePlayer attacker, GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
@@ -99,22 +86,12 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
     }
 
     private static double getDefensivePlayerPlaymakingScore(Player def) {
-        return DEF_SPEED_WEIGHT_ZONE * def.getSpeed() +
-                DEF_SIZE_WEIGHT_ZONE * def.getSize() +
-                DEF_EXTERIOR_WEIGHT_ZONE * def.getDefExterieur()
-                + DEF_ENDURANCE_WEIGHT_ZONE * def.getEndurance()
-                + DEF_IQ_WEIGHT_ZONE * def.getBasketballIqDef()
-                + DEF_STEAL_WEIGHT_ZONE * def.getSteal();
+        return PlayerScoreCalculator.calculateZonePlaymakingDefScore(def);
     }
 
 
     protected double getOffensivePlayerPlaymakingScore(InGamePlayer inGamePlayer) {
-
-        return OFF_PASSING_WEIGHT_ZONE * inGamePlayer.getPlayer().getPassingSkills() +
-                OFF_IQ_WEIGHT_ZONE * inGamePlayer.getPlayer().getBasketballIqOff() +
-                OFF_BALLHANDLING_WEIGHT_ZONE * inGamePlayer.getPlayer().getBallhandling() +
-                OFF_COACHABILITY_WEIGHT_ZONE * inGamePlayer.getPlayer().getCoachability() +
-                OFF_SPEED_WEIGHT_ZONE * inGamePlayer.getPlayer().getSpeed();
+        return PlayerScoreCalculator.calculateZonePlaymakingOffScore(inGamePlayer.getPlayer());
     }
 
 

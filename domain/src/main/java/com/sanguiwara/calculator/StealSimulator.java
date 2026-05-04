@@ -30,14 +30,6 @@ public class StealSimulator {
     // Score d'équipe maximum utilisé pour la conversion score -> probabilité
     public static final double MAX_TEAM_STEAL_SCORE = 100.0;
 
-    // Poids des attributs joueurs pour le score d'interception
-    private static final double STL_SPEED_WEIGHT = 0.20;
-    private static final double STL_DEF_EXT_WEIGHT = 0.25;
-    private static final double STL_STEAL_WEIGHT = 0.30;
-    private static final double STL_BBIQ_DEF_WEIGHT = 0.15;
-    private static final double STL_ENDURANCE_WEIGHT = 0.05;
-    private static final double STL_PHYSIQUE_WEIGHT = 0.05;
-
     // Influence du playmaking global sur les interceptions
     // Si positif => réduit les chances d'interception, si négatif => les augmente
     private static final double PLAYMAKING_IMPACT_SCALE = 0.90; // impact max ~30%
@@ -99,24 +91,19 @@ public class StealSimulator {
 
     private double getPlayerStealScore(InGamePlayer inGamePlayer) {
         Player p = inGamePlayer.getPlayer();
-        double score = STL_SPEED_WEIGHT * p.getSpeed()
-                + STL_DEF_EXT_WEIGHT * p.getDefExterieur()
-                + STL_STEAL_WEIGHT * p.getSteal()
-                + STL_BBIQ_DEF_WEIGHT * p.getBasketballIqDef()
-                + STL_ENDURANCE_WEIGHT * p.getEndurance()
-                + STL_PHYSIQUE_WEIGHT * p.getPhysique();
+        double score = PlayerScoreCalculator.calculateStealScore(p);
         return badgeEngine.apply(p, BadgeType.STEAL, Target.STEAL_SCORE, score, ShotContext.empty());
     }
 
     private static double scoreToProbability(double score) {
         double prob = MIN_STEAL_PROBABILITY + (score / MAX_TEAM_STEAL_SCORE) * (MAX_STEAL_PROBABILITY - MIN_STEAL_PROBABILITY);
-        return clamp(prob, 0.0, 1.0);
+        return Math.clamp(prob, 0.0, 1.0);
     }
 
     private double applyPlaymakingAdjustment(double baseProbability, double assistProbability) {
 
         // Clamp safety
-        double assist = clamp(assistProbability, MIN_ASSIST_PROBABILITY, MAX_ASSIST_PROBABILITY);
+        double assist = Math.clamp(assistProbability, MIN_ASSIST_PROBABILITY, MAX_ASSIST_PROBABILITY);
 
         // Normalize [0.10 .. 0.50] -> [-1 .. 0]
         // 0.10 => -1 (bonus max)
@@ -128,7 +115,7 @@ public class StealSimulator {
         double adjustmentFactor =
                 1.0 - (normalizedPlaymaking * PLAYMAKING_IMPACT_SCALE);
 
-        return clamp(baseProbability * adjustmentFactor, 0.0, 1.0);
+        return Math.clamp(baseProbability * adjustmentFactor, 0.0, 1.0);
     }
 
 
@@ -151,7 +138,4 @@ public class StealSimulator {
         return null;
     }
 
-    private static double clamp(double v, double min, double max) {
-        return Math.max(min, Math.min(max, v));
-    }
 }

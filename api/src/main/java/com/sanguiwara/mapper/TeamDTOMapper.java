@@ -10,5 +10,8 @@ public interface TeamDTOMapper {
 
     @Mapping(target = "clubId", source = "clubID")
     TeamDTO toDto(Team team);
+
+    @Mapping(target = "clubID", source = "clubId")
+    Team toDomain(TeamDTO teamDTO);
 }
 

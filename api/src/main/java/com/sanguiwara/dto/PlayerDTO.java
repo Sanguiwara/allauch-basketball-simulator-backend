@@ -41,7 +41,8 @@ public record PlayerDTO(
         int morale,
         List<BadgeDTO> badges,
         UUID clubId,
-        Set<UUID> teamIds
+        Set<UUID> teamIds,
+        PlayerScoresDTO scores
 ) {
 }
 

@@ -133,4 +133,49 @@ public class InGamePlayerEntity {
 
     @Column(name = "match_rating", nullable = false)
     private double matchRating = 0.0;
+
+    @Column(name = "three_pt_score", nullable = false)
+    private double threePtScore = 0.0;
+
+    @Column(name = "three_pt_defense_score", nullable = false)
+    private double threePtDefenseScore = 0.0;
+
+    @Column(name = "two_pt_score", nullable = false)
+    private double twoPtScore = 0.0;
+
+    @Column(name = "two_pt_defense_score", nullable = false)
+    private double twoPtDefenseScore = 0.0;
+
+    @Column(name = "drive_score", nullable = false)
+    private double driveScore = 0.0;
+
+    @Column(name = "drive_defense_score", nullable = false)
+    private double driveDefenseScore = 0.0;
+
+    @Column(name = "man_to_man_playmaking_off_score", nullable = false)
+    private double manToManPlaymakingOffScore = 0.0;
+
+    @Column(name = "man_to_man_playmaking_def_score", nullable = false)
+    private double manToManPlaymakingDefScore = 0.0;
+
+    @Column(name = "zone_playmaking_off_score", nullable = false)
+    private double zonePlaymakingOffScore = 0.0;
+
+    @Column(name = "zone_playmaking_def_score", nullable = false)
+    private double zonePlaymakingDefScore = 0.0;
+
+    @Column(name = "zone23_defense_score", nullable = false)
+    private double zone23DefenseScore = 0.0;
+
+    @Column(name = "zone32_defense_score", nullable = false)
+    private double zone32DefenseScore = 0.0;
+
+    @Column(name = "zone212_defense_score", nullable = false)
+    private double zone212DefenseScore = 0.0;
+
+    @Column(name = "rebound_score", nullable = false)
+    private double reboundScore = 0.0;
+
+    @Column(name = "steal_score", nullable = false)
+    private double stealScore = 0.0;
 }

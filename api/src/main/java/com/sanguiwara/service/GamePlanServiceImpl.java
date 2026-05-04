@@ -12,7 +12,9 @@ import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.GamePlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -31,13 +33,13 @@ public class GamePlanServiceImpl implements GamePlanService {
 
     @Override
     public Optional<GamePlan> getGamePlan(UUID id) {
-        return gamePlanRepository.findById(id);
+        return gamePlanRepository.findById(id).map(this::refreshScoresIfNeeded);
 
     }
 
     @Override
     public Optional<GamePlan> getNextUpcomingGamePlanForClub(UUID clubId) {
-        return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId);
+        return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId).map(this::refreshScoresIfNeeded);
     }
 
     @Override
@@ -48,6 +50,14 @@ public class GamePlanServiceImpl implements GamePlanService {
 
     @Override
     public GamePlan update(GamePlan gamePlan) {
+        if (gamePlanRepository.isGameFinished(gamePlan.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Game plan can no longer be updated because the match is finished"
+            );
+        }
+        gamePlan.recalculateInGamePlayerScores();
+
         // Build log payload before persistence so we log the user's intended state
         // with resolved names (DTO mapper resolves matchup player IDs to Players).
         String gamePlanDescription = describeGamePlan(gamePlan);
@@ -69,9 +79,20 @@ public class GamePlanServiceImpl implements GamePlanService {
                 .map(player -> new InGamePlayer(player, finalHomeGamePlan.getId())) // map Player -> InGamePlayer
                 .toList();
         gameplan.setActivePlayers(activePlayers);
-        return gamePlanRepository.update(gameplan);
+        return update(gameplan);
 
 
+    }
+
+    private GamePlan refreshScoresIfNeeded(GamePlan gamePlan) {
+        if (gamePlanRepository.isGameFinished(gamePlan.getId())) {
+            return gamePlan;
+        }
+
+        gamePlan.recalculateInGamePlayerScores();
+        GamePlan savedGamePlan = gamePlanRepository.update(gamePlan);
+        log.debug("Recalculated in-game player scores for gamePlanId={}", gamePlan.getId());
+        return savedGamePlan;
     }
 
     private static String describeGamePlan(GamePlan gamePlan) {

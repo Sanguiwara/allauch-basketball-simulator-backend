@@ -3,6 +3,7 @@ package com.sanguiwara.calculator.spec;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.badges.ShotContext;
 import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.badges.BadgeType;
@@ -25,19 +26,6 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     private static final double ADVANTAGE_NORMALIZATION_DIVISOR = 50.0;
 
     // Intensity distribution is handled by ShotAttemptDistributor with shared constants across ShotSpec.
-
-
-    private static final double SCORE_SPEED_WEIGHT_OFF = 0.10;
-    private static final double SCORE_SIZE_WEIGHT_OFF = 0.15;
-    private static final double SCORE_ENDURANCE_WEIGHT_OFF = 0.10;
-    private static final double SCORE_RATING_WEIGHT_OFF = 0.50;
-    private static final double SCORE_IQ_WEIGHT_OFF = 0.15;
-
-    private static final double SCORE_SPEED_WEIGHT_DEF = 0.10;
-    private static final double SCORE_SIZE_WEIGHT_DEF = 0.10;
-    private static final double SCORE_DEF_EXT_WEIGHT = 0.65;
-    private static final double SCORE_ENDURANCE_WEIGHT_DEF = 0.05;
-    private static final double SCORE_IQ_WEIGHT_DEF = 0.10;
     private static final double ASSIST_BONUS_PCT = 0.25;
     private final Random random;
     private final BadgeEngine badgeEngine;
@@ -72,22 +60,14 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
 
     @Override
     public double getDefensiveScoreForAShot(Player defender) {
-        double score = SCORE_SPEED_WEIGHT_DEF * defender.getSpeed() +
-                SCORE_SIZE_WEIGHT_DEF * defender.getSize() +
-                SCORE_DEF_EXT_WEIGHT * defender.getDefExterieur()
-                + SCORE_ENDURANCE_WEIGHT_DEF * defender.getEndurance() +
-                SCORE_IQ_WEIGHT_DEF * defender.getBasketballIqDef();
+        double score = PlayerScoreCalculator.calculateThreePtDefenseScore(defender);
         return badgeEngine.apply(defender, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
     }
 
 
     @Override
     public double getPlayerScoreForAShot(Player attacker) {
-        return SCORE_SPEED_WEIGHT_OFF * attacker.getSpeed() +
-                SCORE_SIZE_WEIGHT_OFF * attacker.getSize()
-                + SCORE_ENDURANCE_WEIGHT_OFF * attacker.getEndurance() +
-                SCORE_RATING_WEIGHT_OFF * attacker.getTir3Pts() +
-                SCORE_IQ_WEIGHT_OFF * attacker.getBasketballIqOff();
+        return PlayerScoreCalculator.calculateThreePtScore(attacker);
     }
 
     @Override

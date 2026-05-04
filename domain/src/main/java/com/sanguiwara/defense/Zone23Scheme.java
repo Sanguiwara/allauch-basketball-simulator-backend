@@ -3,6 +3,7 @@ package com.sanguiwara.defense;
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.type.ShotType;
 
 import java.util.EnumMap;
@@ -12,17 +13,6 @@ public final class Zone23Scheme extends ZoneDefensiveScheme {
     public Zone23Scheme(BadgeEngine badgeEngine) {
         super(badgeEngine);
     }
-
-
-    private static final double WEIGHT_DEF_EXTERIEUR = 0.10;
-    private static final double WEIGHT_DEF_POSTE = 0.20;
-    private static final double WEIGHT_PROTECTION_CERCLE = 0.30;
-    private static final double WEIGHT_TIMING_BLOCK = 0.15;
-    private static final double WEIGHT_STEAL = 0.02;
-    private static final double WEIGHT_SIZE = 0.06;
-    private static final double WEIGHT_IQ_DEF = 0.12;
-    private static final double WEIGHT_ENDURANCE = 0.05;
-
     @Override
     public DefenseType type() {
         return DefenseType.ZONE_2_3;
@@ -31,14 +21,7 @@ public final class Zone23Scheme extends ZoneDefensiveScheme {
 
     @Override
     public double getPlayerDefensiveScoreAgainstShooting(Player player) {
-        return WEIGHT_DEF_EXTERIEUR * player.getDefExterieur()
-                + WEIGHT_DEF_POSTE * player.getDefPoste()
-                + WEIGHT_PROTECTION_CERCLE * player.getProtectionCercle()
-                + WEIGHT_TIMING_BLOCK * player.getTimingBlock()
-                + WEIGHT_STEAL * player.getSteal()
-                + WEIGHT_SIZE * player.getSize()
-                + WEIGHT_IQ_DEF * player.getBasketballIqDef()
-                + WEIGHT_ENDURANCE * player.getEndurance();
+        return PlayerScoreCalculator.calculateZone23DefenseScore(player);
     }
 
 

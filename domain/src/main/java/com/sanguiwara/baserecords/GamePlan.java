@@ -94,4 +94,11 @@ public class GamePlan {
         return (int) activePlayers.stream().mapToDouble(p -> p.getPlayer().getMorale()).average().orElse(0.0);
     }
 
+    public void recalculateInGamePlayerScores() {
+        if (activePlayers == null) {
+            return;
+        }
+        activePlayers.forEach(InGamePlayer::recalculateScores);
+    }
+
 }
