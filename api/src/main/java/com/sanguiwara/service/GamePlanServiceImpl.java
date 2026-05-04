@@ -2,6 +2,9 @@ package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
+import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Position;
 import com.sanguiwara.baserecords.Team;
@@ -9,7 +12,9 @@ import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.GamePlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,13 +33,13 @@ public class GamePlanServiceImpl implements GamePlanService {
 
     @Override
     public Optional<GamePlan> getGamePlan(UUID id) {
-        return gamePlanRepository.findById(id);
+        return gamePlanRepository.findById(id).map(this::refreshScoresIfNeeded);
 
     }
 
     @Override
     public Optional<GamePlan> getNextUpcomingGamePlanForClub(UUID clubId) {
-        return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId);
+        return gamePlanRepository.findNextUpcomingGamePlanForClub(clubId).map(this::refreshScoresIfNeeded);
     }
 
     @Override
@@ -45,6 +50,14 @@ public class GamePlanServiceImpl implements GamePlanService {
 
     @Override
     public GamePlan update(GamePlan gamePlan) {
+        if (gamePlanRepository.isGameFinished(gamePlan.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Game plan can no longer be updated because the match is finished"
+            );
+        }
+        gamePlan.recalculateInGamePlayerScores();
+
         // Build log payload before persistence so we log the user's intended state
         // with resolved names (DTO mapper resolves matchup player IDs to Players).
         String gamePlanDescription = describeGamePlan(gamePlan);
@@ -66,9 +79,20 @@ public class GamePlanServiceImpl implements GamePlanService {
                 .map(player -> new InGamePlayer(player, finalHomeGamePlan.getId())) // map Player -> InGamePlayer
                 .toList();
         gameplan.setActivePlayers(activePlayers);
-        return gamePlanRepository.update(gameplan);
+        return update(gameplan);
 
 
+    }
+
+    private GamePlan refreshScoresIfNeeded(GamePlan gamePlan) {
+        if (gamePlanRepository.isGameFinished(gamePlan.getId())) {
+            return gamePlan;
+        }
+
+        gamePlan.recalculateInGamePlayerScores();
+        GamePlan savedGamePlan = gamePlanRepository.update(gamePlan);
+        log.debug("Recalculated in-game player scores for gamePlanId={}", gamePlan.getId());
+        return savedGamePlan;
     }
 
     private static String describeGamePlan(GamePlan gamePlan) {
@@ -124,19 +148,21 @@ public class GamePlanServiceImpl implements GamePlanService {
         }
 
         // Matchups
-        Map<Player, Player> matchups = gamePlan.getMatchups();
+        Matchups matchups = gamePlan.getMatchups();
         if (matchups == null) {
             descriptionBuilder.append("matchups=<null>\n");
         } else {
             descriptionBuilder.append("matchups(count=").append(matchups.size()).append(")=").append('\n');
-            matchups.entrySet().stream()
+            matchups.asMap().entrySet().stream()
                     .sorted(Comparator
-                            .comparing((Map.Entry<Player, Player> e) -> safeName(e.getKey()))
-                            .thenComparing(e -> safeUuid(e.getKey())))
+                            .comparing((Map.Entry<MatchupDefender, MatchupAttacker> e) -> safeName(e.getKey().player()))
+                            .thenComparing(e -> safeUuid(e.getKey().player())))
                     .forEach(entry -> descriptionBuilder.append(" - ")
-                            .append(playerLabel(entry.getKey()))
+                            .append("defender=")
+                            .append(playerLabel(entry.getKey().player()))
                             .append(" -> ")
-                            .append(playerLabel(entry.getValue()))
+                            .append("attacker=")
+                            .append(playerLabel(entry.getValue().player()))
                             .append('\n'));
         }
 

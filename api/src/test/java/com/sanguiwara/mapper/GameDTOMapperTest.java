@@ -5,6 +5,9 @@ import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.Gender;
+import com.sanguiwara.baserecords.MatchupAttacker;
+import com.sanguiwara.baserecords.MatchupDefender;
+import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.dto.GameDTO;
@@ -37,7 +40,8 @@ class GameDTOMapperTest {
         setField(mapper, "playerProgressionDTOMapper", mock(PlayerProgressionDTOMapper.class));
 
         PlayerService playerService = mock(PlayerService.class);
-        setField(mapper, "playerIdMapper", new PlayerIdMapper(playerService));
+        PlayerIdMapper playerIdMapper = new PlayerIdMapper(playerService);
+        setField(mapper, "matchupsDtoMapper", new MatchupsDtoMapper(playerIdMapper));
 
         Team homeTeam = new Team(UUID.randomUUID(), AgeCategory.U18, Gender.MALE, "home");
         Team awayTeam = new Team(UUID.randomUUID(), AgeCategory.U18, Gender.MALE, "away");
@@ -50,8 +54,12 @@ class GameDTOMapperTest {
         Player a1 = Player.builder().id(UUID.randomUUID()).name("a1").birthDate(2000).build();
         Player a2 = Player.builder().id(UUID.randomUUID()).name("a2").birthDate(2000).build();
 
-        homeGamePlan.setMatchups(Map.of(h1, a1));
-        awayGamePlan.setMatchups(Map.of(a2, h2));
+        homeGamePlan.setMatchups(Matchups.of(Map.of(
+                new MatchupDefender(h1), new MatchupAttacker(a1)
+        )));
+        awayGamePlan.setMatchups(Matchups.of(Map.of(
+                new MatchupDefender(a2), new MatchupAttacker(h2)
+        )));
 
         homeGamePlan.setDefenseType(DefenseType.ZONE_2_3);
         awayGamePlan.setDefenseType(DefenseType.MAN_TO_MAN);

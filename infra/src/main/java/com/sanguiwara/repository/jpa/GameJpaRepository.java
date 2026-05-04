@@ -2,11 +2,10 @@ package com.sanguiwara.repository.jpa;
 
 import com.sanguiwara.entity.GameEntity;
 import com.sanguiwara.repository.jpa.projection.GameSummaryJPAProjection;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,15 +58,11 @@ public interface GameJpaRepository extends JpaRepository<GameEntity, UUID> {
 
 
     @Query("""
-    select g
+    select case when count(g) > 0 then true else false end
     from GameEntity g
-    where g.executeAt >= :now
-      and (
-        g.homeGamePlan.ownerTeam.club.id = :clubId
-        or g.awayGamePlan.ownerTeam.club.id = :clubId
-      )
-    order by g.executeAt asc
+    where (g.homeGamePlan.id = :gamePlanId or g.awayGamePlan.id = :gamePlanId)
+      and g.gameResult is not null
   """)
-    List<GameEntity> findNextGameForClub(UUID clubId, Instant now, Pageable pageable);
+    boolean isGameFinished(@Param("gamePlanId") UUID gamePlanId);
 
 }

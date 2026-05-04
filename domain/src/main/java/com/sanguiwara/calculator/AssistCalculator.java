@@ -9,12 +9,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AssistCalculator {
     // Constantes pour le calcul du pourcentage de passes décisives
-    private static final double PLAYMAKING_SCORE_MIN = -25;
-    private static final double PLAYMAKING_SCORE_MAX = 25;
+    private static final double PLAYMAKING_SCORE_MIN = -20;
+    private static final double PLAYMAKING_SCORE_MAX = 20;
     private static final double ASSIST_PROBABILITY_AT_MIN = 0.05;
-    private static final double ASSIST_PROBABILITY_AT_MAX = 0.60;
+    private static final double ASSIST_PROBABILITY_AT_MAX = 0.70;
     public static final double MIN_ASSIST_PROBABILITY = 0.05;
-    public static final double MAX_ASSIST_PROBABILITY = 0.60;
+    public static final double MAX_ASSIST_PROBABILITY = 0.70;
 
     public static final double MIN_ASSIST_WEIGHT = 0.05;
     public static final double MAX_ASSIST_WEIGHT = 0.80;

@@ -11,6 +11,8 @@ public interface GamePlanRepository {
 
     Optional<GamePlan> findNextUpcomingGamePlanForClub(UUID clubId);
 
+    boolean isGameFinished(UUID gamePlanId);
+
     GamePlan update(GamePlan gamePlan);
 
     GamePlan save(GamePlan gamePlan);

@@ -39,6 +39,10 @@ public class GameExecutor {
     public void executeGame(UUID gameId) {
         Optional<Game> optionalGame = gameRepository.findById(gameId);
         Game game = optionalGame.orElseThrow();
+        game.getHomeGamePlan().recalculateInGamePlayerScores();
+        game.getAwayGamePlan().recalculateInGamePlayerScores();
+        game = gameRepository.save(game);
+        log.debug("Recalculated and saved in-game player scores before execution for gameId={}", gameId);
         GameResult boxScore = gameSimulator.calculateGame(game.getHomeGamePlan(), game.getAwayGamePlan());
         game.setGameResult(boxScore);
         BoxScore homeStats = boxScore.homeScore();

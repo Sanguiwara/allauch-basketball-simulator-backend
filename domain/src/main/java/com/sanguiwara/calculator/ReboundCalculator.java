@@ -23,15 +23,6 @@ public class ReboundCalculator {
     private static final double ADVANTAGE_SHIFT = 1.0;
     private static final double ADVANTAGE_SCALE = 2.0;
 
-    private static final double REB_SIZE_COEFF = 0.18;
-    private static final double REB_WEIGHT_COEFF = 0.10;
-    private static final double REB_AGGR_COEFF = 0.10;
-    private static final double REB_AGGR_REB_COEFF = 0.18;
-    private static final double REB_TIMING_COEFF = 0.18;
-    private static final double REB_PHYSIQUE_COEFF = 0.14;
-    private static final double REB_IQ_COEFF = 0.06;
-    private static final double REB_ENDURANCE_COEFF = 0.06;
-
     private final java.util.Random random;
     private final BadgeEngine badgeEngine;
 
@@ -74,6 +65,8 @@ public class ReboundCalculator {
         double homeReboundScore = populateTeamReboundScore(home, ReboundContext.offensive());
         double visitorReboundScore = populateTeamReboundScore(visitor, ReboundContext.defensive());
 
+        log.info("Rebound scores for home: {}, visitor: {}", homeReboundScore, visitorReboundScore);
+
         return (homeReboundScore - visitorReboundScore) / (homeReboundScore + visitorReboundScore);
     }
 
@@ -94,14 +87,7 @@ public class ReboundCalculator {
 
     private double getPlayerReboundScore(InGamePlayer inGamePlayer, ReboundContext context) {
         Player player = inGamePlayer.getPlayer();
-        double score = REB_SIZE_COEFF * player.getSize()
-                + REB_WEIGHT_COEFF * player.getWeight()
-                + REB_AGGR_COEFF * player.getAgressivite()
-                + REB_AGGR_REB_COEFF * player.getAgressiviteRebond()
-                + REB_TIMING_COEFF * player.getTimingRebond()
-                + REB_PHYSIQUE_COEFF * player.getPhysique()
-                + REB_IQ_COEFF * player.getIq()
-                + REB_ENDURANCE_COEFF * player.getEndurance();
+        double score = PlayerScoreCalculator.calculateReboundScore(player);
         return badgeEngine.apply(player, BadgeType.REBOUND, Target.REBOUND_SCORE, score, context);
     }
 

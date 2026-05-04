@@ -31,7 +31,7 @@ public class GamePlan {
     private DefenseType defenseType = DefenseType.MAN_TO_MAN;
 
 
-    private  Map<Player, Player> matchups = new HashMap<>();
+    private Matchups matchups = Matchups.empty();
     private  Map<Position, InGamePlayer> positions = new HashMap<>();
 
     private double threePointAttemptShare =  1.0/3.0;
@@ -85,9 +85,20 @@ public class GamePlan {
         return Math.toIntExact(Math.round(totalShotNumber * driveAttemptShare));
     }
 
+    public void setMatchups(Matchups matchups) {
+        this.matchups = matchups == null ? Matchups.empty() : matchups;
+    }
+
 
     private int getTeamMorale(){
         return (int) activePlayers.stream().mapToDouble(p -> p.getPlayer().getMorale()).average().orElse(0.0);
+    }
+
+    public void recalculateInGamePlayerScores() {
+        if (activePlayers == null) {
+            return;
+        }
+        activePlayers.forEach(InGamePlayer::recalculateScores);
     }
 
 }

@@ -21,6 +21,10 @@ DELETE {{baseUrl}}/players/<playerId>
 Authorization: Bearer {{token}}
 Accept: application/json
 
+### Delete all players
+DELETE {{baseUrl}}/players
+### Remove a player from all teams (free agent)
+DELETE {{baseUrl}}/players/f7e44bcd-b064-4655-80b2-1abb9ec58d90/teams
 ### Remove a player from all teams (free agent)
 DELETE {{baseUrl}}/players/f7120c64-4bf9-4c5f-8f84-209642523a38/teams
 Authorization: Bearer {{token}}

@@ -74,15 +74,15 @@ class GameSimulatorTest {
 
         homePlan.setActivePlayers(new ArrayList<>(homePos.values()));
         awayPlan.setActivePlayers(new ArrayList<>(awayPos.values()));
-        Map<Player, Player> homeMatchups = new HashMap<>();
-        Map<Player, Player> awayMatchups = new HashMap<>();
+        Matchups homeMatchups = Matchups.empty();
+        Matchups awayMatchups = Matchups.empty();
 
         for (Position pos : Position.values()) {
             InGamePlayer hP = homePos.get(pos);
             InGamePlayer aP = awayPos.get(pos);
             if (hP != null && aP != null) {
-                homeMatchups.put(aP.getPlayer(), hP.getPlayer());
-                awayMatchups.put(hP.getPlayer(), aP.getPlayer());
+                homeMatchups.assign(new MatchupDefender(hP.getPlayer()), new MatchupAttacker(aP.getPlayer()));
+                awayMatchups.assign(new MatchupDefender(aP.getPlayer()), new MatchupAttacker(hP.getPlayer()));
                 hP.setMinutesPlayed(40);
                 aP.setMinutesPlayed(40);
             }

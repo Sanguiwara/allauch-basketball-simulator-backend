@@ -38,10 +38,7 @@ public record InGamePlayerDTO(
         int driveAttempts,
         int driveMade,
         int minutesPlayed,
-        boolean starter,
-        double threePtScore,
-        double twoPtScore,
-        double driveScore
+        boolean starter
 ) {
 }
 

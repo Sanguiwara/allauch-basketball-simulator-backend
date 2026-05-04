@@ -3,9 +3,13 @@ package com.sanguiwara.mapper;
 
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.entity.GamePlanEntity;
-import org.mapstruct.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = {InGamePlayerMapper.class, TeamMapper.class})
+@Mapper(componentModel = "spring", uses = {InGamePlayerMapper.class, TeamMapper.class, MatchupsEntityMapper.class})
 public interface GamePlanMapper {
 
      GamePlanEntity toEntity(GamePlan gamePlan);

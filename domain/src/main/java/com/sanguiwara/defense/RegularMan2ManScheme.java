@@ -8,30 +8,15 @@ import com.sanguiwara.badges.BadgeEngine;
 import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.badges.ShotContext;
 import com.sanguiwara.badges.Target;
+import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.calculator.spec.ShotSpec;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class RegularMan2ManScheme extends Man2ManScheme {
 
-    private static final double OFF_SPEED_WEIGHT = 0.15;
-    private static final double OFF_SIZE_WEIGHT = 0.05;
-    private static final double OFF_ENDURANCE_WEIGHT = 0.05;
-    private static final double OFF_PASSING_WEIGHT = 0.20;
-    private static final double OFF_IQ_WEIGHT = 0.25;
-    private static final double OFF_HANDLING_WEIGHT = 0.15;
-    private static final double OFF_3PT_WEIGHT = 0.05;
-    private static final double OFF_2PT_WEIGHT = 0.05;
-    private static final double OFF_FINISH_WEIGHT = 0.03;
-    private static final double OFF_FLOATER_WEIGHT = 0.02;
-    private static final double DEF_SPEED_WEIGHT_INDIV = 0.15;
-    private static final double DEF_SIZE_WEIGHT_INDIV = 0.08;
-    private static final double DEF_EXTERIOR_WEIGHT_INDIV = 0.42;
-    private static final double DEF_ENDURANCE_WEIGHT_INDIV = 0.05;
-    private static final double DEF_IQ_WEIGHT_INDIV = 0.15;
-    private static final double DEF_STEAL_WEIGHT_INDIV = 0.15;
     private static final double MIN_INDIVIDUAL_ADVANTAGE = -15;
-    private static final double MAX_INDIVIDUAL_ADVANTAGE = 100;
+    private static final double MAX_INDIVIDUAL_ADVANTAGE = 25;
 
     public RegularMan2ManScheme(BadgeEngine badgeEngine) {
         super(badgeEngine);
@@ -46,13 +31,13 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
     public double calculateAdvantageForAPlayer(InGamePlayer attacker, GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
 
         Player attackerPlayer = attacker.getPlayer();
-        Player defender = defensiveGamePlan.getMatchups().get(attackerPlayer);
+        Player defender = defensiveGamePlan.getMatchups().defenderFor(attackerPlayer);
 
         double defensiveScore;
         if (defender == null) {
             defensiveScore = getAverageTeamDefensiveScore(defensiveGamePlan, shotSpec);
         } else {
-            double defenderScore = shotSpec.getDefensiveScoreForAShot(defender) * 1.3;
+            double defenderScore = shotSpec.getDefensiveScoreForAShot(defender) ;
 
             int attackerMinutes = attacker.getMinutesPlayed();
             int defenderMinutes = getMinutesPlayedFor(defensiveGamePlan, defender);
@@ -92,14 +77,12 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
                             baseOffensiveContribution,
                             ShotContext.empty()
                     );
-                    inGameOff.setPlaymakingContribution(offensiveContribution);
-
                     double effectiveOffScoreForAdvantage = offScore;
                     if (offensiveContribution != baseOffensiveContribution) {
                         effectiveOffScoreForAdvantage = (offensiveContribution / minutesShare);
                     }
 
-                    Player defender = defenseTeam.getMatchups().get(off);
+                    Player defender = defenseTeam.getMatchups().defenderFor(off);
                     double effectiveDefensiveScore;
                     int defenderMinutes;
                     if (defender == null) {
@@ -120,7 +103,11 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
                     double rawAdv = effectiveOffScoreForAdvantage - effectiveDefensiveScore;
                     double clampedAdv = Math.clamp(rawAdv, MIN_INDIVIDUAL_ADVANTAGE, MAX_INDIVIDUAL_ADVANTAGE);
                     //log.info("{} for {} (rawAdv: {})", clampedAdv, off.getName(), (rawAdv * 1.5) * minutesShare);
-                    return clampedAdv  * minutesShare;
+                    double v = clampedAdv * minutesShare;
+                    inGameOff.setPlaymakingContribution(v);
+                    log.info("{} for {} (rawAdv: {})", v, off.getName(), rawAdv);
+
+                    return v;
                 })
                 .sum();
     }
@@ -143,25 +130,11 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
     }
 
     private static double getIndividualPlaymakingDefScore(Player def) {
-        return DEF_SPEED_WEIGHT_INDIV * def.getSpeed() +
-                DEF_SIZE_WEIGHT_INDIV * def.getSize() +
-                DEF_EXTERIOR_WEIGHT_INDIV * def.getDefExterieur()
-                + DEF_ENDURANCE_WEIGHT_INDIV * def.getEndurance()
-                + DEF_IQ_WEIGHT_INDIV * def.getBasketballIqDef()
-                + DEF_STEAL_WEIGHT_INDIV * def.getSteal();
+        return PlayerScoreCalculator.calculateManToManPlaymakingDefScore(def);
     }
 
     private static double getIndividualPlaymakingOffScore(Player off) {
-        return OFF_SPEED_WEIGHT * off.getSpeed() +
-                OFF_SIZE_WEIGHT * off.getSize()
-                + OFF_ENDURANCE_WEIGHT * off.getEndurance() +
-                OFF_PASSING_WEIGHT * off.getPassingSkills() +
-                OFF_IQ_WEIGHT * off.getBasketballIqOff() +
-                OFF_HANDLING_WEIGHT * off.getBallhandling() +
-                OFF_3PT_WEIGHT * off.getTir3Pts() +
-                OFF_2PT_WEIGHT * off.getTir2Pts()
-                + OFF_FINISH_WEIGHT * off.getFinitionAuCercle()
-                + OFF_FLOATER_WEIGHT * off.getFloater();
+        return PlayerScoreCalculator.calculateManToManPlaymakingOffScore(off);
     }
 
     private double getAverageTeamDefensiveScore(GamePlan defensiveGamePlan, ShotSpec<?, ?> shotSpec) {
