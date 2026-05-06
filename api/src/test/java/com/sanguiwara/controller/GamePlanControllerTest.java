@@ -1,6 +1,8 @@
 package com.sanguiwara.controller;
 
+import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
+import com.sanguiwara.dto.GamePlanDTO;
 import com.sanguiwara.initializer.SeasonInitializer;
 import com.sanguiwara.mapper.GamePlanDTOMapper;
 import com.sanguiwara.service.GamePlanService;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = GamePlanController.class)
@@ -42,6 +45,58 @@ class GamePlanControllerTest {
 
     @MockitoBean
     private EventManager eventManager;
+
+    @Test
+    void saveGamePlan_returnsAcceptedAndSavedGamePlan() throws Exception {
+        UUID gamePlanId = UUID.randomUUID();
+        GamePlan incomingGamePlan = mock(GamePlan.class);
+        GamePlan savedGamePlan = mock(GamePlan.class);
+        GamePlanDTO savedGamePlanDTO = new GamePlanDTO(
+                gamePlanId,
+                null,
+                null,
+                java.util.List.of(),
+                java.util.Map.of(),
+                java.util.Map.of(),
+                0.33,
+                0.33,
+                0.34,
+                75,
+                DefenseType.MAN_TO_MAN
+        );
+
+        when(gamePlanDTOMapper.toDomain(any())).thenReturn(incomingGamePlan);
+        when(gamePlanService.update(incomingGamePlan)).thenReturn(savedGamePlan);
+        when(gamePlanDTOMapper.toDTO(savedGamePlan)).thenReturn(savedGamePlanDTO);
+
+        String body = """
+                {
+                  "id": "%s",
+                  "ownerTeam": null,
+                  "opponentTeam": null,
+                  "activePlayers": [],
+                  "matchups": {},
+                  "positions": {},
+                  "threePointAttemptShare": 0.33,
+                  "midRangeAttemptShare": 0.33,
+                  "driveAttemptShare": 0.34,
+                  "totalShotNumber": 75,
+                  "defenseType": "MAN_TO_MAN"
+                }
+                """.formatted(gamePlanId);
+
+        mockMvc.perform(post("/gameplans")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id").value(gamePlanId.toString()))
+                .andExpect(jsonPath("$.defenseType").value("MAN_TO_MAN"))
+                .andExpect(jsonPath("$.totalShotNumber").value(75.0));
+
+        verify(gamePlanDTOMapper).toDomain(any());
+        verify(gamePlanService).update(incomingGamePlan);
+        verify(gamePlanDTOMapper).toDTO(savedGamePlan);
+    }
 
     @Test
     void saveGamePlan_returnsConflictWhenMatchIsFinished() throws Exception {

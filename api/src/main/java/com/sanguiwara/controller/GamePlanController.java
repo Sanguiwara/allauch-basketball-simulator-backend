@@ -61,10 +61,9 @@ public class GamePlanController {
     }
 
     @PostMapping()
-    public ResponseEntity<Void> saveGamePlan(@RequestBody GamePlanDTO gamePlanDTO) {
-        gamePlanService.update(gamePlanDTOMapper.toDomain(gamePlanDTO));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-
+    public ResponseEntity<GamePlanDTO> saveGamePlan(@RequestBody GamePlanDTO gamePlanDTO) {
+        var savedGamePlan = gamePlanService.update(gamePlanDTOMapper.toDomain(gamePlanDTO));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(gamePlanDTOMapper.toDTO(savedGamePlan));
     }
 
     @GetMapping("/club/{clubId}")
