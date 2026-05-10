@@ -27,4 +27,18 @@ public interface GamePlanJpaRepository extends JpaRepository<GamePlanEntity, UUI
     List<GameEntity> findNextGameForClub(@Param("clubId") UUID clubId,
                                          @Param("now") Instant now,
                                          Pageable pageable);
+
+    @Query("""
+              select g
+              from GameEntity g
+              where g.executeAt >= :now
+                and g.gameResult is null
+                and (
+                  g.homeGamePlan.ownerTeam.id = :teamId
+                  or g.awayGamePlan.ownerTeam.id = :teamId
+                )
+              order by g.executeAt asc
+            """)
+    List<GameEntity> findUpcomingUnplayedGamesForTeam(@Param("teamId") UUID teamId,
+                                                      @Param("now") Instant now);
 }

@@ -38,9 +38,15 @@ Accept: application/json
 }
 
 ### Get a gameplan by id
-GET {{baseUrl}}/gameplans/<gamePlanId>
+GET {{baseUrl}}/gameplans/38920538-a4cc-4ca8-b071-a0550fd21d2b
 Authorization: Bearer {{token}}
 Accept: application/json
+
+> {%
+    // Use the response as a baseline for the update request below.
+    client.global.set("gamePlanDTO", JSON.stringify(response.body, null, 2));
+%}
+
 
 ### Get next upcoming gameplan for a club
 GET {{baseUrl}}/gameplans/club/<clubId>
@@ -54,6 +60,14 @@ Accept: application/json
 
 ### Update a gameplan (start from previous GET response)
 POST {{baseUrl}}/gameplans
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{{gamePlanDTO}}
+
+### Update a gameplan and apply it to all future unplayed gameplans for the same owner team
+POST {{baseUrl}}/gameplans/apply-to-upcoming
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json

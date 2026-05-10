@@ -6,6 +6,7 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.Gender;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.baserecords.Position;
 import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.GamePlanRepository;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -168,6 +172,113 @@ class GamePlanServiceImplTest {
         verify(gamePlanRepository, never()).update(any(GamePlan.class));
     }
 
+    @Test
+    void saveAndApplyToUpcomingGamePlans_savesSourceAndCopiesTemplateToFutureUnplayedPlans() {
+        GamePlanRepository gamePlanRepository = mock(GamePlanRepository.class);
+        ClubRepository clubRepository = mock(ClubRepository.class);
+        GamePlanServiceImpl service = new GamePlanServiceImpl(gamePlanRepository, clubRepository);
+
+        List<Player> players = List.of(
+                createPlayer("Player 1"),
+                createPlayer("Player 2"),
+                createPlayer("Player 3"),
+                createPlayer("Player 4"),
+                createPlayer("Player 5")
+        );
+        Team ownerTeam = createTeam(UUID.randomUUID(), "owner-team", players);
+        Team opponentTeam = createTeam(UUID.randomUUID(), "opponent-team", List.of(createPlayer("Opponent")));
+
+        UUID sourceGamePlanId = UUID.randomUUID();
+        UUID targetGamePlanId = UUID.randomUUID();
+        GamePlan sourceGamePlan = new GamePlan(sourceGamePlanId, ownerTeam, opponentTeam);
+        List<InGamePlayer> sourceActivePlayers = createActivePlayers(sourceGamePlanId, players);
+        sourceGamePlan.setActivePlayers(sourceActivePlayers);
+        sourceGamePlan.setPositions(Map.of(
+                Position.PG, sourceActivePlayers.get(0),
+                Position.SG, sourceActivePlayers.get(1),
+                Position.SF, sourceActivePlayers.get(2),
+                Position.PF, sourceActivePlayers.get(3),
+                Position.C, sourceActivePlayers.get(4)
+        ));
+        sourceGamePlan.setThreePointAttemptShare(0.4);
+        sourceGamePlan.setMidRangeAttemptShare(0.2);
+        sourceGamePlan.setDriveAttemptShare(0.4);
+
+        GamePlan persistedSource = new GamePlan(sourceGamePlanId, ownerTeam, opponentTeam);
+        GamePlan targetGamePlan = new GamePlan(targetGamePlanId, ownerTeam, opponentTeam);
+        List<InGamePlayer> existingTargetPlayers = createActivePlayers(targetGamePlanId, players);
+        targetGamePlan.setActivePlayers(existingTargetPlayers);
+
+        when(gamePlanRepository.isGameFinished(eq(sourceGamePlanId))).thenReturn(false);
+        when(gamePlanRepository.findById(eq(sourceGamePlanId))).thenReturn(Optional.of(persistedSource));
+        when(gamePlanRepository.update(any(GamePlan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(gamePlanRepository.findUpcomingUnplayedGamePlansForTeam(eq(ownerTeam.getId()), any(Instant.class)))
+                .thenReturn(List.of(persistedSource, targetGamePlan));
+
+        List<GamePlan> updatedGamePlans = service.saveAndApplyToUpcomingGamePlans(sourceGamePlan);
+
+        assertThat(updatedGamePlans).containsExactly(targetGamePlan);
+        assertThat(targetGamePlan.getThreePointAttemptShare()).isEqualTo(0.4);
+        assertThat(targetGamePlan.getMidRangeAttemptShare()).isEqualTo(0.2);
+        assertThat(targetGamePlan.getDriveAttemptShare()).isEqualTo(0.4);
+        assertThat(targetGamePlan.getActivePlayers()).hasSize(5);
+        assertThat(targetGamePlan.getActivePlayers())
+                .extracting(InGamePlayer::getGamePlanId)
+                .containsOnly(targetGamePlanId);
+        assertThat(targetGamePlan.getActivePlayers())
+                .extracting(InGamePlayer::getId)
+                .containsExactlyElementsOf(existingTargetPlayers.stream().map(InGamePlayer::getId).toList());
+        assertThat(targetGamePlan.getActivePlayers())
+                .extracting(InGamePlayer::getMinutesPlayed)
+                .containsExactly(36, 40, 42, 38, 44);
+        assertThat(targetGamePlan.getActivePlayers())
+                .extracting(InGamePlayer::getUsageShoot)
+                .containsExactly(11, 12, 13, 14, 15);
+        assertThat(targetGamePlan.getPositions()).containsKeys(Position.PG, Position.SG, Position.SF, Position.PF, Position.C);
+        assertThat(targetGamePlan.getPositions().get(Position.PG).getPlayer().getId())
+                .isEqualTo(players.getFirst().getId());
+        verify(gamePlanRepository, times(3)).update(any(GamePlan.class));
+        verify(gamePlanRepository).findUpcomingUnplayedGamePlansForTeam(eq(ownerTeam.getId()), any(Instant.class));
+    }
+
+    @Test
+    void saveAndApplyToUpcomingGamePlans_rejectsInvalidMinuteTotalBeforePersisting() {
+        GamePlanRepository gamePlanRepository = mock(GamePlanRepository.class);
+        ClubRepository clubRepository = mock(ClubRepository.class);
+        GamePlanServiceImpl service = new GamePlanServiceImpl(gamePlanRepository, clubRepository);
+
+        List<Player> players = List.of(
+                createPlayer("Player 1"),
+                createPlayer("Player 2"),
+                createPlayer("Player 3"),
+                createPlayer("Player 4"),
+                createPlayer("Player 5")
+        );
+        Team ownerTeam = createTeam(UUID.randomUUID(), "owner-team", players);
+        Team opponentTeam = createTeam(UUID.randomUUID(), "opponent-team", List.of(createPlayer("Opponent")));
+        UUID gamePlanId = UUID.randomUUID();
+
+        GamePlan sourceGamePlan = new GamePlan(gamePlanId, ownerTeam, opponentTeam);
+        List<InGamePlayer> activePlayers = createActivePlayers(gamePlanId, players);
+        activePlayers.getFirst().setMinutesPlayed(35);
+        sourceGamePlan.setActivePlayers(activePlayers);
+
+        GamePlan persistedSource = new GamePlan(gamePlanId, ownerTeam, opponentTeam);
+        when(gamePlanRepository.isGameFinished(eq(gamePlanId))).thenReturn(false);
+        when(gamePlanRepository.findById(eq(gamePlanId))).thenReturn(Optional.of(persistedSource));
+
+        assertThatThrownBy(() -> service.saveAndApplyToUpcomingGamePlans(sourceGamePlan))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(throwable -> {
+                    ResponseStatusException exception = (ResponseStatusException) throwable;
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(exception.getReason()).isEqualTo("activePlayers minutesPlayed must sum to 200, got=199");
+                });
+
+        verify(gamePlanRepository, never()).update(any(GamePlan.class));
+        verify(gamePlanRepository, never()).findUpcomingUnplayedGamePlansForTeam(any(), any());
+    }
+
     private static GamePlan createGamePlanWithOnePlayer() {
         return createGamePlanWithOnePlayer(UUID.randomUUID(), UUID.randomUUID(), createPlayer());
     }
@@ -182,10 +293,36 @@ class GamePlanServiceImplTest {
         return gamePlan;
     }
 
+    private static Team createTeam(UUID id, String name, List<Player> players) {
+        Team team = new Team(id, AgeCategory.U18, Gender.MALE, name);
+        team.setPlayers(players);
+        return team;
+    }
+
+    private static List<InGamePlayer> createActivePlayers(UUID gamePlanId, List<Player> players) {
+        int[] minutes = {36, 40, 42, 38, 44};
+        return java.util.stream.IntStream.range(0, players.size())
+                .mapToObj(i -> {
+                    InGamePlayer inGamePlayer = new InGamePlayer(players.get(i), gamePlanId);
+                    inGamePlayer.setId(UUID.randomUUID());
+                    inGamePlayer.setStarter(true);
+                    inGamePlayer.setMinutesPlayed(minutes[i]);
+                    inGamePlayer.setUsageShoot(11 + i);
+                    inGamePlayer.setUsageDrive(21 + i);
+                    inGamePlayer.setUsagePost(31 + i);
+                    return inGamePlayer;
+                })
+                .toList();
+    }
+
     private static Player createPlayer() {
+        return createPlayer("Test Player");
+    }
+
+    private static Player createPlayer(String name) {
         return Player.builder()
                 .id(UUID.randomUUID())
-                .name("Test Player")
+                .name(name)
                 .birthDate(2000)
                 .speed(60)
                 .size(70)

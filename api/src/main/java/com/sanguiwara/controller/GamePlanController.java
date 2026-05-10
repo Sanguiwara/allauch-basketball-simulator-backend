@@ -1,6 +1,8 @@
 package com.sanguiwara.controller;
 
 
+import com.sanguiwara.baserecords.GamePlan;
+import com.sanguiwara.dto.ApplyGamePlanToUpcomingResponse;
 import com.sanguiwara.dto.GamePlanDTO;
 import com.sanguiwara.dto.SeasonInitMode;
 import com.sanguiwara.dto.SeasonInitRequest;
@@ -15,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -64,6 +67,21 @@ public class GamePlanController {
     public ResponseEntity<GamePlanDTO> saveGamePlan(@RequestBody GamePlanDTO gamePlanDTO) {
         var savedGamePlan = gamePlanService.update(gamePlanDTOMapper.toDomain(gamePlanDTO));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(gamePlanDTOMapper.toDTO(savedGamePlan));
+    }
+
+    @PostMapping("/apply-to-upcoming")
+    public ResponseEntity<ApplyGamePlanToUpcomingResponse> applyGamePlanToUpcoming(@RequestBody GamePlanDTO gamePlanDTO) {
+        var sourceGamePlan = gamePlanDTOMapper.toDomain(gamePlanDTO);
+        var updatedGamePlans = gamePlanService.saveAndApplyToUpcomingGamePlans(sourceGamePlan);
+        List<UUID> updatedGamePlanIds = updatedGamePlans.stream()
+                .map(GamePlan::getId)
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApplyGamePlanToUpcomingResponse(
+                sourceGamePlan.getId(),
+                updatedGamePlanIds.size(),
+                updatedGamePlanIds
+        ));
     }
 
     @GetMapping("/club/{clubId}")

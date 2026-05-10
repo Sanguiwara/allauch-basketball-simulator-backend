@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -130,5 +131,50 @@ class GamePlanControllerTest {
 
         verify(gamePlanDTOMapper).toDomain(any());
         verify(gamePlanService).update(gamePlan);
+    }
+
+    @Test
+    void applyGamePlanToUpcoming_returnsAcceptedAndUpdatedIds() throws Exception {
+        UUID sourceGamePlanId = UUID.randomUUID();
+        UUID updatedGamePlanId1 = UUID.randomUUID();
+        UUID updatedGamePlanId2 = UUID.randomUUID();
+        GamePlan sourceGamePlan = mock(GamePlan.class);
+        GamePlan updatedGamePlan1 = mock(GamePlan.class);
+        GamePlan updatedGamePlan2 = mock(GamePlan.class);
+
+        when(sourceGamePlan.getId()).thenReturn(sourceGamePlanId);
+        when(updatedGamePlan1.getId()).thenReturn(updatedGamePlanId1);
+        when(updatedGamePlan2.getId()).thenReturn(updatedGamePlanId2);
+        when(gamePlanDTOMapper.toDomain(any())).thenReturn(sourceGamePlan);
+        when(gamePlanService.saveAndApplyToUpcomingGamePlans(sourceGamePlan))
+                .thenReturn(List.of(updatedGamePlan1, updatedGamePlan2));
+
+        String body = """
+                {
+                  "id": "%s",
+                  "ownerTeam": null,
+                  "opponentTeam": null,
+                  "activePlayers": [],
+                  "matchups": {},
+                  "positions": {},
+                  "threePointAttemptShare": 0.33,
+                  "midRangeAttemptShare": 0.33,
+                  "driveAttemptShare": 0.34,
+                  "totalShotNumber": 75,
+                  "defenseType": "MAN_TO_MAN"
+                }
+                """.formatted(sourceGamePlanId);
+
+        mockMvc.perform(post("/gameplans/apply-to-upcoming")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.sourceGamePlanId").value(sourceGamePlanId.toString()))
+                .andExpect(jsonPath("$.updatedGamePlanCount").value(2))
+                .andExpect(jsonPath("$.updatedGamePlanIds[0]").value(updatedGamePlanId1.toString()))
+                .andExpect(jsonPath("$.updatedGamePlanIds[1]").value(updatedGamePlanId2.toString()));
+
+        verify(gamePlanDTOMapper).toDomain(any());
+        verify(gamePlanService).saveAndApplyToUpcomingGamePlans(sourceGamePlan);
     }
 }

@@ -48,6 +48,18 @@ public class GamePlanRepositoryPGSQL implements GamePlanRepository {
     }
 
     @Override
+    public List<GamePlan> findUpcomingUnplayedGamePlansForTeam(UUID teamId, Instant now) {
+        return gamePlanJpaRepository.findUpcomingUnplayedGamesForTeam(teamId, now)
+                .stream()
+                .map(g -> {
+                    UUID homeTeamId = g.getHomeGamePlan().getOwnerTeam().getId();
+                    GamePlanEntity gamePlan = homeTeamId.equals(teamId) ? g.getHomeGamePlan() : g.getAwayGamePlan();
+                    return gamePlanMapper.toDomain(gamePlan);
+                })
+                .toList();
+    }
+
+    @Override
     public boolean isGameFinished(UUID gamePlanId) {
         return gameJpaRepository.isGameFinished(gamePlanId);
     }
