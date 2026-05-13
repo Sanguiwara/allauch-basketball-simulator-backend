@@ -4,6 +4,9 @@ import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
 import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.progression.ArchetypeProgressionProfile;
+import com.sanguiwara.progression.ArchetypeProgressionProfiles;
+import com.sanguiwara.progression.ProgressionSkillGroup;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashSet;
@@ -35,17 +38,19 @@ public final class StocksProgressionManager {
 
         double minutesMult = minutesMultiplier(minutesPlayed);
         double potentialMult = potentialMultiplier(player.getPotentielSkill());
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
 
         int steals = p.getSteals();
         boolean anyStocks = steals > 0 || p.getBlocks() > 0;
         if (anyStocks) {
-            applyStocksBadgeDrop(p);
+            applyStocksBadgeDrop(p, profile);
         }
         if (steals > 0) {
             double delta = BASE_STEAL_GAIN
                     * saturatingLog(steals)
                     * minutesMult
-                    * potentialMult;
+                    * potentialMult
+                    * profile.matchMultiplier(ProgressionSkillGroup.STEAL);
             player.setSteal(applyDelta(player.getSteal(), (int) Math.round(delta)));
         }
 
@@ -56,6 +61,7 @@ public final class StocksProgressionManager {
                     * saturatingLog(blocks)
                     * minutesMult
                     * potentialMult
+                    * profile.matchMultiplier(ProgressionSkillGroup.BLOCK)
                     * diminishingMultiplier(timingBlock);
             player.setTimingBlock(applyDelta(player.getTimingBlock(), (int) Math.round(timingDelta)));
 
@@ -64,6 +70,7 @@ public final class StocksProgressionManager {
                     * saturatingLog(blocks)
                     * minutesMult
                     * potentialMult
+                    * profile.matchMultiplier(ProgressionSkillGroup.RIM_PROTECTION)
                     * diminishingMultiplier(protect);
             player.setProtectionCercle(applyDelta(player.getProtectionCercle(), (int) Math.round(protectDelta)));
         }
@@ -71,7 +78,12 @@ public final class StocksProgressionManager {
 
     public void applyStocksBadgeDrop(InGamePlayer p) {
         var player = p.getPlayer();
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        applyStocksBadgeDrop(p, profile);
+    }
 
+    private void applyStocksBadgeDrop(InGamePlayer p, ArchetypeProgressionProfile profile) {
+        var player = p.getPlayer();
         Set<Long> badgeIds = player.getBadgeIds();
         if (badgeIds == null) {
             badgeIds = new HashSet<>();
@@ -82,7 +94,7 @@ public final class StocksProgressionManager {
             if (!badge.types().contains(BadgeType.STEAL)) continue;
             if (badgeIds.contains(badge.id())) continue;
 
-            if (random.nextDouble() < badge.dropRate()) {
+            if (random.nextDouble() < profile.effectiveBadgeDropRate(badge)) {
                 badgeIds.add(badge.id());
             }
         }

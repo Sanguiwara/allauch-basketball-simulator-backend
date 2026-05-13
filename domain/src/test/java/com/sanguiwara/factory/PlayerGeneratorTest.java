@@ -21,6 +21,7 @@ class PlayerGeneratorTest {
         assertFalse(p.getBadgeIds().isEmpty());
         assertNotNull(p.getName());
         assertTrue(p.getName().contains(" "));
+        assertEquals(PlayerArchetype.ALL_AROUND, p.getArchetype());
     }
 
     @Test
@@ -42,6 +43,7 @@ class PlayerGeneratorTest {
         PlayerGenerator gen = new PlayerGenerator(new Random(7L));
         Player p = gen.generatePlayer( PlayerArchetype.SOLDIER);
 
+        assertEquals(PlayerArchetype.SOLDIER, p.getArchetype());
         assertBetweenInclusive(p.getPhysique(), 82, 99);
         assertBetweenInclusive(p.getSolidite(), 80, 99);
         assertBetweenInclusive(p.getEndurance(), 78, 96);

@@ -20,7 +20,6 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -202,14 +201,14 @@ public class SeasonInitializer {
 
         // ALLER
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(r), false, true);
+            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(r), r, false, true);
             rotate(rotating);
         }
 
         // RETOUR (home/away inverses)
         rotating = new ArrayList<>(teams.subList(1, n));
         for (int r = 0; r < rounds; r++) {
-            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(rounds + r), true, true);
+            createRoundGames(fixed, rotating, leagueSeason, scheduler.timesForRound(rounds + r), rounds + r, true, true);
             rotate(rotating);
         }
     }
@@ -225,6 +224,7 @@ public class SeasonInitializer {
             List<TeamSeason> rotating,
             LeagueSeason leagueSeason,
             RoundTimes roundTimes,
+            int roundIndex,
             boolean reverse,
             boolean scheduleTrainings
     ) {
@@ -247,8 +247,8 @@ public class SeasonInitializer {
 
             Instant trainingExecuteAt = roundTimes.trainingExecuteAt();
             if (scheduleTrainings && trainingExecuteAt != null) {
-                createAndScheduleTraining(homeTeam.team(), trainingExecuteAt);
-                createAndScheduleTraining(visitorTeam.team(), trainingExecuteAt);
+                createAndScheduleTraining(homeTeam.team(), trainingExecuteAt, roundIndex);
+                createAndScheduleTraining(visitorTeam.team(), trainingExecuteAt, roundIndex);
             }
 
             Instant gameExecuteAt = roundTimes.gameExecuteAt();
@@ -271,12 +271,12 @@ public class SeasonInitializer {
         rotating.addFirst(last);
     }
 
-    private void createAndScheduleTraining(Team team, Instant executeAt) {
+    private void createAndScheduleTraining(Team team, Instant executeAt, int roundIndex) {
         Objects.requireNonNull(team, "team");
         Objects.requireNonNull(executeAt, "executeAt");
 
         TrainingType[] trainingTypes = TrainingType.values();
-        TrainingType trainingType = trainingTypes[ThreadLocalRandom.current().nextInt(trainingTypes.length)];
+        TrainingType trainingType = trainingTypes[roundIndex % trainingTypes.length];
         Training training = new Training(null, executeAt, team, trainingType);
         Training saved = trainingRepository.save(training);
 

@@ -121,7 +121,13 @@ class SeasonInitializerTest {
         assertThat(games).hasSize(rounds * (teams / 2));
         assertThat(capturedTrainingTypes).hasSize(rounds * teams);
         assertThat(capturedTrainingTypes).doesNotContainNull();
-        assertThat(capturedTrainingTypes).anyMatch(t -> t != TrainingType.PHYSICAL);
+        assertThat(capturedTrainingTypes).contains(TrainingType.values());
+
+        TrainingType[] trainingTypes = TrainingType.values();
+        for (int r = 0; r < rounds; r++) {
+            TrainingType expectedTrainingType = trainingTypes[r % trainingTypes.length];
+            assertThat(capturedTrainingTypes.subList(r * teams, (r + 1) * teams)).containsOnly(expectedTrainingType);
+        }
 
         List<Instant> trainingInstants = trainings.stream()
                 .map(TrainingTimeEvent::getExecuteAt)

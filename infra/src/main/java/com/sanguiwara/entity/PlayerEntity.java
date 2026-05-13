@@ -1,5 +1,6 @@
 package com.sanguiwara.entity;
 
+import com.sanguiwara.factory.PlayerArchetype;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,10 @@ public class PlayerEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "archetype", nullable = false)
+    private PlayerArchetype archetype;
 
     @ManyToMany
     @JoinTable(

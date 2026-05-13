@@ -4,6 +4,9 @@ import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
 import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.progression.ArchetypeProgressionProfile;
+import com.sanguiwara.progression.ArchetypeProgressionProfiles;
+import com.sanguiwara.progression.ProgressionSkillGroup;
 import com.sanguiwara.type.ShotType;
 import lombok.RequiredArgsConstructor;
 
@@ -37,25 +40,30 @@ public final class ShootingSkillProgressionManager {
             return;
         }
 
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
         double minutesMult = minutesMultiplier(minutesPlayed);
         double potentialMult = potentialMultiplier(player.getPotentielSkill());
 
         for (ShotType shotType : ShotType.values()) {
             int attempts;
             int made;
+            ProgressionSkillGroup skillGroup;
 
             switch (shotType) {
                 case THREE_POINT -> {
                     attempts = p.getThreePointAttempt();
                     made = p.getThreePointMade();
+                    skillGroup = ProgressionSkillGroup.THREE_POINT;
                 }
                 case TWO_POINT -> {
                     attempts = p.getTwoPointAttempts();
                     made = p.getTwoPointMade();
+                    skillGroup = ProgressionSkillGroup.TWO_POINT;
                 }
                 case DRIVE -> {
                     attempts = p.getDriveAttempts();
                     made = p.getDriveMade();
+                    skillGroup = ProgressionSkillGroup.DRIVE;
                 }
                 default -> throw new IllegalStateException("Unexpected shotType=" + shotType);
             }
@@ -69,7 +77,8 @@ public final class ShootingSkillProgressionManager {
 
             double scaledDelta = rawDelta
                     * minutesMult
-                    * potentialMult;
+                    * potentialMult
+                    * profile.matchMultiplier(skillGroup);
 
             // Only change here: widen clamp to allow +2..+3 outcomes from volume if you want.
 
@@ -87,13 +96,18 @@ public final class ShootingSkillProgressionManager {
 
         int totalAttempts = p.getThreePointAttempt() + p.getTwoPointAttempts() + p.getDriveAttempts();
         if (totalAttempts > 0 || p.getAssists() > 0) {
-            applyShootingAndAssistBadgeDrop(p);
+            applyShootingAndAssistBadgeDrop(p, profile);
         }
     }
 
     public void applyShootingAndAssistBadgeDrop(InGamePlayer p) {
         var player = p.getPlayer();
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        applyShootingAndAssistBadgeDrop(p, profile);
+    }
 
+    private void applyShootingAndAssistBadgeDrop(InGamePlayer p, ArchetypeProgressionProfile profile) {
+        var player = p.getPlayer();
         Set<Long> badgeIds = player.getBadgeIds();
 
 
@@ -101,7 +115,7 @@ public final class ShootingSkillProgressionManager {
             if (!handlesBadge(badge)) continue;
             if (badgeIds.contains(badge.id())) continue;
 
-            if (random.nextDouble() < badge.dropRate()) {
+            if (random.nextDouble() < profile.effectiveBadgeDropRate(badge)) {
                 badgeIds.add(badge.id());
             }
         }

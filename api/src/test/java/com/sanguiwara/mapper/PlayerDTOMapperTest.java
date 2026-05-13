@@ -2,6 +2,7 @@ package com.sanguiwara.mapper;
 
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.dto.PlayerDTO;
+import com.sanguiwara.factory.PlayerArchetype;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -19,6 +20,7 @@ class PlayerDTOMapperTest {
                 .id(UUID.randomUUID())
                 .name("Test Player")
                 .birthDate(2000)
+                .archetype(PlayerArchetype.THREE_POINT_SHOOTER)
                 .speed(60)
                 .size(70)
                 .weight(65)
@@ -47,6 +49,7 @@ class PlayerDTOMapperTest {
         PlayerDTO dto = mapper.toDto(player);
 
         assertThat(dto.scores()).isNotNull();
+        assertThat(dto.archetype()).isEqualTo(PlayerArchetype.THREE_POINT_SHOOTER);
         assertThat(dto.scores().threePtScore()).isCloseTo(77.0, within(0.0001));
         assertThat(dto.scores().threePtDefenseScore()).isCloseTo(44.0, within(0.0001));
         assertThat(dto.scores().twoPtScore()).isCloseTo(63.75, within(0.0001));

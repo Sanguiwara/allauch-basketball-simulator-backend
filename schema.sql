@@ -33,6 +33,7 @@ CREATE TABLE teams (
 CREATE TABLE players (
                           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                           name VARCHAR(255) NOT NULL,
+                          archetype VARCHAR(255) NOT NULL DEFAULT 'ALL_AROUND',
                           team_id UUID,
                           club_id UUID,
                          birth_date INTEGER NOT NULL,
@@ -71,8 +72,20 @@ CREATE TABLE players (
                          CONSTRAINT fk_players_team
                              FOREIGN KEY (team_id) REFERENCES teams (id),
                           CONSTRAINT fk_players_club
-                              FOREIGN KEY (club_id) REFERENCES clubs (id)
- );
+                              FOREIGN KEY (club_id) REFERENCES clubs (id),
+                          CONSTRAINT ck_players_archetype CHECK (archetype IN (
+                              'SOLDIER',
+                              'STRATEGIST',
+                              'CROQUEUR',
+                              'WHITE_SHOOTER',
+                              'THREE_POINT_SHOOTER',
+                              'TWO_POINT_SCORER',
+                              'DRIVE_SPECIALIST',
+                              'YOUNG_STAR',
+                              'ALL_AROUND',
+                              'ALL_STAR'
+                          ))
+);
 
 CREATE TABLE badges (
                         id BIGINT PRIMARY KEY,

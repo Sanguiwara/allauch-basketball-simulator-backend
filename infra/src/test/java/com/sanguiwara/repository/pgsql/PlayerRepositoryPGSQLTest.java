@@ -3,6 +3,7 @@ package com.sanguiwara.repository.pgsql;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
+import com.sanguiwara.factory.PlayerArchetype;
 import com.sanguiwara.mapper.PlayerMapper;
 import com.sanguiwara.repository.jpa.BadgeJpaRepository;
 import com.sanguiwara.repository.jpa.PlayerJpaRepository;
@@ -92,6 +93,7 @@ class PlayerRepositoryPGSQLTest {
                 .id(null)
                 .name("P")
                 .birthDate(20000101)
+                .archetype(PlayerArchetype.CROQUEUR)
                 .badgeIds(Set.of(badgeId))
                 .build();
 
@@ -99,6 +101,7 @@ class PlayerRepositoryPGSQLTest {
         playerRepository.save(created);
 
         PlayerEntity persisted = playerJpaRepository.findById(created.getId()).orElseThrow();
+        assertThat(persisted.getArchetype()).isEqualTo(PlayerArchetype.CROQUEUR);
         assertThat(persisted.getBadges()).extracting(BadgeEntity::getId).containsExactly(badgeId);
     }
 

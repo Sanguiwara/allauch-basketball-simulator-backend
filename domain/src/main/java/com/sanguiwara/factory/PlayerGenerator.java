@@ -29,7 +29,8 @@ public final class PlayerGenerator {
      */
     public Player generateRandomPlayer() {
         String effectiveName = generateRandomName();
-        Player.PlayerBuilder b = basePlayerBuilder(effectiveName);
+        Player.PlayerBuilder b = basePlayerBuilder(effectiveName)
+                .archetype(PlayerArchetype.ALL_AROUND);
 
         // Shooting / finishing
         b.tir3Pts(r(30, 95))
@@ -84,7 +85,8 @@ public final class PlayerGenerator {
                 : archetype;
 
         String effectiveName = generateRandomName();
-        Player.PlayerBuilder builder = basePlayerBuilder(effectiveName);
+        Player.PlayerBuilder builder = basePlayerBuilder(effectiveName)
+                .archetype(effective);
 
         switch (effective) {
             case SOLDIER -> applySoldier(builder);

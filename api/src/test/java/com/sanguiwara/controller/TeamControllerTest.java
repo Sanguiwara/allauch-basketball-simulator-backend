@@ -147,6 +147,7 @@ class TeamControllerTest {
                 created.getId(),
                 created.getName(),
                 created.getBirthDate(),
+                created.getArchetype(),
                 created.getTir3Pts(),
                 created.getTir2Pts(),
                 created.getLancerFranc(),

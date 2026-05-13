@@ -1,6 +1,7 @@
 package com.sanguiwara.mapper;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.factory.PlayerArchetype;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -20,11 +21,13 @@ class PlayerMapperTest {
                 .id(playerId)
                 .name("p")
                 .birthDate(20000101)
+                .archetype(PlayerArchetype.DRIVE_SPECIALIST)
                 .badgeIds(Set.of(1L, 2L))
                 .build();
 
         var e = mapper.toEntity(p);
 
+        assertThat(e.getArchetype()).isEqualTo(PlayerArchetype.DRIVE_SPECIALIST);
         assertThat(e.getBadges()).extracting("id").containsExactlyInAnyOrder(1L, 2L);
     }
 }

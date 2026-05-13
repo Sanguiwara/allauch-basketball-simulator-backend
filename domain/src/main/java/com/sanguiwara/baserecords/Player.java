@@ -2,6 +2,7 @@ package com.sanguiwara.baserecords;
 
 
 import com.sanguiwara.badges.AutoSkillBadges;
+import com.sanguiwara.factory.PlayerArchetype;
 import lombok.*;
 
 import java.util.HashSet;
@@ -24,6 +25,8 @@ public class Player {
     private final UUID id;
     private final String name;
     private final int birthDate;
+    @Builder.Default
+    private final PlayerArchetype archetype = PlayerArchetype.ALL_AROUND;
 
     @Setter
     private boolean injured;
@@ -153,6 +156,7 @@ public class Player {
                 .id(id)
                 .name(name)
                 .birthDate(birthDate)
+                .archetype(archetype)
                 .injured(injured)
                 .tir3Pts(tir3Pts)
                 .tir2Pts(tir2Pts)

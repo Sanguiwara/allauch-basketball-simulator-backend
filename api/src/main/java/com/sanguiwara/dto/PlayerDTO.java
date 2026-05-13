@@ -1,5 +1,7 @@
 package com.sanguiwara.dto;
 
+import com.sanguiwara.factory.PlayerArchetype;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -8,6 +10,7 @@ public record PlayerDTO(
         UUID id,
         String name,
         int birthDate,
+        PlayerArchetype archetype,
         int tir3Pts,
         int tir2Pts,
         int lancerFranc,

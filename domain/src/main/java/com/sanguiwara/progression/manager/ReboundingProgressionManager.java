@@ -4,6 +4,9 @@ import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
 import com.sanguiwara.badges.BadgeType;
 import com.sanguiwara.baserecords.InGamePlayer;
+import com.sanguiwara.progression.ArchetypeProgressionProfile;
+import com.sanguiwara.progression.ArchetypeProgressionProfiles;
+import com.sanguiwara.progression.ProgressionSkillGroup;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Random;
@@ -36,16 +39,19 @@ public final class ReboundingProgressionManager {
             return;
         }
 
-        applyReboundingBadgeDrop(p);
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        applyReboundingBadgeDrop(p, profile);
 
         double minutesMultiplier = minutesMultiplier(minutesPlayed);
         double potentialMultiplier = potentialMultiplier(player.getPotentielSkill());
+        double archetypeMultiplier = profile.matchMultiplier(ProgressionSkillGroup.REBOUND);
 
         // Timing rebounds
         double timingDelta = BASE_REBOUND_GAIN
                 * saturatingLog(rebounds)
                 * minutesMultiplier
-                * potentialMultiplier;
+                * potentialMultiplier
+                * archetypeMultiplier;
 
         player.setTimingRebond(applyDelta(player.getTimingRebond(), (int) Math.round(timingDelta)));
 
@@ -53,20 +59,26 @@ public final class ReboundingProgressionManager {
         double aggressDelta = (BASE_REBOUND_GAIN * REBOUND_AGGRESS_DELTA_MULT)
                 * saturatingLog(rebounds)
                 * minutesMultiplier
-                * potentialMultiplier;
+                * potentialMultiplier
+                * archetypeMultiplier;
         player.setAgressiviteRebond(applyDelta(player.getAgressiviteRebond(), (int) Math.round(aggressDelta)));
     }
 
     public void applyReboundingBadgeDrop(InGamePlayer p) {
         var player = p.getPlayer();
+        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        applyReboundingBadgeDrop(p, profile);
+    }
 
+    private void applyReboundingBadgeDrop(InGamePlayer p, ArchetypeProgressionProfile profile) {
+        var player = p.getPlayer();
         Set<Long> badgeIds = player.getBadgeIds();
 
         for (Badge badge : BadgeCatalog.badgeMap().values()) {
             if (!badge.types().contains(BadgeType.REBOUND)) continue;
             if (badgeIds.contains(badge.id())) continue;
 
-            double rate = badge.dropRate();
+            double rate = profile.effectiveBadgeDropRate(badge);
 
             if (random.nextDouble() < rate) {
                 badgeIds.add(badge.id());
