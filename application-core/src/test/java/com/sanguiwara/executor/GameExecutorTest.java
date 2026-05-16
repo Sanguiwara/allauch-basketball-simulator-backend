@@ -1,6 +1,6 @@
 package com.sanguiwara.executor;
 
-import com.sanguiwara.PostGameManager;
+import com.sanguiwara.postgame.PostGameManager;
 import com.sanguiwara.baserecords.AgeCategory;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.baserecords.GamePlan;
@@ -9,7 +9,6 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.calculator.GameSimulator;
-import com.sanguiwara.progression.PlayerProgression;
 import com.sanguiwara.repository.GameRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.repository.PlayerRepository;
@@ -104,7 +103,11 @@ class GameExecutorTest {
         assertThat(postGameSaved.getGameResult()).isEqualTo(gameResult);
 
         verify(gameRepository, times(2)).save(any(Game.class));
-        verify(playerRepository, times(2)).save(any(Player.class));
+        ArgumentCaptor<Player> savedPlayerCaptor = ArgumentCaptor.forClass(Player.class);
+        verify(playerRepository, times(4)).save(savedPlayerCaptor.capture());
+        assertThat(savedPlayerCaptor.getAllValues())
+                .extracting(Player::getName)
+                .contains("Home inactive", "Away inactive");
         verify(playerProgressionRepository).saveAll(List.of());
     }
 
@@ -113,18 +116,26 @@ class GameExecutorTest {
         Team awayTeam = new Team(UUID.randomUUID(), AgeCategory.U18, Gender.MALE, "away");
 
         GamePlan homeGamePlan = new GamePlan(UUID.randomUUID(), homeTeam, awayTeam);
-        homeGamePlan.setActivePlayers(List.of(createInGamePlayer(homeGamePlan.getId())));
+        InGamePlayer homeActivePlayer = createInGamePlayer(homeGamePlan.getId());
+        homeGamePlan.setActivePlayers(List.of(homeActivePlayer));
+        homeTeam.setPlayers(List.of(homeActivePlayer.getPlayer(), createPlayer("Home inactive")));
 
         GamePlan awayGamePlan = new GamePlan(UUID.randomUUID(), awayTeam, homeTeam);
-        awayGamePlan.setActivePlayers(List.of(createInGamePlayer(awayGamePlan.getId())));
+        InGamePlayer awayActivePlayer = createInGamePlayer(awayGamePlan.getId());
+        awayGamePlan.setActivePlayers(List.of(awayActivePlayer));
+        awayTeam.setPlayers(List.of(awayActivePlayer.getPlayer(), createPlayer("Away inactive")));
 
         return new Game(UUID.randomUUID(), homeGamePlan, awayGamePlan, null, Instant.now());
     }
 
     private static InGamePlayer createInGamePlayer(UUID gamePlanId) {
-        Player player = Player.builder()
+        return new InGamePlayer(createPlayer("Test Player"), gamePlanId);
+    }
+
+    private static Player createPlayer(String name) {
+        return Player.builder()
                 .id(UUID.randomUUID())
-                .name("Test Player")
+                .name(name)
                 .birthDate(2000)
                 .speed(60)
                 .size(70)
@@ -150,7 +161,6 @@ class GameExecutorTest {
                 .iq(40)
                 .coachability(60)
                 .build();
-        return new InGamePlayer(player, gamePlanId);
     }
 
     private static GameResult emptyGameResult() {

@@ -7,6 +7,7 @@ import com.sanguiwara.factory.ClubNameFactory;
 import com.sanguiwara.factory.PlayerArchetype;
 import com.sanguiwara.factory.PlayerGenerator;
 import com.sanguiwara.factory.TeamFactory;
+import com.sanguiwara.progression.PlayerSeasonSnapshot;
 import com.sanguiwara.repository.*;
 import com.sanguiwara.service.GamePlanService;
 import com.sanguiwara.service.PlayerService;
@@ -20,6 +21,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +58,7 @@ public class SeasonInitializer {
     private final GameTimeEventRepository gameTimeEventRepository;
     private final TrainingRepository trainingRepository;
     private final TrainingTimeEventRepository trainingTimeEventRepository;
+    private final PlayerSeasonSnapshotRepository playerSeasonSnapshotRepository;
 
     /**
      * Legacy behavior: fast schedule (10 min rounds) + immediate execution (dev/testing).
@@ -128,6 +131,7 @@ public class SeasonInitializer {
         leagueSeason = leagueSeasonRepository.save(leagueSeason);
 
         List<TeamSeason> teamSeasonList = new ArrayList<>();
+        List<Player> seasonPlayers = new ArrayList<>();
         for (int i = 0; i < NB_CLUBS; i++) {
             String randomFrenchBasketClubName = ClubNameFactory.generateRandomFrenchBasketClubName();
             Club club = new Club(randomFrenchBasketClubName);
@@ -146,6 +150,7 @@ public class SeasonInitializer {
             }
 
             team.setPlayers(players);
+            seasonPlayers.addAll(players);
             club.getTeams().add(team);
             team = teamRepository.save(team);
             clubRepository.save(club);
@@ -157,6 +162,13 @@ public class SeasonInitializer {
 
         leagueSeason.getTeamSeasons().addAll(teamSeasonList);
         leagueSeason = leagueSeasonRepository.save(leagueSeason);
+
+        UUID leagueSeasonId = leagueSeason.getId();
+        playerSeasonSnapshotRepository.saveAll(
+                seasonPlayers.stream()
+                        .map(player -> PlayerSeasonSnapshot.from(leagueSeasonId, player))
+                        .toList()
+        );
 
         createGamesForSeason(leagueSeason, scheduler);
 

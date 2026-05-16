@@ -1,6 +1,7 @@
 package com.sanguiwara.executor;
 
-import com.sanguiwara.PostGameManager;
+import com.sanguiwara.postgame.PostGameManager;
+import com.sanguiwara.postgame.PostGamePlayerResolver;
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -21,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -49,12 +49,7 @@ public class GameExecutor {
         BoxScore awayStats = boxScore.awayScore();
         printGame(game, homeStats, awayStats);
         List<PlayerProgression> progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
-        List<InGamePlayer> playersFromGame =
-                Stream.concat(
-                        game.getHomeGamePlan().getActivePlayers().stream(),
-                        game.getAwayGamePlan().getActivePlayers().stream()
-                ).toList();
-        playersFromGame.forEach(player -> playerRepository.save(player.getPlayer()));
+        PostGamePlayerResolver.resolveAffectedPlayers(game).forEach(playerRepository::save);
         gameRepository.save(game);
         playerProgressionRepository.saveAll(progressions);
     }

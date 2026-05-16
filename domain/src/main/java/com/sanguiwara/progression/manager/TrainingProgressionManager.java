@@ -95,7 +95,12 @@ public final class TrainingProgressionManager {
             case MORALE -> {
                 int baseDelta = rollDelta(MORALE_MIN_DELTA, MORALE_MAX_DELTA);
                 double multiplier = profile.trainingMultiplier(trainingType, ProgressionSkillGroup.MORALE);
-                player.setMorale(clampSkill(player.getMorale() + roundExpectedDelta(baseDelta * multiplier)));
+                player.setMorale(MoraleDeltaScaler.applyDelta(
+                        player.getMorale(),
+                        roundExpectedDelta(baseDelta * multiplier),
+                        MIN_SKILL_VALUE,
+                        MAX_SKILL_VALUE
+                ));
             }
             case TACTICAL -> applySkillRolls(trainingType, profile, player, List.of(
                     skill(ProgressionSkillGroup.MENTAL, Player::getBasketballIqOff, Player::setBasketballIqOff),
@@ -198,9 +203,5 @@ public final class TrainingProgressionManager {
     }
 
     private record SkillRef(ProgressionSkillGroup group, ToIntFunction<Player> get, ObjIntConsumer<Player> set) {}
-
-    private static int clampSkill(int value) {
-        return Math.clamp(value, MIN_SKILL_VALUE, MAX_SKILL_VALUE);
-    }
 
 }

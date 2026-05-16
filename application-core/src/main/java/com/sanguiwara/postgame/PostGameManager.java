@@ -1,4 +1,4 @@
-package com.sanguiwara;
+package com.sanguiwara.postgame;
 
 import com.sanguiwara.baserecords.Game;
 import com.sanguiwara.baserecords.GamePlan;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,23 +30,20 @@ public class PostGameManager {
 
     public List<PlayerProgression> applyPostGameEffectsAndReturnsPlayersProgression(Game game) {
         List<PlayerProgression> progressionList = new ArrayList<>();
-        List<InGamePlayer> playersFromGame =
-                Stream.concat(
-                        game.getHomeGamePlan().getActivePlayers().stream(),
-                        game.getAwayGamePlan().getActivePlayers().stream()
-                ).toList();
+        List<Player> playersFromGame = PostGamePlayerResolver.resolveAffectedPlayers(game);
 
         Map<UUID, Player> beforeByPlayerId =
                 playersFromGame.stream()
                         .collect(Collectors.toMap(
-                                inGamePlayer -> inGamePlayer.getPlayer().getId(),
-                                inGamePlayer -> inGamePlayer.getPlayer().snapshotPlayer()
+                                Player::getId,
+                                Player::snapshotPlayer,
+                                (first, ignored) -> first,
+                                LinkedHashMap::new
                         ));
 
         applyPostGameEffects(game);
 
-        for (InGamePlayer inGamePlayer : playersFromGame) {
-            Player playerAfterProgress = inGamePlayer.getPlayer();
+        for (Player playerAfterProgress : playersFromGame) {
             Player playerBeforeProgress = beforeByPlayerId.get(playerAfterProgress.getId());
             PlayerProgressionDelta delta = PlayerProgressionDelta.between(playerBeforeProgress, playerAfterProgress);
             // Store only badges earned during this event (not the full post-event badge set).
@@ -79,6 +75,8 @@ public class PostGameManager {
         }
         moraleProgressionManager.applyLosingEffect(losingGamePlan);
         moraleProgressionManager.applyWinningEffect(winningGamePlan);
+        moraleProgressionManager.applyDidNotPlayPenalty(losingGamePlan);
+        moraleProgressionManager.applyDidNotPlayPenalty(winningGamePlan);
 
         winningGamePlan.getActivePlayers().forEach(this::applyProgression);
         losingGamePlan.getActivePlayers().forEach(this::applyProgression);

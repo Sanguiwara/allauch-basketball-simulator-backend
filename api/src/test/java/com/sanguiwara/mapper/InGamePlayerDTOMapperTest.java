@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.within;
 class InGamePlayerDTOMapperTest {
 
     @Test
-    void toDto_exposesCalculatedScoresThroughNestedPlayerDto() throws Exception {
+    void toDto_exposesCalculatedScoresAndMatchRating() throws Exception {
         InGamePlayerDTOMapperImpl mapper = new InGamePlayerDTOMapperImpl();
         setField(mapper, "playerDTOMapper", new PlayerDTOMapperImpl());
 
@@ -48,9 +48,11 @@ class InGamePlayerDTOMapperTest {
                 .build();
 
         InGamePlayer inGamePlayer = new InGamePlayer(player, UUID.randomUUID());
+        inGamePlayer.setMatchRating(7.25);
 
         InGamePlayerDTO dto = mapper.toDto(inGamePlayer);
 
+        assertThat(dto.matchRating()).isEqualTo(7.25);
         assertThat(dto.player()).isNotNull();
         assertThat(dto.player().scores()).isNotNull();
         assertThat(dto.player().scores().threePtScore()).isCloseTo(77.0, within(0.0001));

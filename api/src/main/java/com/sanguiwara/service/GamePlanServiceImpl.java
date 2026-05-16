@@ -176,6 +176,7 @@ public class GamePlanServiceImpl implements GamePlanService {
                 throw badRequest("Each active player must reference a player id");
             }
 
+            activePlayerIds.add(activePlayer.getPlayer().getId());
             totalMinutes += activePlayer.getMinutesPlayed();
             if (activePlayer.isStarter()) {
                 starters++;

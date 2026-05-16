@@ -1,7 +1,9 @@
 package com.sanguiwara.controller;
 
 import com.sanguiwara.dto.PlayerDTO;
+import com.sanguiwara.dto.PlayerSeasonStateDTO;
 import com.sanguiwara.mapper.PlayerDTOMapper;
+import com.sanguiwara.mapper.PlayerSeasonStateDTOMapper;
 import com.sanguiwara.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.UUID;
 public class PlayerController {
     private final PlayerService playerService;
     private final PlayerDTOMapper playerDTOMapper;
+    private final PlayerSeasonStateDTOMapper playerSeasonStateDTOMapper;
 
     @GetMapping("/{id}")
     public PlayerDTO getPlayer(@PathVariable UUID id) {
@@ -30,6 +33,17 @@ public class PlayerController {
     @GetMapping
     public List<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers().stream().map(playerDTOMapper::toDto).toList();
+    }
+
+    @GetMapping("/{id}/season-state")
+    public PlayerSeasonStateDTO getPlayerSeasonState(
+            @PathVariable UUID id
+    ) {
+        var state = playerService.getPlayerSeasonState(id);
+        if (state == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player season state not found");
+        }
+        return playerSeasonStateDTOMapper.toDto(state);
     }
 
     @DeleteMapping

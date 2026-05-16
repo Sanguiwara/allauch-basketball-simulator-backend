@@ -130,6 +130,82 @@ CREATE TABLE team_season (
                                  FOREIGN KEY (league_season_id) REFERENCES league_seasons (id)
 );
 
+CREATE TABLE player_season_snapshots (
+                                         league_season_id UUID NOT NULL,
+                                         player_id UUID NOT NULL,
+                                         name VARCHAR(255) NOT NULL,
+                                         archetype VARCHAR(255) NOT NULL,
+                                         club_id UUID,
+                                         birth_date INTEGER NOT NULL,
+                                         injured BOOLEAN NOT NULL,
+                                         tir_3_pts INTEGER NOT NULL,
+                                         tir_2_pts INTEGER NOT NULL,
+                                         lancer_franc INTEGER NOT NULL,
+                                         floater INTEGER NOT NULL,
+                                         finition_au_cercle INTEGER NOT NULL,
+                                         speed INTEGER NOT NULL,
+                                         ballhandling INTEGER NOT NULL,
+                                         size INTEGER NOT NULL,
+                                         weight INTEGER NOT NULL,
+                                         agressivite INTEGER NOT NULL,
+                                         def_exterieur INTEGER NOT NULL,
+                                         def_poste INTEGER NOT NULL,
+                                         protection_cercle INTEGER NOT NULL,
+                                         timing_rebond INTEGER NOT NULL,
+                                         agressivite_rebond INTEGER NOT NULL,
+                                         steal INTEGER NOT NULL,
+                                         timing_block INTEGER NOT NULL,
+                                         physique INTEGER NOT NULL,
+                                         basketball_iq_off INTEGER NOT NULL,
+                                         basketball_iq_def INTEGER NOT NULL,
+                                         passing_skills INTEGER NOT NULL,
+                                         iq INTEGER NOT NULL,
+                                         endurance INTEGER NOT NULL,
+                                         solidite INTEGER NOT NULL,
+                                         potentiel_skill INTEGER NOT NULL,
+                                         potentiel_physique INTEGER NOT NULL,
+                                         coachability INTEGER NOT NULL,
+                                         ego INTEGER NOT NULL,
+                                         soft_skills INTEGER NOT NULL,
+                                         leadership INTEGER NOT NULL,
+                                         morale INTEGER NOT NULL,
+                                         CONSTRAINT pk_player_season_snapshots PRIMARY KEY (league_season_id, player_id),
+                                         CONSTRAINT fk_player_season_snapshots_league_season
+                                             FOREIGN KEY (league_season_id) REFERENCES league_seasons (id),
+                                         CONSTRAINT fk_player_season_snapshots_player
+                                             FOREIGN KEY (player_id) REFERENCES players (id),
+                                         CONSTRAINT fk_player_season_snapshots_club
+                                             FOREIGN KEY (club_id) REFERENCES clubs (id),
+                                         CONSTRAINT ck_player_season_snapshots_archetype CHECK (archetype IN (
+                                             'SOLDIER',
+                                             'STRATEGIST',
+                                             'CROQUEUR',
+                                             'WHITE_SHOOTER',
+                                             'THREE_POINT_SHOOTER',
+                                             'TWO_POINT_SCORER',
+                                             'DRIVE_SPECIALIST',
+                                             'YOUNG_STAR',
+                                             'ALL_AROUND',
+                                             'ALL_STAR'
+                                         ))
+);
+CREATE INDEX idx_player_season_snapshots_player_id ON player_season_snapshots(player_id);
+
+CREATE TABLE player_season_snapshot_badges (
+                                               league_season_id UUID NOT NULL,
+                                               player_id UUID NOT NULL,
+                                               badge_id BIGINT NOT NULL,
+                                               CONSTRAINT pk_player_season_snapshot_badges
+                                                   PRIMARY KEY (league_season_id, player_id, badge_id),
+                                               CONSTRAINT fk_player_season_snapshot_badges_snapshot
+                                                   FOREIGN KEY (league_season_id, player_id)
+                                                       REFERENCES player_season_snapshots (league_season_id, player_id)
+                                                       ON DELETE CASCADE,
+                                               CONSTRAINT fk_player_season_snapshot_badges_badge
+                                                   FOREIGN KEY (badge_id) REFERENCES badges (id)
+);
+CREATE INDEX idx_player_season_snapshot_badges_badge_id ON player_season_snapshot_badges(badge_id);
+
 CREATE TABLE gameplans (
                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                            team_home_id UUID NOT NULL,

@@ -1,6 +1,7 @@
 package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.progression.PlayerSeasonState;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,4 +18,6 @@ public interface PlayerService {
     Player savePlayer(Player player);
 
     void deletePlayer(UUID id);
+
+    PlayerSeasonState getPlayerSeasonState(UUID playerId);
 }

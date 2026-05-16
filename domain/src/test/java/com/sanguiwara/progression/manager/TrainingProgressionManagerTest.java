@@ -116,6 +116,22 @@ class TrainingProgressionManagerTest {
     }
 
     @Test
+    void applyTraining_moraleGivesMoreMoraleWhenCurrentMoraleIsLow() {
+        TrainingProgressionManager manager = new TrainingProgressionManager(maxDeltaHighVarianceNoDropRandom());
+        Player lowMoralePlayer = basePlayer();
+        Player highMoralePlayer = basePlayer();
+        lowMoralePlayer.setMorale(20);
+        highMoralePlayer.setMorale(80);
+
+        manager.applyTraining(TrainingType.MORALE, lowMoralePlayer);
+        manager.applyTraining(TrainingType.MORALE, highMoralePlayer);
+
+        int lowMoraleGain = lowMoralePlayer.getMorale() - 20;
+        int highMoraleGain = highMoralePlayer.getMorale() - 80;
+        assertThat(lowMoraleGain).isGreaterThan(highMoraleGain);
+    }
+
+    @Test
     void applyTraining_shooting_canUnlockShootingBadges() {
         TrainingProgressionManager manager = new TrainingProgressionManager(alwaysDropRandom());
         Player p = basePlayer();

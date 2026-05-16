@@ -44,6 +44,7 @@ class SeasonInitializerTest {
         GameTimeEventRepository gameTimeEventRepository = mock(GameTimeEventRepository.class);
         TrainingRepository trainingRepository = mock(TrainingRepository.class);
         TrainingTimeEventRepository trainingTimeEventRepository = mock(TrainingTimeEventRepository.class);
+        PlayerSeasonSnapshotRepository playerSeasonSnapshotRepository = mock(PlayerSeasonSnapshotRepository.class);
 
         EventManager eventManager = new EventManager(gameTimeEventRepository, trainingTimeEventRepository);
 
@@ -63,7 +64,8 @@ class SeasonInitializerTest {
                 eventManager,
                 gameTimeEventRepository,
                 trainingRepository,
-                trainingTimeEventRepository
+                trainingTimeEventRepository,
+                playerSeasonSnapshotRepository
         );
 
         List<TrainingType> capturedTrainingTypes = new ArrayList<>();

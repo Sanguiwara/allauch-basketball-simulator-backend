@@ -1,7 +1,10 @@
 package com.sanguiwara.controller;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.dto.PlayerSeasonStateDTO;
 import com.sanguiwara.mapper.PlayerDTOMapper;
+import com.sanguiwara.mapper.PlayerSeasonStateDTOMapper;
+import com.sanguiwara.progression.PlayerSeasonState;
 import com.sanguiwara.service.PlayerService;
 import com.sanguiwara.timeevent.EventManager;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = PlayerController.class)
@@ -35,6 +40,9 @@ class PlayerControllerTest {
 
     @MockitoBean
     private PlayerDTOMapper playerDTOMapper;
+
+    @MockitoBean
+    private PlayerSeasonStateDTOMapper playerSeasonStateDTOMapper;
 
     // Required because Application defines an ApplicationRunner bean depending on EventManager.
     @MockitoBean
@@ -107,5 +115,53 @@ class PlayerControllerTest {
 
         verify(playerService, never()).savePlayer(any());
     }
+
+    @Test
+    void getPlayerSeasonState_returnsSeasonComparison() throws Exception {
+        UUID playerId = UUID.randomUUID();
+        UUID leagueSeasonId = UUID.randomUUID();
+        Player seasonStart = player(playerId, 50);
+        Player current = player(playerId, 54);
+        PlayerSeasonState state = PlayerSeasonState.between(leagueSeasonId, seasonStart, current);
+        PlayerSeasonStateDTO dto = new PlayerSeasonStateDTO(
+                playerId,
+                leagueSeasonId,
+                null,
+                null,
+                null
+        );
+
+        when(playerService.getPlayerSeasonState(playerId)).thenReturn(state);
+        when(playerSeasonStateDTOMapper.toDto(state)).thenReturn(dto);
+
+        mockMvc.perform(get("/players/{id}/season-state", playerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.playerId").value(playerId.toString()))
+                .andExpect(jsonPath("$.leagueSeasonId").value(leagueSeasonId.toString()));
+    }
+
+    @Test
+    void getPlayerSeasonState_returnsNotFound_whenSnapshotDoesNotExist() throws Exception {
+        UUID playerId = UUID.randomUUID();
+
+        when(playerService.getPlayerSeasonState(playerId)).thenReturn(null);
+
+        mockMvc.perform(get("/players/{id}/season-state", playerId))
+                .andExpect(status().isNotFound());
+    }
+
+    private Player player(UUID playerId, int tir3Pts) {
+        return Player.builder()
+                .id(playerId)
+                .name("P")
+                .birthDate(20000101)
+                .teamsID(new HashSet<>())
+                .clubID(null)
+                .badgeIds(new HashSet<>())
+                .injured(false)
+                .tir3Pts(tir3Pts)
+                .build();
+    }
+
 }
 
