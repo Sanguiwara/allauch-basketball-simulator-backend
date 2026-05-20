@@ -3,6 +3,7 @@ package com.sanguiwara.progression.manager;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.progression.MoraleDeltaScaler;
 
 import java.util.Set;
 import java.util.UUID;

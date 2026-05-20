@@ -3,6 +3,7 @@ package com.sanguiwara.baserecords;
 
 import com.sanguiwara.badges.AutoSkillBadges;
 import com.sanguiwara.factory.PlayerArchetype;
+import com.sanguiwara.modifiers.PlayerModifier;
 import lombok.*;
 
 import java.util.HashSet;
@@ -21,6 +22,8 @@ public class Player {
     private UUID clubID;
     @Setter
     private Set<Long> badgeIds;
+    @Builder.Default
+    private Set<PlayerModifier> temporaryModifiers = new HashSet<>();
 
     private final UUID id;
     private final String name;
@@ -97,6 +100,32 @@ public class Player {
     @Setter
     private  int morale;
 
+    public void setTemporaryModifiers(Set<PlayerModifier> temporaryModifiers) {
+        this.temporaryModifiers = temporaryModifiers == null ? new HashSet<>() : new HashSet<>(temporaryModifiers);
+    }
+
+    public void addTemporaryModifier(PlayerModifier modifier) {
+        Objects.requireNonNull(modifier, "modifier");
+        if (temporaryModifiers == null) {
+            temporaryModifiers = new HashSet<>();
+        } else if (!(temporaryModifiers instanceof HashSet)) {
+            temporaryModifiers = new HashSet<>(temporaryModifiers);
+        }
+        temporaryModifiers.add(modifier);
+    }
+
+    public void consumeTemporaryModifiersForGame() {
+        if (temporaryModifiers == null || temporaryModifiers.isEmpty()) {
+            return;
+        }
+
+        Set<PlayerModifier> remainingModifiers = new HashSet<>();
+        for (PlayerModifier modifier : temporaryModifiers) {
+            modifier.afterGame().ifPresent(remainingModifiers::add);
+        }
+        temporaryModifiers = remainingModifiers;
+    }
+
     // Custom setters (override Lombok-generated ones) to keep auto-badges in sync with stats.
     public void setTir3Pts(int tir3Pts) {
         this.tir3Pts = tir3Pts;
@@ -148,11 +177,15 @@ public class Player {
     public Player snapshotPlayer() {
         Set<UUID> teamsCopy = (teamsID == null) ? new HashSet<>() : new HashSet<>(teamsID);
         Set<Long> badgeIdsCopy = (badgeIds == null) ? new HashSet<>() : new HashSet<>(badgeIds);
+        Set<PlayerModifier> temporaryModifiersCopy = temporaryModifiers == null
+                ? new HashSet<>()
+                : new HashSet<>(temporaryModifiers);
 
         return Player.builder()
                 .teamsID(teamsCopy)
                 .clubID(clubID)
                 .badgeIds(badgeIdsCopy)
+                .temporaryModifiers(temporaryModifiersCopy)
                 .id(id)
                 .name(name)
                 .birthDate(birthDate)

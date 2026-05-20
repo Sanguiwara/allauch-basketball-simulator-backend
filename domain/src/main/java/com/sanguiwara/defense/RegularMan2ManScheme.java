@@ -4,8 +4,8 @@ import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.ShotContext;
 import com.sanguiwara.badges.Target;
 import com.sanguiwara.calculator.PlayerScoreCalculator;
@@ -18,8 +18,8 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
     private static final double MIN_INDIVIDUAL_ADVANTAGE = -15;
     private static final double MAX_INDIVIDUAL_ADVANTAGE = 25;
 
-    public RegularMan2ManScheme(BadgeEngine badgeEngine) {
-        super(badgeEngine);
+    public RegularMan2ManScheme(PlayerModifierEngine modifierEngine) {
+        super(modifierEngine);
     }
 
     @Override
@@ -70,9 +70,9 @@ public final class RegularMan2ManScheme extends Man2ManScheme {
 
                     double minutesShare = (double) inGameOff.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
                     double baseOffensiveContribution = offScore * minutesShare;
-                    double offensiveContribution = badgeEngine.apply(
+                    double offensiveContribution = modifierEngine.apply(
                             off,
-                            BadgeType.ASSIST,
+                            ModifierType.ASSIST,
                             Target.PLAYMAKING_CONTRIBUTION,
                             baseOffensiveContribution,
                             ShotContext.empty()

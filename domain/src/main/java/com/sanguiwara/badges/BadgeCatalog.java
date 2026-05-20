@@ -42,39 +42,39 @@ public final class BadgeCatalog {
 
 
     private static Badge threePointSpecialist() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
-        return new StandardBadge(THREE_POINT_SPECIALIST_ID, "Three Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.THREE_POINT), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
+        return new StandardBadge(THREE_POINT_SPECIALIST_ID, "Three Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.THREE_POINT), mods);
     }
 
     private static Badge twoPointSpecialist() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
-        return new StandardBadge(TWO_POINT_SPECIALIST_ID, "Two Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.TWO_POINT), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
+        return new StandardBadge(TWO_POINT_SPECIALIST_ID, "Two Point Specialist", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.TWO_POINT), mods);
     }
 
     private static Badge driveFinisher() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
-        return new StandardBadge(DRIVE_FINISHER_ID, "Drive Finisher", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.DRIVE), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.1)));
+        return new StandardBadge(DRIVE_FINISHER_ID, "Drive Finisher", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.DRIVE), mods);
     }
 
     private static Badge reboundHunter() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.REBOUND, List.of(new Modifier(Target.REBOUND_SCORE, ModifierOp.MUL, 1.10)));
-        return new StandardBadge(REBOUND_HUNTER_ID, "Rebound Hunter", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.REBOUND), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.REBOUND, List.of(new Modifier(Target.REBOUND_SCORE, ModifierOp.MUL, 1.10)));
+        return new StandardBadge(REBOUND_HUNTER_ID, "Rebound Hunter", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.REBOUND), mods);
     }
 
     private static Badge thief() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.STEAL, List.of(new Modifier(Target.STEAL_SCORE, ModifierOp.MUL, 1.10)));
-        return new StandardBadge(THIEF_ID, "Thief", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.STEAL), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.STEAL, List.of(new Modifier(Target.STEAL_SCORE, ModifierOp.MUL, 1.10)));
+        return new StandardBadge(THIEF_ID, "Thief", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.STEAL), mods);
     }
 
     private static Badge playmaker() {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.ASSIST, List.of(new Modifier(Target.PLAYMAKING_CONTRIBUTION, ModifierOp.MUL, 1.10)));
-        return new StandardBadge(PLAYMAKER_ID, "Playmaker", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.ASSIST), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.ASSIST, List.of(new Modifier(Target.PLAYMAKING_CONTRIBUTION, ModifierOp.MUL, 1.10)));
+        return new StandardBadge(PLAYMAKER_ID, "Playmaker", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.ASSIST), mods);
     }
 
     private static Badge defensiveReboundSpecialist() {
@@ -82,11 +82,11 @@ public final class BadgeCatalog {
             @Override public long id() { return DEF_REBOUND_SPECIALIST_ID; }
             @Override public String name() { return "Defensive Rebound Specialist"; }
             @Override public double dropRate() { return DEFAULT_DROP_RATE; }
-            @Override public java.util.Set<BadgeType> types() { return EnumSet.of(BadgeType.REBOUND); }
+            @Override public java.util.Set<ModifierType> types() { return EnumSet.of(ModifierType.REBOUND); }
 
             @Override
-            public List<Modifier> modifiersFor(BadgeType type, Context context) {
-                if (type != BadgeType.REBOUND) return List.of();
+            public List<Modifier> modifiersFor(ModifierType type, Context context) {
+                if (type != ModifierType.REBOUND) return List.of();
                 if (!(context instanceof ReboundContext(ReboundType reboundType))) return List.of();
                 if (reboundType != ReboundType.DEFENSIVE) return List.of();
                 return List.of(new Modifier(Target.REBOUND_SCORE, ModifierOp.MUL, 1.20));
@@ -99,10 +99,10 @@ public final class BadgeCatalog {
             @Override public long id() { return ASSISTED_SHOT_BOOST_ID; }
             @Override public String name() { return "Assisted Shot Boost"; }
             @Override public double dropRate() { return DEFAULT_DROP_RATE; }
-            @Override public java.util.Set<BadgeType> types() { return EnumSet.of(BadgeType.THREE_POINT, BadgeType.TWO_POINT, BadgeType.DRIVE); }
+            @Override public java.util.Set<ModifierType> types() { return EnumSet.of(ModifierType.THREE_POINT, ModifierType.TWO_POINT, ModifierType.DRIVE); }
 
             @Override
-            public List<Modifier> modifiersFor(BadgeType type, Context context) {
+            public List<Modifier> modifiersFor(ModifierType type, Context context) {
                 if (!(context instanceof ShotContext sc)) return List.of();
                 if (!sc.assisted()) return List.of();
                 return switch (type) {
@@ -114,10 +114,10 @@ public final class BadgeCatalog {
     }
 
     private static Badge crazyShooter(){
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
-        mods.put(BadgeType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
-        mods.put(BadgeType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
-        return new StandardBadge(CRAZY_SHOOTER_ID, "Crazy Shooter", DEFAULT_DROP_RATE, EnumSet.of(BadgeType.DRIVE, BadgeType.THREE_POINT), mods);
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
+        mods.put(ModifierType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
+        mods.put(ModifierType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, 0.02)));
+        return new StandardBadge(CRAZY_SHOOTER_ID, "Crazy Shooter", DEFAULT_DROP_RATE, EnumSet.of(ModifierType.DRIVE, ModifierType.THREE_POINT), mods);
 
     }
 }

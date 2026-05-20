@@ -1,6 +1,6 @@
 package com.sanguiwara.calculator.spec;
 
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
@@ -65,10 +65,10 @@ class ShotSpecificationsDistributeShotAttemptsTest {
         plan.setTotalShotNumber(attempts);
         configureShares(kind, plan);
 
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         Random random = new StratifiedRandom(attempts);
 
-        distribute(kind, plan, random, badgeEngine);
+        distribute(kind, plan, random, modifierEngine);
 
         log.info("=== {} distributeShotAttempts (attempts={}) ===", kind, attempts);
         for (InGamePlayer p : players) {
@@ -89,11 +89,11 @@ class ShotSpecificationsDistributeShotAttemptsTest {
                 "With equal aggressiveness/minutes, usage=30 players should always get more attempts than usage=10 players");
     }
 
-    private static void distribute(SpecKind kind, GamePlan plan, Random random, BadgeEngine badgeEngine) {
+    private static void distribute(SpecKind kind, GamePlan plan, Random random, PlayerModifierEngine modifierEngine) {
         switch (kind) {
-            case THREE_POINT -> new ThreePointSpecification(random, badgeEngine).distributeShotAttempts(plan);
-            case TWO_POINT -> new TwoPointSpecification(random, badgeEngine).distributeShotAttempts(plan);
-            case DRIVE -> new DriveSpecification(random, badgeEngine).distributeShotAttempts(plan);
+            case THREE_POINT -> new ThreePointSpecification(random, modifierEngine).distributeShotAttempts(plan);
+            case TWO_POINT -> new TwoPointSpecification(random, modifierEngine).distributeShotAttempts(plan);
+            case DRIVE -> new DriveSpecification(random, modifierEngine).distributeShotAttempts(plan);
         }
     }
 

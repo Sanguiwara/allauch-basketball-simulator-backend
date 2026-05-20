@@ -1,7 +1,7 @@
 package com.sanguiwara.calculator.spec;
 
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.ShotContext;
 import com.sanguiwara.badges.Target;
 import com.sanguiwara.baserecords.GamePlan;
@@ -32,7 +32,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     // Attempts Sampling Constants
     // Intensity distribution is handled by ShotAttemptDistributor with shared constants across ShotSpec.
     private final Random random;
-    private final BadgeEngine badgeEngine;
+    private final PlayerModifierEngine modifierEngine;
 
 
     @Override
@@ -61,7 +61,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
         double advPct = (advantage / ADVANTAGE_DIVISOR) * ADVANTAGE_IMPACT_COEFFICIENT;
 
         double pct = base + advPct + assistBonusPct;
-        pct = badgeEngine.apply(attacker, BadgeType.DRIVE, Target.SHOT_PCT, pct,
+        pct = modifierEngine.apply(attacker, ModifierType.DRIVE, Target.SHOT_PCT, pct,
                 ShotContext.forShot(ShotType.DRIVE, isAssistedShot, advantage));
         return clamp(pct);
 
@@ -71,7 +71,7 @@ public class DriveSpecification implements ShotSpec<DriveEvent, DriveResult> {
     @Override
     public double getDefensiveScoreForAShot(Player defender) {
         double score = PlayerScoreCalculator.calculateDriveDefenseScore(defender);
-        return badgeEngine.apply(defender, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
+        return modifierEngine.apply(defender, ModifierType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
     }
 
     public double getPlayerScoreForAShot(Player attacker) {

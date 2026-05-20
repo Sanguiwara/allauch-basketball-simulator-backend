@@ -1,6 +1,6 @@
 package com.sanguiwara.defense;
 
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.calculator.spec.ShotSpec;
 import com.sanguiwara.gameevent.ShotEvent;
@@ -23,7 +23,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getAverageTeamDefensiveScore_shouldBeMinutesWeightedAverage() throws Exception {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         GamePlan defensivePlan = new GamePlan(UUID.nameUUIDFromBytes("DEF_GP".getBytes(StandardCharsets.UTF_8)), null, null);
         defensivePlan.setActivePlayers(List.of(
@@ -46,7 +46,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void calculateAdvantageForAPlayer_whenAttackerPlaysMoreThanDefender_shouldUseTeamAverageForExtraMinutes() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
         ShotSpec<?, ?> spec = testSpec();
 
         InGamePlayer attacker = makePlayer("ATTACKER", 80, 40);
@@ -75,7 +75,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_whenNoMatchup_shouldUseDegradedTeamAverageDefenseOnPlaymaking() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         InGamePlayer attacker = makePlayer("ATTACKER", 60, 40);
         InGamePlayer neutral1 = makePlayer("NEUTRAL_1", 50, 40);
@@ -115,7 +115,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_whenAttackerPlaysMoreThanDefender_shouldBlendMatchupDefenseAndTeamAverage() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         InGamePlayer attacker = makePlayer("ATTACKER", 60, 40);
         InGamePlayer neutral1 = makePlayer("NEUTRAL_1", 50, 40);
@@ -154,7 +154,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_shouldReflectDifferentOffensiveArchetypes() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         // One playmaker + 4 neutral players (all play 40 min => 200 total).
         InGamePlayer playmaker = makePlayer("PLAYMAKER", 50, 40, b -> {
@@ -198,7 +198,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_playmakerShouldOutscoreShooterInPlaymaking_againstSameDefense() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         GamePlan defensePlan = new GamePlan(UUID.randomUUID(), null, null);
         InGamePlayer def1 = makePlayer("DEF_1", 50, 40);
@@ -257,7 +257,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_shouldDependOnMatchupAssignments() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         InGamePlayer playmaker = makePlayer("PLAYMAKER", 50, 40, b -> {
             b.passingSkills(99);
@@ -318,7 +318,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_shouldClampLowWhenEliteDefenderShadowsPlaymaker_fullMinutes() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         InGamePlayer playmaker = makePlayer("PLAYMAKER", 50, 40, b -> {
             b.passingSkills(99);
@@ -364,7 +364,7 @@ class RegularMan2ManSchemeTest {
 
     @Test
     void getOffensiveTeamPlaymakingScore_whenEliteDefenderPlaysLess_shouldBlendWithTeamAverageDefense() {
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new BadgeEngine());
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(new PlayerModifierEngine());
 
         InGamePlayer playmaker = makePlayer("PLAYMAKER", 50, 40, b -> {
             b.passingSkills(99);

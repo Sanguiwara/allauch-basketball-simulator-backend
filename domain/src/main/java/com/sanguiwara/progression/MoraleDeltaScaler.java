@@ -1,6 +1,6 @@
-package com.sanguiwara.progression.manager;
+package com.sanguiwara.progression;
 
-final class MoraleDeltaScaler {
+public final class MoraleDeltaScaler {
 
     private static final double MIN_MORALE_DELTA_MULTIPLIER = 0.5;
     private static final double MAX_MORALE_DELTA_MULTIPLIER = 1.5;
@@ -8,7 +8,7 @@ final class MoraleDeltaScaler {
     private MoraleDeltaScaler() {
     }
 
-    static int applyDelta(int currentMorale, int delta, int minMorale, int maxMorale) {
+    public static int applyDelta(int currentMorale, int delta, int minMorale, int maxMorale) {
         return Math.clamp(currentMorale + scaleDelta(currentMorale, delta, minMorale, maxMorale), minMorale, maxMorale);
     }
 

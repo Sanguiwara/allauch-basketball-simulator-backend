@@ -6,6 +6,8 @@ import com.sanguiwara.baserecords.TrainingType;
 import com.sanguiwara.baserecords.Team;
 import com.sanguiwara.executor.TrainingExecutor;
 import com.sanguiwara.progression.ProgressionEventType;
+import com.sanguiwara.progression.training.TrainingProgression;
+import com.sanguiwara.progression.training.TrainingProgressions;
 import com.sanguiwara.repository.ClubRepository;
 import com.sanguiwara.repository.PlayerProgressionRepository;
 import com.sanguiwara.repository.TeamRepository;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +72,13 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public List<Training> getAllTrainings() {
         return trainingRepository.findAll();
+    }
+
+    @Override
+    public List<TrainingProgression> getAvailableTrainingProgressions() {
+        return Arrays.stream(TrainingType.values())
+                .map(TrainingProgressions::defaultFor)
+                .toList();
     }
 
     @Override

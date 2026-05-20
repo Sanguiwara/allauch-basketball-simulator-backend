@@ -10,6 +10,7 @@ public record PlayerProgressionDTO(
         ProgressionEventType eventType,
         UUID eventId,
         List<BadgeDTO> badges,
+        List<TrainingTemporaryModifierDTO> temporaryModifiers,
         Integer tir3Pts,
         Integer tir2Pts,
         Integer lancerFranc,

@@ -6,8 +6,8 @@ import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.entity.PlayerEntity;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MatchupsEntityMapperTest {
 
-    private final PlayerMapper playerMapper = Mappers.getMapper(PlayerMapper.class);
+    private final PlayerMapper playerMapper = playerMapper();
     private final MatchupsEntityMapper mapper = new MatchupsEntityMapper(playerMapper);
 
     @Test
@@ -62,5 +62,23 @@ class MatchupsEntityMapperTest {
         entity.setName(name);
         entity.setBirthDate(20000101);
         return entity;
+    }
+
+    private static PlayerMapperImpl playerMapper() {
+        PlayerMapperImpl mapper = new PlayerMapperImpl();
+        setField(mapper, "badgeEntityMapper", new BadgeEntityMapperImpl());
+        setField(mapper, "entityReferenceMapper", new EntityReferenceMapperImpl());
+        setField(mapper, "playerTemporaryModifierEntityMapper", new PlayerTemporaryModifierEntityMapperImpl());
+        return mapper;
+    }
+
+    private static void setField(Object target, String fieldName, Object value) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

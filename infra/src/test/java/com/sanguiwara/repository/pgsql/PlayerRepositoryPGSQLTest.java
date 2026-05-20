@@ -4,12 +4,18 @@ import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.entity.BadgeEntity;
 import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.factory.PlayerArchetype;
+import com.sanguiwara.mapper.BadgeEntityMapper;
+import com.sanguiwara.mapper.BadgeEntityMapperImpl;
+import com.sanguiwara.mapper.EntityReferenceMapper;
+import com.sanguiwara.mapper.EntityReferenceMapperImpl;
 import com.sanguiwara.mapper.PlayerMapper;
+import com.sanguiwara.mapper.PlayerMapperImpl;
+import com.sanguiwara.mapper.PlayerTemporaryModifierEntityMapper;
+import com.sanguiwara.mapper.PlayerTemporaryModifierEntityMapperImpl;
 import com.sanguiwara.repository.jpa.BadgeJpaRepository;
 import com.sanguiwara.repository.jpa.PlayerJpaRepository;
 import com.sanguiwara.repository.jpa.TeamJpaRepository;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -22,6 +28,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,9 +62,31 @@ class PlayerRepositoryPGSQLTest {
     @TestConfiguration
     static class MapperConfig {
         @Bean
-        PlayerMapper playerMapper() {
-            // In tests we don't need the Spring component model, just the mapper implementation.
-            return Mappers.getMapper(PlayerMapper.class);
+        BadgeEntityMapper badgeEntityMapper() {
+            return new BadgeEntityMapperImpl();
+        }
+
+        @Bean
+        EntityReferenceMapper entityReferenceMapper() {
+            return new EntityReferenceMapperImpl();
+        }
+
+        @Bean
+        PlayerTemporaryModifierEntityMapper playerTemporaryModifierEntityMapper() {
+            return new PlayerTemporaryModifierEntityMapperImpl();
+        }
+
+        @Bean
+        PlayerMapper playerMapper(
+                BadgeEntityMapper badgeEntityMapper,
+                EntityReferenceMapper entityReferenceMapper,
+                PlayerTemporaryModifierEntityMapper playerTemporaryModifierEntityMapper
+        ) {
+            PlayerMapperImpl mapper = new PlayerMapperImpl();
+            setField(mapper, "badgeEntityMapper", badgeEntityMapper);
+            setField(mapper, "entityReferenceMapper", entityReferenceMapper);
+            setField(mapper, "playerTemporaryModifierEntityMapper", playerTemporaryModifierEntityMapper);
+            return mapper;
         }
 
         @Bean
@@ -68,6 +97,16 @@ class PlayerRepositoryPGSQLTest {
                 PlayerMapper playerMapper
         ) {
             return new PlayerRepositoryPGSQL(playerJpaRepository, badgeJpaRepository, teamJpaRepository, playerMapper);
+        }
+
+        private static void setField(Object target, String fieldName, Object value) {
+            try {
+                Field field = target.getClass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                field.set(target, value);
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sanguiwara.progression;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.modifiers.PlayerModifier;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,13 +45,30 @@ public record PlayerProgressionDelta(
         Integer leadership,
         Integer morale,
         Set<Long> badgesAdded,
-        Set<Long> badgesRemoved
+        Set<Long> badgesRemoved,
+        Set<PlayerModifier> temporaryModifiersAdded,
+        Set<PlayerModifier> temporaryModifiersRemoved
 ) {
+    public PlayerProgressionDelta {
+        badgesAdded = badgesAdded == null ? Set.of() : Set.copyOf(badgesAdded);
+        badgesRemoved = badgesRemoved == null ? Set.of() : Set.copyOf(badgesRemoved);
+        temporaryModifiersAdded = temporaryModifiersAdded == null ? Set.of() : Set.copyOf(temporaryModifiersAdded);
+        temporaryModifiersRemoved = temporaryModifiersRemoved == null ? Set.of() : Set.copyOf(temporaryModifiersRemoved);
+    }
+
     public static PlayerProgressionDelta between(Player before, Player after) {
         Set<Long> beforeBadges = before.getBadgeIds() == null ? Set.of() : before.getBadgeIds();
         Set<Long> afterBadges = after.getBadgeIds() == null ? Set.of() : after.getBadgeIds();
         Set<Long> badgesAdded = diff(afterBadges, beforeBadges);
         Set<Long> badgesRemoved = diff(beforeBadges, afterBadges);
+        Set<PlayerModifier> beforeTemporaryModifiers = before.getTemporaryModifiers() == null
+                ? Set.of()
+                : before.getTemporaryModifiers();
+        Set<PlayerModifier> afterTemporaryModifiers = after.getTemporaryModifiers() == null
+                ? Set.of()
+                : after.getTemporaryModifiers();
+        Set<PlayerModifier> temporaryModifiersAdded = diff(afterTemporaryModifiers, beforeTemporaryModifiers);
+        Set<PlayerModifier> temporaryModifiersRemoved = diff(beforeTemporaryModifiers, afterTemporaryModifiers);
 
         return new PlayerProgressionDelta(
                 deltaOrNull(after.getTir3Pts() - before.getTir3Pts()),
@@ -85,7 +103,9 @@ public record PlayerProgressionDelta(
                 deltaOrNull(after.getLeadership() - before.getLeadership()),
                 deltaOrNull(after.getMorale() - before.getMorale()),
                 badgesAdded,
-                badgesRemoved
+                badgesRemoved,
+                temporaryModifiersAdded,
+                temporaryModifiersRemoved
         );
     }
 
@@ -93,8 +113,8 @@ public record PlayerProgressionDelta(
         return delta == 0 ? null : delta;
     }
 
-    private static Set<Long> diff(Set<Long> left, Set<Long> right) {
-        Set<Long> diff = new HashSet<>(left);
+    private static <T> Set<T> diff(Set<T> left, Set<T> right) {
+        Set<T> diff = new HashSet<>(left);
         diff.removeAll(right);
         return Set.copyOf(diff);
     }

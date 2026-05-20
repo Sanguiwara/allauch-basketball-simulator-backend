@@ -1,10 +1,11 @@
-package com.sanguiwara.progression.manager;
+package com.sanguiwara.progression.training;
 
 import com.sanguiwara.badges.BadgeCatalog;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.baserecords.TrainingType;
 import com.sanguiwara.factory.PlayerArchetype;
+import com.sanguiwara.modifiers.PlayerModifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -15,11 +16,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class TrainingProgressionManagerTest {
+class TrainingEngineTest {
 
     @Test
     void applyTraining_shooting_usesSkillCurveAtMidSkill() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(minDeltaHighVarianceNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(minDeltaHighVarianceNoDropRandom());
         Player p = basePlayer();
 
         p.setTir3Pts(50);
@@ -28,7 +29,7 @@ class TrainingProgressionManagerTest {
         p.setFloater(50);
         p.setFinitionAuCercle(50);
 
-        manager.applyTraining(TrainingType.SHOOTING, p);
+        engine.applyTraining(progression(TrainingType.SHOOTING), p);
 
         assertThat(p.getTir3Pts()).isEqualTo(55);
         assertThat(p.getTir2Pts()).isEqualTo(55);
@@ -39,14 +40,14 @@ class TrainingProgressionManagerTest {
 
     @Test
     void applyTraining_tactical_usesSkillCurveAtMidSkill() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(maxDeltaHighVarianceNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(maxDeltaHighVarianceNoDropRandom());
         Player p = basePlayer();
 
         p.setBasketballIqOff(50);
         p.setBasketballIqDef(50);
         p.setIq(50);
 
-        manager.applyTraining(TrainingType.TACTICAL, p);
+        engine.applyTraining(progression(TrainingType.TACTICAL), p);
 
         assertThat(p.getBasketballIqOff()).isEqualTo(57);
         assertThat(p.getBasketballIqDef()).isEqualTo(57);
@@ -55,7 +56,7 @@ class TrainingProgressionManagerTest {
 
     @Test
     void applyTraining_physical_usesSkillCurveAtMidSkill() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(maxDeltaHighVarianceNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(maxDeltaHighVarianceNoDropRandom());
         Player p = basePlayer();
 
         p.setPhysique(50);
@@ -63,7 +64,7 @@ class TrainingProgressionManagerTest {
         p.setEndurance(50);
         p.setSolidite(50);
 
-        manager.applyTraining(TrainingType.PHYSICAL, p);
+        engine.applyTraining(progression(TrainingType.PHYSICAL), p);
 
         assertThat(p.getPhysique()).isEqualTo(57);
         assertThat(p.getSpeed()).isEqualTo(57);
@@ -72,59 +73,137 @@ class TrainingProgressionManagerTest {
     }
 
     @Test
+    void applyTraining_playmaking_usesSkillCurveAtMidSkill() {
+        TrainingEngine engine = new TrainingEngine(maxDeltaHighVarianceNoDropRandom());
+        Player p = basePlayer();
+
+        p.setBallhandling(50);
+        p.setPassingSkills(50);
+        p.setBasketballIqOff(50);
+        p.setIq(50);
+
+        engine.applyTraining(progression(TrainingType.PLAYMAKING), p);
+
+        assertThat(p.getBallhandling()).isEqualTo(57);
+        assertThat(p.getPassingSkills()).isEqualTo(57);
+        assertThat(p.getBasketballIqOff()).isEqualTo(57);
+        assertThat(p.getIq()).isEqualTo(57);
+    }
+
+    @Test
+    void applyTraining_freePlay_lightlyImprovesMoraleAttackAndDefense() {
+        TrainingEngine engine = new TrainingEngine(maxDeltaHighVarianceNoDropRandom());
+        Player p = basePlayer();
+
+        engine.applyTraining(progression(TrainingType.FREE_PLAY), p);
+
+        assertThat(p.getMorale()).isEqualTo(51);
+
+        assertThat(p.getTir3Pts()).isGreaterThan(50);
+        assertThat(p.getTir2Pts()).isGreaterThan(50);
+        assertThat(p.getFinitionAuCercle()).isGreaterThan(50);
+        assertThat(p.getBallhandling()).isGreaterThan(50);
+        assertThat(p.getPassingSkills()).isGreaterThan(50);
+        assertThat(p.getBasketballIqOff()).isGreaterThan(50);
+
+        assertThat(p.getDefExterieur()).isGreaterThan(50);
+        assertThat(p.getDefPoste()).isGreaterThan(50);
+        assertThat(p.getProtectionCercle()).isGreaterThan(50);
+        assertThat(p.getSteal()).isGreaterThan(50);
+        assertThat(p.getBasketballIqDef()).isGreaterThan(50);
+
+        assertThat(p.getPhysique()).isEqualTo(50);
+        assertThat(p.getSpeed()).isEqualTo(50);
+        assertThat(p.getEndurance()).isEqualTo(50);
+        assertThat(p.getSolidite()).isEqualTo(50);
+    }
+
+    @Test
+    void applyTraining_freePlay_canUnlockAttackAndDefenseBadgesAtReducedRate() {
+        assertTrainingCanUnlockBadges(
+                TrainingType.FREE_PLAY,
+                ModifierType.THREE_POINT,
+                ModifierType.TWO_POINT,
+                ModifierType.DRIVE,
+                ModifierType.ASSIST,
+                ModifierType.STEAL,
+                ModifierType.BLOCK,
+                ModifierType.DEF_EXTER
+        );
+    }
+
+    @Test
+    void applyTraining_threePointFocus_createsNextGameThreePointModifierOnly() {
+        TrainingEngine engine = new TrainingEngine(minDeltaHighVarianceNoDropRandom());
+        Player p = basePlayer();
+
+        engine.applyTraining(progression(TrainingType.THREE_POINT_FOCUS), p);
+
+        assertThat(p.getTemporaryModifiers())
+                .containsExactly(PlayerModifier.nextGameThreePointShotPctBonus(0.05));
+        assertThat(p.getTir3Pts()).isEqualTo(50);
+        assertThat(p.getTir2Pts()).isEqualTo(50);
+        assertThat(p.getMorale()).isEqualTo(50);
+
+        p.consumeTemporaryModifiersForGame();
+
+        assertThat(p.getTemporaryModifiers()).isEmpty();
+    }
+
+    @Test
     void applyTraining_lowSkillCanGainTwentyWithStrongArchetypeAndHighRoll() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(firstSkillMaxVarianceAndRoundUpNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(firstSkillMaxVarianceAndRoundUpNoDropRandom());
         Player p = basePlayer(PlayerArchetype.THREE_POINT_SHOOTER);
         p.setTir3Pts(1);
 
-        manager.applyTraining(TrainingType.SHOOTING, p);
+        engine.applyTraining(progression(TrainingType.SHOOTING), p);
 
         assertThat(p.getTir3Pts()).isEqualTo(21);
     }
 
     @Test
     void applyTraining_eliteSkillCanGainAtMostOneWithHighRoll() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(alwaysDropRandom());
+        TrainingEngine engine = new TrainingEngine(alwaysDropRandom());
         Player p = basePlayer(PlayerArchetype.THREE_POINT_SHOOTER);
         p.setTir3Pts(90);
 
-        manager.applyTraining(TrainingType.SHOOTING, p);
+        engine.applyTraining(progression(TrainingType.SHOOTING), p);
 
         assertThat(p.getTir3Pts()).isEqualTo(91);
     }
 
     @Test
     void applyTraining_maxSkillDoesNotProgress() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(alwaysDropRandom());
+        TrainingEngine engine = new TrainingEngine(alwaysDropRandom());
         Player p = basePlayer(PlayerArchetype.THREE_POINT_SHOOTER);
         p.setTir3Pts(99);
 
-        manager.applyTraining(TrainingType.SHOOTING, p);
+        engine.applyTraining(progression(TrainingType.SHOOTING), p);
 
         assertThat(p.getTir3Pts()).isEqualTo(99);
     }
 
     @Test
     void applyTraining_rejectsSkillOutsideGlobalInvariant() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(minDeltaHighVarianceNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(minDeltaHighVarianceNoDropRandom());
         Player p = basePlayer();
         p.setTir3Pts(0);
 
-        assertThatThrownBy(() -> manager.applyTraining(TrainingType.SHOOTING, p))
+        assertThatThrownBy(() -> engine.applyTraining(progression(TrainingType.SHOOTING), p))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Skill value must be between 1 and 99");
     }
 
     @Test
     void applyTraining_moraleGivesMoreMoraleWhenCurrentMoraleIsLow() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(maxDeltaHighVarianceNoDropRandom());
+        TrainingEngine engine = new TrainingEngine(maxDeltaHighVarianceNoDropRandom());
         Player lowMoralePlayer = basePlayer();
         Player highMoralePlayer = basePlayer();
         lowMoralePlayer.setMorale(20);
         highMoralePlayer.setMorale(80);
 
-        manager.applyTraining(TrainingType.MORALE, lowMoralePlayer);
-        manager.applyTraining(TrainingType.MORALE, highMoralePlayer);
+        engine.applyTraining(progression(TrainingType.MORALE), lowMoralePlayer);
+        engine.applyTraining(progression(TrainingType.MORALE), highMoralePlayer);
 
         int lowMoraleGain = lowMoralePlayer.getMorale() - 20;
         int highMoraleGain = highMoralePlayer.getMorale() - 80;
@@ -133,25 +212,12 @@ class TrainingProgressionManagerTest {
 
     @Test
     void applyTraining_shooting_canUnlockShootingBadges() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(alwaysDropRandom());
-        Player p = basePlayer();
-        p.setBadgeIds(new HashSet<>());
-
-        manager.applyTraining(TrainingType.SHOOTING, p);
-
-        Set<Long> expected = new HashSet<>();
-        for (var badge : BadgeCatalog.badgeMap().values()) {
-            if (badge.types().contains(BadgeType.THREE_POINT)
-                    || badge.types().contains(BadgeType.TWO_POINT)
-                    || badge.types().contains(BadgeType.DRIVE)) {
-                // Training unlocks by drop rate; auto-skill badges have dropRate=0 and should not unlock here.
-                if (badge.dropRate() > 0.0) {
-                    expected.add(badge.id());
-                }
-            }
-        }
-
-        assertThat(p.getBadgeIds()).containsAll(expected);
+        assertTrainingCanUnlockBadges(
+                TrainingType.SHOOTING,
+                ModifierType.THREE_POINT,
+                ModifierType.TWO_POINT,
+                ModifierType.DRIVE
+        );
     }
 
     @Test
@@ -161,32 +227,81 @@ class TrainingProgressionManagerTest {
         shooter.setTir3Pts(50);
         soldier.setTir3Pts(50);
 
-        new TrainingProgressionManager(thresholdThenNoDropRandom(0.75)).applyTraining(TrainingType.SHOOTING, shooter);
-        new TrainingProgressionManager(thresholdThenNoDropRandom(0.75)).applyTraining(TrainingType.SHOOTING, soldier);
+        new TrainingEngine(thresholdThenNoDropRandom(0.75)).applyTraining(progression(TrainingType.SHOOTING), shooter);
+        new TrainingEngine(thresholdThenNoDropRandom(0.75)).applyTraining(progression(TrainingType.SHOOTING), soldier);
 
         assertThat(shooter.getTir3Pts()).isEqualTo(56);
         assertThat(soldier.getTir3Pts()).isEqualTo(53);
     }
 
     @Test
-    void applyTraining_defense_canUnlockStealBadges() {
-        TrainingProgressionManager manager = new TrainingProgressionManager(alwaysDropRandom());
+    void applyTraining_defense_canUnlockDefenseBadges() {
+        assertTrainingCanUnlockBadges(
+                TrainingType.DEFENSE,
+                ModifierType.STEAL,
+                ModifierType.BLOCK,
+                ModifierType.DEF_EXTER
+        );
+    }
+
+    @Test
+    void applyTraining_physical_canUnlockPhysicalBadges() {
+        assertTrainingCanUnlockBadges(
+                TrainingType.PHYSICAL,
+                ModifierType.DRIVE,
+                ModifierType.REBOUND,
+                ModifierType.BLOCK
+        );
+    }
+
+    @Test
+    void applyTraining_playmaking_canUnlockPlaymakingBadges() {
+        assertTrainingCanUnlockBadges(
+                TrainingType.PLAYMAKING,
+                ModifierType.ASSIST,
+                ModifierType.DRIVE
+        );
+    }
+
+    @Test
+    void applyTraining_tactical_canUnlockTacticalBadges() {
+        assertTrainingCanUnlockBadges(
+                TrainingType.TACTICAL,
+                ModifierType.ASSIST,
+                ModifierType.DEF_EXTER
+        );
+    }
+
+    private static void assertTrainingCanUnlockBadges(TrainingType trainingType, ModifierType... eligibleTypes) {
+        TrainingEngine engine = new TrainingEngine(alwaysDropRandom());
         Player p = basePlayer();
         p.setBadgeIds(new HashSet<>());
 
-        manager.applyTraining(TrainingType.DEFENSE, p);
+        engine.applyTraining(progression(trainingType), p);
 
+        assertThat(p.getBadgeIds()).containsAll(expectedRandomBadgeIdsFor(eligibleTypes));
+    }
+
+    private static Set<Long> expectedRandomBadgeIdsFor(ModifierType... eligibleTypes) {
+        Set<ModifierType> eligible = Set.of(eligibleTypes);
         Set<Long> expected = new HashSet<>();
         for (var badge : BadgeCatalog.badgeMap().values()) {
-            if (badge.types().contains(BadgeType.STEAL)) {
-                // Training unlocks by drop rate; auto-skill badges have dropRate=0 and should not unlock here.
-                if (badge.dropRate() > 0.0) {
-                    expected.add(badge.id());
-                }
+            // Training unlocks by drop rate; auto-skill badges have dropRate=0 and should not unlock here.
+            if (badge.dropRate() <= 0.0) {
+                continue;
+            }
+            for (ModifierType type : badge.types()) {
+                if (!eligible.contains(type)) continue;
+
+                expected.add(badge.id());
+                break;
             }
         }
+        return expected;
+    }
 
-        assertThat(p.getBadgeIds()).containsAll(expected);
+    private static TrainingProgression progression(TrainingType trainingType) {
+        return TrainingProgressions.defaultFor(trainingType);
     }
 
     private static Player basePlayer() {

@@ -2,7 +2,7 @@ package com.sanguiwara.defense;
 
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.type.ShotType;
 
@@ -10,8 +10,8 @@ import java.util.EnumMap;
 
 public final class Zone32Scheme extends ZoneDefensiveScheme {
 
-    public Zone32Scheme(BadgeEngine badgeEngine) {
-        super(badgeEngine);
+    public Zone32Scheme(PlayerModifierEngine modifierEngine) {
+        super(modifierEngine);
     }
     @Override
     public DefenseType type() {

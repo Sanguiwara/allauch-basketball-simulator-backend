@@ -5,6 +5,8 @@ import java.util.List;
 public record PlayerDeltaDTO(
         List<BadgeDTO> badgesAdded,
         List<BadgeDTO> badgesRemoved,
+        List<TrainingTemporaryModifierDTO> temporaryModifiersAdded,
+        List<TrainingTemporaryModifierDTO> temporaryModifiersRemoved,
         Integer tir3Pts,
         Integer tir2Pts,
         Integer lancerFranc,

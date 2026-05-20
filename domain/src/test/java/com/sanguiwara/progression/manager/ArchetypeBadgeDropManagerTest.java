@@ -2,7 +2,7 @@ package com.sanguiwara.progression.manager;
 
 import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.factory.PlayerArchetype;
@@ -22,7 +22,7 @@ class ArchetypeBadgeDropManagerTest {
     void shootingBadgeDrop_usesArchetypeDropRateMultiplier() {
         Player shooter = basePlayer(PlayerArchetype.THREE_POINT_SHOOTER);
         Player allAround = basePlayer(PlayerArchetype.ALL_AROUND);
-        Set<Long> randomThreePointBadgeIds = randomBadgeIdsFor(BadgeType.THREE_POINT);
+        Set<Long> randomThreePointBadgeIds = randomBadgeIdsFor(ModifierType.THREE_POINT);
         Set<Long> autoSkillBadgeIds = zeroDropRateBadgeIds();
 
         new ShootingSkillProgressionManager(constantDoubleRandom(0.012))
@@ -35,7 +35,7 @@ class ArchetypeBadgeDropManagerTest {
         assertThat(shooter.getBadgeIds()).doesNotContainAnyElementsOf(autoSkillBadgeIds);
     }
 
-    private static Set<Long> randomBadgeIdsFor(BadgeType badgeType) {
+    private static Set<Long> randomBadgeIdsFor(ModifierType badgeType) {
         return BadgeCatalog.badgeMap().values().stream()
                 .filter(badge -> badge.dropRate() > 0.0)
                 .filter(badge -> badge.types().contains(badgeType))

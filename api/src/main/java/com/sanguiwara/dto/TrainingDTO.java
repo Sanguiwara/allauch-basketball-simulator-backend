@@ -10,6 +10,7 @@ public record TrainingDTO(
         UUID id,
         Instant executeAt,
         TrainingType trainingType,
+        TrainingProgressionDTO trainingProgression,
         TeamDTO team,
         List<PlayerProgressionDTO> playerProgressions
 ) {

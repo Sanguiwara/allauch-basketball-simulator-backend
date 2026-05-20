@@ -2,10 +2,10 @@ package com.sanguiwara.progression.manager;
 
 import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.baserecords.InGamePlayer;
-import com.sanguiwara.progression.ArchetypeProgressionProfile;
-import com.sanguiwara.progression.ArchetypeProgressionProfiles;
+import com.sanguiwara.progression.archetype.PlayerArchetypeDefinition;
+import com.sanguiwara.progression.archetype.PlayerArchetypes;
 import com.sanguiwara.progression.ProgressionSkillGroup;
 import com.sanguiwara.type.ShotType;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public final class ShootingSkillProgressionManager {
             return;
         }
 
-        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        PlayerArchetypeDefinition archetype = PlayerArchetypes.definitionFor(player.getArchetype());
         double minutesMult = minutesMultiplier(minutesPlayed);
         double potentialMult = potentialMultiplier(player.getPotentielSkill());
 
@@ -78,7 +78,7 @@ public final class ShootingSkillProgressionManager {
             double scaledDelta = rawDelta
                     * minutesMult
                     * potentialMult
-                    * profile.matchMultiplier(skillGroup);
+                    * archetype.matchMultiplier(skillGroup);
 
             // Only change here: widen clamp to allow +2..+3 outcomes from volume if you want.
 
@@ -96,17 +96,17 @@ public final class ShootingSkillProgressionManager {
 
         int totalAttempts = p.getThreePointAttempt() + p.getTwoPointAttempts() + p.getDriveAttempts();
         if (totalAttempts > 0 || p.getAssists() > 0) {
-            applyShootingAndAssistBadgeDrop(p, profile);
+            applyShootingAndAssistBadgeDrop(p, archetype);
         }
     }
 
     public void applyShootingAndAssistBadgeDrop(InGamePlayer p) {
         var player = p.getPlayer();
-        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
-        applyShootingAndAssistBadgeDrop(p, profile);
+        PlayerArchetypeDefinition archetype = PlayerArchetypes.definitionFor(player.getArchetype());
+        applyShootingAndAssistBadgeDrop(p, archetype);
     }
 
-    private void applyShootingAndAssistBadgeDrop(InGamePlayer p, ArchetypeProgressionProfile profile) {
+    private void applyShootingAndAssistBadgeDrop(InGamePlayer p, PlayerArchetypeDefinition archetype) {
         var player = p.getPlayer();
         Set<Long> badgeIds = player.getBadgeIds();
 
@@ -115,7 +115,7 @@ public final class ShootingSkillProgressionManager {
             if (!handlesBadge(badge)) continue;
             if (badgeIds.contains(badge.id())) continue;
 
-            if (random.nextDouble() < profile.effectiveBadgeDropRate(badge)) {
+            if (random.nextDouble() < archetype.effectiveBadgeDropRate(badge)) {
                 badgeIds.add(badge.id());
             }
         }
@@ -123,9 +123,9 @@ public final class ShootingSkillProgressionManager {
 
     private static boolean handlesBadge(Badge badge) {
         var types = badge.types();
-        return types.contains(BadgeType.THREE_POINT)
-                || types.contains(BadgeType.TWO_POINT)
-                || types.contains(BadgeType.DRIVE);
+        return types.contains(ModifierType.THREE_POINT)
+                || types.contains(ModifierType.TWO_POINT)
+                || types.contains(ModifierType.DRIVE);
     }
 
     private static int applyDelta(int currentSkill, int delta) {

@@ -1,6 +1,6 @@
 package com.sanguiwara.dto;
 
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ModifierType;
 
 import java.util.Set;
 
@@ -8,6 +8,6 @@ public record BadgeDTO(
         long id,
         String name,
         double dropRate,
-        Set<BadgeType> types
+        Set<ModifierType> types
 ) {
 }

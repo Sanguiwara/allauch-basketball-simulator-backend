@@ -14,8 +14,8 @@ public interface Badge {
      */
     double dropRate();
 
-    Set<BadgeType> types();
+    Set<ModifierType> types();
 
-    List<Modifier> modifiersFor(BadgeType type, Context context);
+    List<Modifier> modifiersFor(ModifierType type, Context context);
 }
 

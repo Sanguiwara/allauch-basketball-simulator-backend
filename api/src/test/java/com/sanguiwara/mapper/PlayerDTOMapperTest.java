@@ -3,8 +3,11 @@ package com.sanguiwara.mapper;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.dto.PlayerDTO;
 import com.sanguiwara.factory.PlayerArchetype;
+import com.sanguiwara.modifiers.PlayerModifier;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,8 +16,8 @@ import static org.assertj.core.api.Assertions.within;
 class PlayerDTOMapperTest {
 
     @Test
-    void toDto_includesCalculatedScores() {
-        PlayerDTOMapperImpl mapper = new PlayerDTOMapperImpl();
+    void toDto_includesCalculatedScores() throws Exception {
+        PlayerDTOMapperImpl mapper = mapper();
 
         Player player = Player.builder()
                 .id(UUID.randomUUID())
@@ -65,5 +68,40 @@ class PlayerDTOMapperTest {
         assertThat(dto.scores().zone212DefenseScore()).isCloseTo(37.15, within(0.0001));
         assertThat(dto.scores().reboundScore()).isCloseTo(56.6, within(0.0001));
         assertThat(dto.scores().stealScore()).isCloseTo(38.25, within(0.0001));
+    }
+
+    @Test
+    void toDto_exposesTemporaryModifiers() throws Exception {
+        PlayerDTOMapperImpl mapper = mapper();
+        PlayerModifier modifier = PlayerModifier.nextGameThreePointShotPctBonus(0.05);
+
+        Player player = Player.builder()
+                .id(UUID.randomUUID())
+                .name("Test Player")
+                .birthDate(2000)
+                .temporaryModifiers(Set.of(modifier))
+                .build();
+
+        PlayerDTO dto = mapper.toDto(player);
+
+        assertThat(dto.temporaryModifiers()).hasSize(1);
+        assertThat(dto.temporaryModifiers().getFirst().effectType()).isEqualTo(modifier.effectType());
+        assertThat(dto.temporaryModifiers().getFirst().target()).isEqualTo(modifier.target());
+        assertThat(dto.temporaryModifiers().getFirst().op()).isEqualTo(modifier.op());
+        assertThat(dto.temporaryModifiers().getFirst().value()).isEqualTo(modifier.value());
+        assertThat(dto.temporaryModifiers().getFirst().gamesRemaining()).isEqualTo(modifier.gamesRemaining());
+    }
+
+    private static PlayerDTOMapperImpl mapper() throws Exception {
+        PlayerDTOMapperImpl mapper = new PlayerDTOMapperImpl();
+        setField(mapper, "badgeDTOMapper", new BadgeDTOMapperImpl());
+        setField(mapper, "temporaryModifierDTOMapper", new TemporaryModifierDTOMapperImpl());
+        return mapper;
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 }

@@ -4,8 +4,8 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.badges.ShotContext;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.Target;
 import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.calculator.spec.ShotSpec;
@@ -17,10 +17,10 @@ import java.util.List;
 public abstract class ZoneDefensiveScheme implements DefensiveScheme {
     protected static final int TOTAL_MINUTES_FOR_TEAM = 200;
 
-    protected final BadgeEngine badgeEngine;
+    protected final PlayerModifierEngine modifierEngine;
 
-    protected ZoneDefensiveScheme(BadgeEngine badgeEngine) {
-        this.badgeEngine = badgeEngine;
+    protected ZoneDefensiveScheme(PlayerModifierEngine modifierEngine) {
+        this.modifierEngine = modifierEngine;
     }
 
     @Override
@@ -44,7 +44,7 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
             double minutesWeight = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
             Player player = inGamePlayer.getPlayer();
             double playerScore = getPlayerDefensiveScoreAgainstShooting(player);
-            playerScore = badgeEngine.apply(player, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, playerScore, ShotContext.empty());
+            playerScore = modifierEngine.apply(player, ModifierType.DEF_EXTER, Target.DEFENSE_SCORE, playerScore, ShotContext.empty());
             score += minutesWeight * playerScore;
         }
         return score;
@@ -59,7 +59,7 @@ public abstract class ZoneDefensiveScheme implements DefensiveScheme {
         for (InGamePlayer inGamePlayer : offenseTeam.getActivePlayers()) {
             double minutesShare = (double) inGamePlayer.getMinutesPlayed() / TOTAL_MINUTES_FOR_TEAM;
             double individualPlayMakingScore = getOffensivePlayerPlaymakingScore(inGamePlayer) * minutesShare;
-            individualPlayMakingScore = badgeEngine.apply(inGamePlayer.getPlayer(), BadgeType.ASSIST, Target.PLAYMAKING_CONTRIBUTION,
+            individualPlayMakingScore = modifierEngine.apply(inGamePlayer.getPlayer(), ModifierType.ASSIST, Target.PLAYMAKING_CONTRIBUTION,
                     individualPlayMakingScore, ShotContext.empty());
             inGamePlayer.setPlaymakingContribution(individualPlayMakingScore);
             playmakingScore += individualPlayMakingScore;

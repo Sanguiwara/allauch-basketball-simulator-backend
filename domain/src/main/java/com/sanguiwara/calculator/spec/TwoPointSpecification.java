@@ -5,8 +5,8 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.badges.ShotContext;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.Target;
 import com.sanguiwara.gameevent.TwoPointShotEvent;
 import com.sanguiwara.result.TwoPointShootingResult;
@@ -31,7 +31,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
     // Intensity distribution is handled by ShotAttemptDistributor with shared constants across ShotSpec.
     public static final double MAX_MATCHUP_ADVANTAGE = 50.0;
     private final Random random;
-    private final BadgeEngine badgeEngine;
+    private final PlayerModifierEngine modifierEngine;
 
 
     @Override
@@ -57,7 +57,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
         double base =  (shooter.getPlayer().getTir2Pts() / 100.0) * TWO_POINT_SHOT_COEFF ;
         double scaledMatchupAdvantageImpact = (matchupAdvantage / MAX_MATCHUP_ADVANTAGE) * MATCHUP_COEFFICIENT;
         double pct = base + scaledMatchupAdvantageImpact + assistBonusPct;
-        pct = badgeEngine.apply(shooter.getPlayer(), BadgeType.TWO_POINT, Target.SHOT_PCT, pct,
+        pct = modifierEngine.apply(shooter.getPlayer(), ModifierType.TWO_POINT, Target.SHOT_PCT, pct,
                 ShotContext.forShot(ShotType.TWO_POINT, isAssistedShot, matchupAdvantage));
         return Math.clamp(pct, MIN_SHOT_PCT, MAX_SHOT_PCT);
 
@@ -66,7 +66,7 @@ public class TwoPointSpecification implements ShotSpec<TwoPointShotEvent, TwoPoi
 
     public double getDefensiveScoreForAShot(Player defender) {
         double score = PlayerScoreCalculator.calculateTwoPtDefenseScore(defender);
-        return badgeEngine.apply(defender, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
+        return modifierEngine.apply(defender, ModifierType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
     }
 
     @Override

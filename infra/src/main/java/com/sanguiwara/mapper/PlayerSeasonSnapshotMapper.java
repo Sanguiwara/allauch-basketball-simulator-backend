@@ -10,8 +10,6 @@ import com.sanguiwara.progression.PlayerSeasonSnapshot;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
@@ -41,22 +39,16 @@ public abstract class PlayerSeasonSnapshotMapper {
     @Mapping(target = "id", source = "id.playerId")
     @Mapping(target = "clubID", source = "club.id")
     @Mapping(target = "teamsID", expression = "java(new java.util.HashSet<>())")
-    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(entity.getBadgeIds()))")
+    @Mapping(target = "badgeIds", source = "badgeIds")
+    @Mapping(target = "temporaryModifiers", expression = "java(new java.util.HashSet<>())")
     protected abstract Player toPlayer(PlayerSeasonSnapshotEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "leagueSeason", ignore = true)
     @Mapping(target = "player", ignore = true)
     @Mapping(target = "club", ignore = true)
-    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(player.getBadgeIds()))")
+    @Mapping(target = "badgeIds", source = "badgeIds")
     protected abstract PlayerSeasonSnapshotEntity toEntity(Player player);
-
-    protected Set<Long> copyBadgeIds(Set<Long> badgeIds) {
-        if (badgeIds == null || badgeIds.isEmpty()) {
-            return new HashSet<>();
-        }
-        return new HashSet<>(badgeIds);
-    }
 
     private LeagueSeasonEntity leagueSeasonRef(UUID id) {
         LeagueSeasonEntity leagueSeason = new LeagueSeasonEntity();

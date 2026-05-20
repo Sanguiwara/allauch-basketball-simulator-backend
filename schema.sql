@@ -105,6 +105,22 @@ CREATE TABLE player_badges (
 );
 CREATE INDEX idx_player_badges_badge_id ON player_badges(badge_id);
 
+CREATE TABLE player_temporary_modifiers (
+                                            player_id UUID NOT NULL,
+                                            effect_type VARCHAR(255) NOT NULL,
+                                            target VARCHAR(255) NOT NULL,
+                                            op VARCHAR(255) NOT NULL,
+                                            value DOUBLE PRECISION NOT NULL,
+                                            games_remaining INTEGER NOT NULL,
+                                            CONSTRAINT pk_player_temporary_modifiers
+                                                PRIMARY KEY (player_id, effect_type, target, op, value, games_remaining),
+                                            CONSTRAINT fk_player_temporary_modifiers_player
+                                                FOREIGN KEY (player_id) REFERENCES players (id) ON DELETE CASCADE,
+                                            CONSTRAINT ck_player_temporary_modifiers_games_remaining
+                                                CHECK (games_remaining > 0)
+);
+CREATE INDEX idx_player_temporary_modifiers_player_id ON player_temporary_modifiers(player_id);
+
 CREATE TABLE leagues (
                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                          age_category VARCHAR(255) NOT NULL,
@@ -412,6 +428,27 @@ CREATE TABLE player_progression_badges (
                                                FOREIGN KEY (badge_id) REFERENCES badges (id)
 );
 CREATE INDEX idx_player_progression_badges_badge_id ON player_progression_badges(badge_id);
+
+-- Temporary modifiers gained during a given progression event (snapshot of "temporaryModifiersAdded").
+CREATE TABLE player_progression_temporary_modifiers (
+                                                       player_id UUID NOT NULL,
+                                                       event_type VARCHAR(255) NOT NULL,
+                                                       event_id UUID NOT NULL,
+                                                       effect_type VARCHAR(255) NOT NULL,
+                                                       target VARCHAR(255) NOT NULL,
+                                                       op VARCHAR(255) NOT NULL,
+                                                       value DOUBLE PRECISION NOT NULL,
+                                                       games_remaining INTEGER NOT NULL,
+                                                       CONSTRAINT pk_player_progression_temporary_modifiers
+                                                           PRIMARY KEY (player_id, event_type, event_id, effect_type, target, op, value, games_remaining),
+                                                       CONSTRAINT fk_player_progression_temporary_modifiers_progression
+                                                           FOREIGN KEY (player_id, event_type, event_id)
+                                                               REFERENCES player_progressions (player_id, event_type, event_id) ON DELETE CASCADE,
+                                                       CONSTRAINT ck_player_progression_temporary_modifiers_games_remaining
+                                                           CHECK (games_remaining > 0)
+);
+CREATE INDEX idx_player_progression_temporary_modifiers_event
+    ON player_progression_temporary_modifiers(event_type, event_id);
 
 CREATE TABLE team_players (
                               team_id UUID NOT NULL,

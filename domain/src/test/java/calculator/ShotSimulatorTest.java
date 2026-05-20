@@ -8,7 +8,7 @@ import com.sanguiwara.baserecords.Matchups;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.ShotSimulator;
 import com.sanguiwara.calculator.spec.ShotSpec;
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.defense.*;
 import com.sanguiwara.gameevent.ShotEvent;
 import com.sanguiwara.result.ShotResult;
@@ -139,12 +139,12 @@ class ShotSimulatorTest {
 
     @Test
     void pickAssister_shouldRespectAssistProbability_andWeights() {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
@@ -183,12 +183,12 @@ class ShotSimulatorTest {
 
     @Test
     void getTotalShotContribution_aggregatesAcrossPlayers() {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(5, 1.0), defenseSchemeResolver);
@@ -227,16 +227,15 @@ class ShotSimulatorTest {
 
     @Test
     void simulateShots_appliesMoraleBonus_toShotPct() {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
-        // Morale bonus is currently not applied in ShotSimulator.
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
 
         InGamePlayer off1 = new InGamePlayer(p("O1", 99), null);
@@ -254,21 +253,20 @@ class ShotSimulatorTest {
         TestShotResult total = sim.getTotalShotContribution(home, defense, 0.0, 0.0);
         assertEquals(1, total.attempts());
         assertEquals(1, total.events().size());
-        assertEquals(0.50, total.events().getFirst().successPct(), 1e-9);
+        assertEquals(expectedShotPctWithMorale(0.50, 99), total.events().getFirst().successPct(), 1e-9);
     }
 
     @Test
     void simulateShots_usesAverageTeamMorale_shooterPlusPotentialPassers() {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
-        // Morale bonus is currently not applied in ShotSimulator.
         ShotSimulator<TestShotEvent, TestShotResult> sim = new ShotSimulator<>(rng, new FakeShotSpec(1, 0.50), defenseSchemeResolver);
 
         InGamePlayer hi = new InGamePlayer(p("HI", 99), null);
@@ -294,7 +292,12 @@ class ShotSimulatorTest {
         assertEquals(2, total.attempts());
         assertEquals(2, total.events().size());
 
-        assertEquals(0.50, total.events().get(0).successPct(), 1e-9);
-        assertEquals(0.50, total.events().get(1).successPct(), 1e-9);
+        assertEquals(expectedShotPctWithMorale(0.50, 50), total.events().get(0).successPct(), 1e-9);
+        assertEquals(expectedShotPctWithMorale(0.50, 50), total.events().get(1).successPct(), 1e-9);
+    }
+
+    private static double expectedShotPctWithMorale(double baseShotPct, int morale) {
+        double moraleBonus = (morale / 99.0) * 0.40 - 0.20;
+        return Math.clamp(baseShotPct + moraleBonus, 0.0, 0.90);
     }
 }

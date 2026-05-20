@@ -158,6 +158,13 @@ public class PlayerEntity {
     )
     private Set<BadgeEntity> badges = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "player_temporary_modifiers",
+            joinColumns = @JoinColumn(name = "player_id")
+    )
+    private Set<PlayerTemporaryModifierEmbeddable> temporaryModifiers = new HashSet<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

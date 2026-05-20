@@ -1,6 +1,6 @@
 package com.sanguiwara.badges;
 
-public enum BadgeType {
+public enum ModifierType {
     THREE_POINT,
     TWO_POINT,
     DRIVE,

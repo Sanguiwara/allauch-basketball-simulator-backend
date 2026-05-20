@@ -1,6 +1,6 @@
 package com.sanguiwara.calculator.spec;
 
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.defense.RegularMan2ManScheme;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,9 @@ class ThreePointDuelTest {
 
     @Test
     void computePct_regularMan2Man_individualMatchup_noBadges_logsPctAnd100Shots() {
-        BadgeEngine badgeEngine = new BadgeEngine();
-        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), badgeEngine);
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(badgeEngine);
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
+        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), modifierEngine);
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(modifierEngine);
 
         // If you want to tweak the duel, edit these:
         int attackerRatingEverywhere = 95;
@@ -69,9 +69,9 @@ class ThreePointDuelTest {
 
     @Test
     void computePct_regularMan2Man_individualMatchup_withAutoPrecision3ptsPlatine_logsPctAnd100Shots() {
-        BadgeEngine badgeEngine = new BadgeEngine();
-        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), badgeEngine);
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(badgeEngine);
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
+        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), modifierEngine);
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(modifierEngine);
 
         // If you want to tweak the duel, edit these:
         int attackerRatingEverywhere = 99;
@@ -122,9 +122,9 @@ class ThreePointDuelTest {
 
     @Test
     void computePct_regularMan2Man_withoutMatchup_usesTeamAverageDefense_logsPctAnd100Shots() {
-        BadgeEngine badgeEngine = new BadgeEngine();
-        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), badgeEngine);
-        RegularMan2ManScheme scheme = new RegularMan2ManScheme(badgeEngine);
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
+        ThreePointSpecification spec = new ThreePointSpecification(new Random(0L), modifierEngine);
+        RegularMan2ManScheme scheme = new RegularMan2ManScheme(modifierEngine);
 
         int attackerRatingEverywhere = 95;
         int defenderRatingEverywhere = 84;

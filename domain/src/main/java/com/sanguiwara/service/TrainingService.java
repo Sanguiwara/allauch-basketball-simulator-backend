@@ -2,6 +2,7 @@ package com.sanguiwara.service;
 
 import com.sanguiwara.baserecords.Training;
 import com.sanguiwara.baserecords.TrainingType;
+import com.sanguiwara.progression.training.TrainingProgression;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +22,8 @@ public interface TrainingService {
     Optional<List<Training>> getAllTrainingsForAUserSub(String sub);
 
     List<Training> getAllTrainings();
+
+    List<TrainingProgression> getAvailableTrainingProgressions();
 
     Training createTraining(UUID teamId, Instant executeAt, TrainingType trainingType);
 

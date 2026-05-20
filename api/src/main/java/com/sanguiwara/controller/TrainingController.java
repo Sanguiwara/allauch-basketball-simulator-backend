@@ -1,8 +1,10 @@
 package com.sanguiwara.controller;
 
 import com.sanguiwara.dto.TrainingDTO;
+import com.sanguiwara.dto.TrainingProgressionDTO;
 import com.sanguiwara.dto.UpdateTrainingRequestDTO;
 import com.sanguiwara.mapper.TrainingDTOMapper;
+import com.sanguiwara.mapper.TrainingProgressionDTOMapper;
 import com.sanguiwara.service.TrainingService;
 import com.sanguiwara.timeevent.EventManager;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class TrainingController {
 
     private final TrainingService trainingService;
     private final TrainingDTOMapper trainingDTOMapper;
+    private final TrainingProgressionDTOMapper trainingProgressionDTOMapper;
     private final EventManager eventManager;
 
     @GetMapping("/teamID/{teamId}")
@@ -53,6 +56,14 @@ public class TrainingController {
     public ResponseEntity<List<TrainingDTO>> getTrainingsForAUserSub(@PathVariable String sub) {
         return ResponseEntity.of(trainingService.getAllTrainingsForAUserSub(sub)
                 .map(list -> list.stream().map(trainingDTOMapper::toDto).toList()));
+    }
+
+    @GetMapping("/catalog")
+    public ResponseEntity<List<TrainingProgressionDTO>> getTrainingCatalog() {
+        var catalog = trainingService.getAvailableTrainingProgressions().stream()
+                .map(trainingProgressionDTOMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(catalog);
     }
 
     @GetMapping("/{id}")

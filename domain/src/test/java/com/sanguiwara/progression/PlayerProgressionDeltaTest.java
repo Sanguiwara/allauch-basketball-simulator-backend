@@ -1,6 +1,7 @@
 package com.sanguiwara.progression;
 
 import com.sanguiwara.baserecords.Player;
+import com.sanguiwara.modifiers.PlayerModifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -11,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PlayerProgressionDeltaTest {
 
     private static Player basePlayer(Set<Long> badgeIds) {
+        return basePlayer(badgeIds, Set.of());
+    }
+
+    private static Player basePlayer(Set<Long> badgeIds, Set<PlayerModifier> temporaryModifiers) {
         int v = 50;
         return Player.builder()
                 .id(UUID.randomUUID())
@@ -18,6 +23,7 @@ class PlayerProgressionDeltaTest {
                 .birthDate(1990)
                 .injured(false)
                 .badgeIds(badgeIds)
+                .temporaryModifiers(temporaryModifiers)
                 .tir3Pts(v)
                 .tir2Pts(v)
                 .lancerFranc(v)
@@ -80,5 +86,29 @@ class PlayerProgressionDeltaTest {
         PlayerProgressionDelta delta = PlayerProgressionDelta.between(before, after);
         assertEquals(Set.of(), delta.badgesAdded());
         assertEquals(Set.of(1L), delta.badgesRemoved());
+    }
+
+    @Test
+    void between_whenTemporaryModifierAdded_returnsTemporaryModifiersAddedOnly() {
+        PlayerModifier modifier = PlayerModifier.nextGameThreePointShotPctBonus(0.05);
+        Player before = basePlayer(Set.of(), Set.of());
+        Player after = basePlayer(Set.of(), Set.of(modifier));
+
+        PlayerProgressionDelta delta = PlayerProgressionDelta.between(before, after);
+
+        assertEquals(Set.of(modifier), delta.temporaryModifiersAdded());
+        assertEquals(Set.of(), delta.temporaryModifiersRemoved());
+    }
+
+    @Test
+    void between_whenTemporaryModifierRemoved_returnsTemporaryModifiersRemovedOnly() {
+        PlayerModifier modifier = PlayerModifier.nextGameThreePointShotPctBonus(0.05);
+        Player before = basePlayer(Set.of(), Set.of(modifier));
+        Player after = basePlayer(Set.of(), Set.of());
+
+        PlayerProgressionDelta delta = PlayerProgressionDelta.between(before, after);
+
+        assertEquals(Set.of(), delta.temporaryModifiersAdded());
+        assertEquals(Set.of(modifier), delta.temporaryModifiersRemoved());
     }
 }

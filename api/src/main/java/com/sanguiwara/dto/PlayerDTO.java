@@ -45,6 +45,7 @@ public record PlayerDTO(
         List<BadgeDTO> badges,
         UUID clubId,
         Set<UUID> teamIds,
+        List<TrainingTemporaryModifierDTO> temporaryModifiers,
         PlayerScoresDTO scores
 ) {
 }

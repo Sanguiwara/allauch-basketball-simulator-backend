@@ -4,7 +4,7 @@ import com.sanguiwara.calculator.*;
 import com.sanguiwara.calculator.spec.DriveSpecification;
 import com.sanguiwara.calculator.spec.ThreePointSpecification;
 import com.sanguiwara.calculator.spec.TwoPointSpecification;
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.defense.*;
 import com.sanguiwara.factory.PlayerGenerator;
 import com.sanguiwara.factory.TeamFactory;
@@ -16,7 +16,7 @@ import com.sanguiwara.progression.manager.MoraleProgressionManager;
 import com.sanguiwara.progression.manager.ReboundingProgressionManager;
 import com.sanguiwara.progression.manager.ShootingSkillProgressionManager;
 import com.sanguiwara.progression.manager.StocksProgressionManager;
-import com.sanguiwara.progression.manager.TrainingProgressionManager;
+import com.sanguiwara.progression.training.TrainingEngine;
 import com.sanguiwara.result.DriveResult;
 import com.sanguiwara.result.ThreePointShootingResult;
 import com.sanguiwara.result.TwoPointShootingResult;
@@ -42,41 +42,41 @@ public class GameConfig {
     public TeamFactory teamFactory() { return new TeamFactory();}
 
     @Bean
-    public BadgeEngine badgeEngine() {
-        return new BadgeEngine();
+    public PlayerModifierEngine modifierEngine() {
+        return new PlayerModifierEngine();
     }
 
     @Bean
-    public DefenseSchemeResolver defenseSchemeResolver(BadgeEngine badgeEngine) {
+    public DefenseSchemeResolver defenseSchemeResolver(PlayerModifierEngine modifierEngine) {
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
 
         return new DefenseSchemeResolver(schemes);}
 
     @Bean
-    public ThreePointSpecification threePointSpecification(Random random, BadgeEngine badgeEngine) {
-        return new ThreePointSpecification(random, badgeEngine);
+    public ThreePointSpecification threePointSpecification(Random random, PlayerModifierEngine modifierEngine) {
+        return new ThreePointSpecification(random, modifierEngine);
     }
 
     @Bean
-    public TwoPointSpecification twoPointSpecification(Random random, BadgeEngine badgeEngine) {
-        return new TwoPointSpecification(random, badgeEngine);
+    public TwoPointSpecification twoPointSpecification(Random random, PlayerModifierEngine modifierEngine) {
+        return new TwoPointSpecification(random, modifierEngine);
     }
 
     @Bean
-    public DriveSpecification driveSpecification(Random random, BadgeEngine badgeEngine) {
-        return new DriveSpecification(random, badgeEngine);
+    public DriveSpecification driveSpecification(Random random, PlayerModifierEngine modifierEngine) {
+        return new DriveSpecification(random, modifierEngine);
     }
 
     @Bean
     public AssistCalculator playmakingCalculator(DefenseSchemeResolver defenseSchemeResolver) { return  new AssistCalculator(defenseSchemeResolver);}
 
     @Bean
-    public StealSimulator stealSimulator(Random random, BadgeEngine badgeEngine) { return new StealSimulator(random, badgeEngine);}
+    public StealSimulator stealSimulator(Random random, PlayerModifierEngine modifierEngine) { return new StealSimulator(random, modifierEngine);}
 
     @Bean
     public ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator(
@@ -102,10 +102,10 @@ public class GameConfig {
         return new ShotSimulator<>(random,  spec, defenseSchemeResolver);
     }
     @Bean
-    public ReboundCalculator reboundCalculator(Random random, BadgeEngine badgeEngine) { return new ReboundCalculator(random, badgeEngine);}
+    public ReboundCalculator reboundCalculator(Random random, PlayerModifierEngine modifierEngine) { return new ReboundCalculator(random, modifierEngine);}
 
     @Bean
-    public BlockCalculator blockCalculator(BadgeEngine badgeEngine){ return new BlockCalculator(badgeEngine);}
+    public BlockCalculator blockCalculator(PlayerModifierEngine modifierEngine){ return new BlockCalculator(modifierEngine);}
 
     @Bean
     public GameSimulator gameCalculator(ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator,
@@ -145,8 +145,8 @@ public class GameConfig {
     }
 
     @Bean
-    public TrainingProgressionManager trainingProgressionManager(Random random) {
-        return new TrainingProgressionManager(random);
+    public TrainingEngine trainingEngine(Random random) {
+        return new TrainingEngine(random);
     }
 
 }

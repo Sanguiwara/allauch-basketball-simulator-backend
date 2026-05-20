@@ -1,28 +1,33 @@
 package com.sanguiwara.mapper;
 
-import com.sanguiwara.entity.PlayerEntity;
 import com.sanguiwara.entity.PlayerProgressionEntity;
 import com.sanguiwara.progression.PlayerProgression;
-import com.sanguiwara.progression.PlayerProgressionDelta;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.Set;
-import java.util.UUID;
-
-@Mapper(componentModel = "spring", imports = {com.sanguiwara.entity.PlayerProgressionId.class})
+@Mapper(
+        componentModel = "spring",
+        imports = {com.sanguiwara.entity.PlayerProgressionId.class},
+        uses = {
+                EntityReferenceMapper.class,
+                PlayerProgressionDeltaMapper.class,
+                PlayerTemporaryModifierEntityMapper.class
+        }
+)
 public interface PlayerProgressionMapper {
 
     @Mapping(target = "playerId", source = "player.id")
     @Mapping(target = "eventType", source = "id.eventType")
     @Mapping(target = "eventId", source = "id.eventId")
-    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(entity.getBadgeIds()))")
-    @Mapping(target = "delta", expression = "java(toDelta(entity))")
+    @Mapping(target = "badgeIds", source = "badgeIds")
+    @Mapping(target = "temporaryModifiers", source = "temporaryModifiers")
+    @Mapping(target = "delta", source = ".")
     PlayerProgression toDomain(PlayerProgressionEntity entity);
 
     @Mapping(target = "id", expression = "java(new PlayerProgressionId(progression.playerId(), progression.eventType(), progression.eventId()))")
-    @Mapping(target = "player", expression = "java(playerRef(progression.playerId()))")
-    @Mapping(target = "badgeIds", expression = "java(copyBadgeIds(progression.badgeIds()))")
+    @Mapping(target = "player", source = "playerId")
+    @Mapping(target = "badgeIds", source = "badgeIds")
+    @Mapping(target = "temporaryModifiers", source = "temporaryModifiers")
     @Mapping(target = "tir3Pts", source = "delta.tir3Pts")
     @Mapping(target = "tir2Pts", source = "delta.tir2Pts")
     @Mapping(target = "lancerFranc", source = "delta.lancerFranc")
@@ -55,55 +60,4 @@ public interface PlayerProgressionMapper {
     @Mapping(target = "leadership", source = "delta.leadership")
     @Mapping(target = "morale", source = "delta.morale")
     PlayerProgressionEntity toEntity(PlayerProgression progression);
-
-    default Set<Long> copyBadgeIds(Set<Long> badgeIds) {
-        if (badgeIds == null || badgeIds.isEmpty()) return Set.of();
-        return Set.copyOf(badgeIds);
-    }
-
-    default PlayerProgressionDelta toDelta(PlayerProgressionEntity entity) {
-        if (entity == null) return null;
-        return new PlayerProgressionDelta(
-                entity.getTir3Pts(),
-                entity.getTir2Pts(),
-                entity.getLancerFranc(),
-                entity.getFloater(),
-                entity.getFinitionAuCercle(),
-                entity.getSpeed(),
-                entity.getBallhandling(),
-                entity.getSize(),
-                entity.getWeight(),
-                entity.getAgressivite(),
-                entity.getDefExterieur(),
-                entity.getDefPoste(),
-                entity.getProtectionCercle(),
-                entity.getTimingRebond(),
-                entity.getAgressiviteRebond(),
-                entity.getSteal(),
-                entity.getTimingBlock(),
-                entity.getPhysique(),
-                entity.getBasketballIqOff(),
-                entity.getBasketballIqDef(),
-                entity.getPassingSkills(),
-                entity.getIq(),
-                entity.getEndurance(),
-                entity.getSolidite(),
-                entity.getPotentielSkill(),
-                entity.getPotentielPhysique(),
-                entity.getCoachability(),
-                entity.getEgo(),
-                entity.getSoftSkills(),
-                entity.getLeadership(),
-                entity.getMorale(),
-                null,
-                null
-        );
-    }
-
-    default PlayerEntity playerRef(UUID id) {
-        if (id == null) return null;
-        PlayerEntity p = new PlayerEntity();
-        p.setId(id);
-        return p;
-    }
 }

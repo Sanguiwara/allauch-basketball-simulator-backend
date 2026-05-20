@@ -5,8 +5,8 @@ import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.badges.ShotContext;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.Target;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class StealSimulator {
     private static final double PLAYMAKING_IMPACT_SCALE = 0.90; // impact max ~30%
 
     private final Random random;
-    private final BadgeEngine badgeEngine;
+    private final PlayerModifierEngine modifierEngine;
 
     public int calculateSteals(GamePlan offensiveTeam, GamePlan defensiveTeam, double assistProbability) {
 
@@ -92,7 +92,7 @@ public class StealSimulator {
     private double getPlayerStealScore(InGamePlayer inGamePlayer) {
         Player p = inGamePlayer.getPlayer();
         double score = PlayerScoreCalculator.calculateStealScore(p);
-        return badgeEngine.apply(p, BadgeType.STEAL, Target.STEAL_SCORE, score, ShotContext.empty());
+        return modifierEngine.apply(p, ModifierType.STEAL, Target.STEAL_SCORE, score, ShotContext.empty());
     }
 
     private static double scoreToProbability(double score) {

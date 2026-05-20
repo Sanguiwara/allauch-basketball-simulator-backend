@@ -2,7 +2,7 @@ package service;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.*;
 import com.sanguiwara.calculator.*;
 import com.sanguiwara.calculator.spec.DriveSpecification;
@@ -77,25 +77,25 @@ class EnduranceAdvantageSimulationTest {
     private record GamePlans(GamePlan home, GamePlan away) {}
 
     private static GameSimulator createGameSimulator(Random random) {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver defenseSchemeResolver = new DefenseSchemeResolver(schemes);
 
         AssistCalculator assistCalculator = new AssistCalculator(defenseSchemeResolver);
         ShotSimulator<ThreePointShotEvent, ThreePointShootingResult> threePointSimulator =
-                new ShotSimulator<>(random, new ThreePointSpecification(random, badgeEngine), defenseSchemeResolver);
+                new ShotSimulator<>(random, new ThreePointSpecification(random, modifierEngine), defenseSchemeResolver);
         ShotSimulator<TwoPointShotEvent, TwoPointShootingResult> twoPointSimulator =
-                new ShotSimulator<>(random, new TwoPointSpecification(random, badgeEngine), defenseSchemeResolver);
+                new ShotSimulator<>(random, new TwoPointSpecification(random, modifierEngine), defenseSchemeResolver);
         ShotSimulator<DriveEvent, DriveResult> driveSimulator =
-                new ShotSimulator<>(random, new DriveSpecification(random, badgeEngine), defenseSchemeResolver);
-        ReboundCalculator reboundCalculator = new ReboundCalculator(random, badgeEngine);
-        BlockCalculator blockCalculator = new BlockCalculator(badgeEngine);
-        StealSimulator stealSimulator = new StealSimulator(random, badgeEngine);
+                new ShotSimulator<>(random, new DriveSpecification(random, modifierEngine), defenseSchemeResolver);
+        ReboundCalculator reboundCalculator = new ReboundCalculator(random, modifierEngine);
+        BlockCalculator blockCalculator = new BlockCalculator(modifierEngine);
+        StealSimulator stealSimulator = new StealSimulator(random, modifierEngine);
 
         return new GameSimulator(
                 threePointSimulator,

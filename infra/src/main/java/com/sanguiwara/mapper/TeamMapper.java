@@ -1,27 +1,14 @@
 package com.sanguiwara.mapper;
 
 import com.sanguiwara.baserecords.Team;
-import com.sanguiwara.entity.ClubEntity;
 import com.sanguiwara.entity.TeamEntity;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = {PlayerMapper.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", uses = {EntityReferenceMapper.class, PlayerMapper.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TeamMapper {
-    @Mapping(target = "club", ignore = true)
+    @Mapping(target = "club", source = "clubID")
     TeamEntity toEntity(Team team);
 
-    @Mapping(target = "clubID", source = "club.id")
+    @Mapping(target = "clubID", source = "club")
     Team toDomain(TeamEntity entity);
-
-    @AfterMapping
-    default void linkClub(Team team, @MappingTarget TeamEntity entity) {
-        if (team.getClubID() != null) {
-            ClubEntity c = new ClubEntity();
-            c.setId(team.getClubID());
-            entity.setClub(c);
-        } else {
-            entity.setClub(null);
-        }
-    }
-
 }

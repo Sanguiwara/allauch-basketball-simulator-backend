@@ -182,6 +182,7 @@ class TeamControllerTest {
                 List.of(),
                 created.getClubID(),
                 created.getTeamsID(),
+                List.of(),
                 new PlayerScoresDTO(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         );
 

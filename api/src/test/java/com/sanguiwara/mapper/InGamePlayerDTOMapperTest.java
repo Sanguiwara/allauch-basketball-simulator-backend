@@ -16,7 +16,7 @@ class InGamePlayerDTOMapperTest {
     @Test
     void toDto_exposesCalculatedScoresAndMatchRating() throws Exception {
         InGamePlayerDTOMapperImpl mapper = new InGamePlayerDTOMapperImpl();
-        setField(mapper, "playerDTOMapper", new PlayerDTOMapperImpl());
+        setField(mapper, "playerDTOMapper", playerDTOMapper());
 
         Player player = Player.builder()
                 .id(UUID.randomUUID())
@@ -70,6 +70,13 @@ class InGamePlayerDTOMapperTest {
         assertThat(dto.player().scores().zone212DefenseScore()).isCloseTo(37.15, within(0.0001));
         assertThat(dto.player().scores().reboundScore()).isCloseTo(56.6, within(0.0001));
         assertThat(dto.player().scores().stealScore()).isCloseTo(38.25, within(0.0001));
+    }
+
+    private static PlayerDTOMapperImpl playerDTOMapper() throws Exception {
+        PlayerDTOMapperImpl mapper = new PlayerDTOMapperImpl();
+        setField(mapper, "badgeDTOMapper", new BadgeDTOMapperImpl());
+        setField(mapper, "temporaryModifierDTOMapper", new TemporaryModifierDTOMapperImpl());
+        return mapper;
     }
 
     private static void setField(Object target, String fieldName, Object value) throws Exception {

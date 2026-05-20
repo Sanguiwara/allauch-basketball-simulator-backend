@@ -49,9 +49,24 @@ public class GameExecutor {
         BoxScore awayStats = boxScore.awayScore();
         printGame(game, homeStats, awayStats);
         List<PlayerProgression> progressions = postGameManager.applyPostGameEffectsAndReturnsPlayersProgression(game);
+        consumeTemporaryModifiersForActivePlayers(game);
         PostGamePlayerResolver.resolveAffectedPlayers(game).forEach(playerRepository::save);
         gameRepository.save(game);
         playerProgressionRepository.saveAll(progressions);
+    }
+
+    private void consumeTemporaryModifiersForActivePlayers(Game game) {
+        consumeTemporaryModifiersForActivePlayers(game.getHomeGamePlan());
+        consumeTemporaryModifiersForActivePlayers(game.getAwayGamePlan());
+    }
+
+    private void consumeTemporaryModifiersForActivePlayers(GamePlan gamePlan) {
+        if (gamePlan.getActivePlayers() == null) {
+            return;
+        }
+        for (InGamePlayer inGamePlayer : gamePlan.getActivePlayers()) {
+            inGamePlayer.getPlayer().consumeTemporaryModifiersForGame();
+        }
     }
 
 

@@ -1,6 +1,6 @@
 package com.sanguiwara.calculator;
 
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -148,12 +148,12 @@ class ShotResultsMatrixTest {
     ) {
         int attempts = 100;
 
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         DefenseSchemeResolver schemeResolver = new DefenseSchemeResolver(List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         ));
 
         // Build attacker/defender players with "same value everywhere" for the selected caliber.
@@ -174,7 +174,7 @@ class ShotResultsMatrixTest {
             defensivePlan.getMatchups().assign(new MatchupDefender(defender), new MatchupAttacker(attacker));
         }
 
-        ShotSpec<?, ?> spec = specFor(shotKind, badgeEngine);
+        ShotSpec<?, ?> spec = specFor(shotKind, modifierEngine);
         DefensiveScheme scheme = schemeResolver.resolve(defenseType);
         double advantage = scheme.calculateAdvantageForAPlayer(shooter, defensivePlan, spec);
 
@@ -309,13 +309,13 @@ class ShotResultsMatrixTest {
         return p;
     }
 
-    private static ShotSpec<?, ?> specFor(ShotKind kind, BadgeEngine badgeEngine) {
+    private static ShotSpec<?, ?> specFor(ShotKind kind, PlayerModifierEngine modifierEngine) {
         // Random isn't used by computePct / score computations, but the specs require one in ctor.
         Random random = new Random(0L);
         return switch (kind) {
-            case THREE_POINT -> new ThreePointSpecification(random, badgeEngine);
-            case TWO_POINT -> new TwoPointSpecification(random, badgeEngine);
-            case DRIVE -> new DriveSpecification(random, badgeEngine);
+            case THREE_POINT -> new ThreePointSpecification(random, modifierEngine);
+            case TWO_POINT -> new TwoPointSpecification(random, modifierEngine);
+            case DRIVE -> new DriveSpecification(random, modifierEngine);
         };
     }
 

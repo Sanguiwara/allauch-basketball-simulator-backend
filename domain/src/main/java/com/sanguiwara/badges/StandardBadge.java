@@ -10,10 +10,10 @@ public final class StandardBadge implements Badge {
     private final long id;
     private final String name;
     private final double dropRate;
-    private final Set<BadgeType> types;
-    private final EnumMap<BadgeType, List<Modifier>> modifiersByType;
+    private final Set<ModifierType> types;
+    private final EnumMap<ModifierType, List<Modifier>> modifiersByType;
 
-    public StandardBadge(long id, String name, double dropRate, Set<BadgeType> types, EnumMap<BadgeType, List<Modifier>> modifiersByType) {
+    public StandardBadge(long id, String name, double dropRate, Set<ModifierType> types, EnumMap<ModifierType, List<Modifier>> modifiersByType) {
         this.id = id;
         this.name = Objects.requireNonNull(name, "name");
         this.dropRate = dropRate;
@@ -37,12 +37,12 @@ public final class StandardBadge implements Badge {
     }
 
     @Override
-    public Set<BadgeType> types() {
+    public Set<ModifierType> types() {
         return types;
     }
 
     @Override
-    public List<Modifier> modifiersFor(BadgeType type, Context context) {
+    public List<Modifier> modifiersFor(ModifierType type, Context context) {
         return modifiersByType.getOrDefault(type, List.of());
     }
 }

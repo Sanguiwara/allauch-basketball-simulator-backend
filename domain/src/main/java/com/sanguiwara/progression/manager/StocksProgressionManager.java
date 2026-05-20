@@ -2,10 +2,10 @@ package com.sanguiwara.progression.manager;
 
 import com.sanguiwara.badges.Badge;
 import com.sanguiwara.badges.BadgeCatalog;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.baserecords.InGamePlayer;
-import com.sanguiwara.progression.ArchetypeProgressionProfile;
-import com.sanguiwara.progression.ArchetypeProgressionProfiles;
+import com.sanguiwara.progression.archetype.PlayerArchetypeDefinition;
+import com.sanguiwara.progression.archetype.PlayerArchetypes;
 import com.sanguiwara.progression.ProgressionSkillGroup;
 import lombok.RequiredArgsConstructor;
 
@@ -38,19 +38,19 @@ public final class StocksProgressionManager {
 
         double minutesMult = minutesMultiplier(minutesPlayed);
         double potentialMult = potentialMultiplier(player.getPotentielSkill());
-        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
+        PlayerArchetypeDefinition archetype = PlayerArchetypes.definitionFor(player.getArchetype());
 
         int steals = p.getSteals();
         boolean anyStocks = steals > 0 || p.getBlocks() > 0;
         if (anyStocks) {
-            applyStocksBadgeDrop(p, profile);
+            applyStocksBadgeDrop(p, archetype);
         }
         if (steals > 0) {
             double delta = BASE_STEAL_GAIN
                     * saturatingLog(steals)
                     * minutesMult
                     * potentialMult
-                    * profile.matchMultiplier(ProgressionSkillGroup.STEAL);
+                    * archetype.matchMultiplier(ProgressionSkillGroup.STEAL);
             player.setSteal(applyDelta(player.getSteal(), (int) Math.round(delta)));
         }
 
@@ -61,7 +61,7 @@ public final class StocksProgressionManager {
                     * saturatingLog(blocks)
                     * minutesMult
                     * potentialMult
-                    * profile.matchMultiplier(ProgressionSkillGroup.BLOCK)
+                    * archetype.matchMultiplier(ProgressionSkillGroup.BLOCK)
                     * diminishingMultiplier(timingBlock);
             player.setTimingBlock(applyDelta(player.getTimingBlock(), (int) Math.round(timingDelta)));
 
@@ -70,7 +70,7 @@ public final class StocksProgressionManager {
                     * saturatingLog(blocks)
                     * minutesMult
                     * potentialMult
-                    * profile.matchMultiplier(ProgressionSkillGroup.RIM_PROTECTION)
+                    * archetype.matchMultiplier(ProgressionSkillGroup.RIM_PROTECTION)
                     * diminishingMultiplier(protect);
             player.setProtectionCercle(applyDelta(player.getProtectionCercle(), (int) Math.round(protectDelta)));
         }
@@ -78,11 +78,11 @@ public final class StocksProgressionManager {
 
     public void applyStocksBadgeDrop(InGamePlayer p) {
         var player = p.getPlayer();
-        ArchetypeProgressionProfile profile = ArchetypeProgressionProfiles.forArchetype(player.getArchetype());
-        applyStocksBadgeDrop(p, profile);
+        PlayerArchetypeDefinition archetype = PlayerArchetypes.definitionFor(player.getArchetype());
+        applyStocksBadgeDrop(p, archetype);
     }
 
-    private void applyStocksBadgeDrop(InGamePlayer p, ArchetypeProgressionProfile profile) {
+    private void applyStocksBadgeDrop(InGamePlayer p, PlayerArchetypeDefinition archetype) {
         var player = p.getPlayer();
         Set<Long> badgeIds = player.getBadgeIds();
         if (badgeIds == null) {
@@ -91,10 +91,10 @@ public final class StocksProgressionManager {
         }
 
         for (Badge badge : BadgeCatalog.badgeMap().values()) {
-            if (!badge.types().contains(BadgeType.STEAL)) continue;
+            if (!badge.types().contains(ModifierType.STEAL)) continue;
             if (badgeIds.contains(badge.id())) continue;
 
-            if (random.nextDouble() < profile.effectiveBadgeDropRate(badge)) {
+            if (random.nextDouble() < archetype.effectiveBadgeDropRate(badge)) {
                 badgeIds.add(badge.id());
             }
         }

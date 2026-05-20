@@ -2,6 +2,8 @@ package com.sanguiwara.factory;
 
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.badges.AutoSkillBadges;
+import com.sanguiwara.progression.archetype.PlayerArchetypeDefinition;
+import com.sanguiwara.progression.archetype.PlayerArchetypes;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashSet;
@@ -85,21 +87,10 @@ public final class PlayerGenerator {
                 : archetype;
 
         String effectiveName = generateRandomName();
+        PlayerArchetypeDefinition definition = PlayerArchetypes.definitionFor(effective);
         Player.PlayerBuilder builder = basePlayerBuilder(effectiveName)
-                .archetype(effective);
-
-        switch (effective) {
-            case SOLDIER -> applySoldier(builder);
-            case STRATEGIST -> applyStrategist(builder);
-            case CROQUEUR -> applyCroqueur(builder);
-            case WHITE_SHOOTER -> applyWhiteShooter(builder);
-            case THREE_POINT_SHOOTER -> applyThreePointShooter(builder);
-            case TWO_POINT_SCORER -> applyTwoPointScorer(builder);
-            case DRIVE_SPECIALIST -> applyDriveSpecialist(builder);
-            case YOUNG_STAR -> applyYoungStar(builder);
-            case ALL_AROUND -> applyAllAround(builder);
-            case ALL_STAR -> applyAllStar(builder);
-        }
+                .archetype(definition.type());
+        definition.applyInitialStats(builder, this::r);
 
         Player p = builder.build();
         assignAutoBadges(p);
@@ -128,189 +119,6 @@ public final class PlayerGenerator {
 
     private static void assignAutoBadges(Player player) {
         AutoSkillBadges.syncAll(player);
-    }
-
-    private void fillAll(Player.PlayerBuilder b, int min, int max) {
-        // All stats are expected to stay in [0..99].
-        b.tir3Pts(r(min, max))
-                .tir2Pts(r(min, max))
-                .lancerFranc(r(min, max))
-                .floater(r(min, max))
-                .finitionAuCercle(r(min, max))
-                .agressivite(r(min, max))
-                .speed(r(min, max))
-                .ballhandling(r(min, max))
-                .size(r(min, max))
-                .weight(r(min, max))
-                .defExterieur(r(min, max))
-                .defPoste(r(min, max))
-                .protectionCercle(r(min, max))
-                .timingRebond(r(min, max))
-                .agressiviteRebond(r(min, max))
-                .steal(r(min, max))
-                .timingBlock(r(min, max))
-                .physique(r(min, max))
-                .basketballIqOff(r(min, max))
-                .basketballIqDef(r(min, max))
-                .passingSkills(r(min, max))
-                .iq(r(min, max))
-                .endurance(r(min, max))
-                .solidite(r(min, max))
-                .potentielSkill(r(min, max))
-                .potentielPhysique(r(min, max))
-                .coachability(r(min, max))
-                .ego(r(min, max))
-                .softSkills(r(min, max))
-                .leadership(r(min, max))
-                .morale(r(min, max));
-    }
-
-    private void applySoldier(Player.PlayerBuilder b) {
-        fillAll(b, 1, 78);
-
-        b.physique(r(90, 99))
-                .solidite(r(80, 99))
-                .endurance(r(78, 99))
-                .defExterieur(r(85, 99))
-                .defPoste(r(85, 99))
-                .protectionCercle(r(85, 99))
-                .timingRebond(r(88, 99))
-                .agressiviteRebond(r(90, 99))
-                .steal(r(90, 99))
-                .timingBlock(r(90, 99))
-                .size(r(88, 99))
-                .weight(r(88, 99))
-                .coachability(r(90, 99))
-                .speed(r(90,99))
-                .iq(r(85, 99))
-                .basketballIqDef(r(85, 99))
-                .ego(r(20, 60));
-
-
-        // Not a priority
-        b.tir3Pts(r(25, 65))
-                .ballhandling(r(35, 70))
-                .passingSkills(r(35, 72))
-                .tir2Pts(r(35, 70));
-    }
-
-    private void applyStrategist(Player.PlayerBuilder b) {
-        fillAll(b, 1, 82);
-
-        // Stats contributing to RegularMan2ManScheme playmaking offensive score must be elite.
-        // Everything else remains in [1..82] from fillAll().
-        b.speed(r(75, 99))
-                .size(r(75, 99))
-                .endurance(r(75, 99))
-                .passingSkills(r(75, 99))
-                .basketballIqOff(r(75, 99))
-                .ballhandling(r(75, 99))
-                .tir3Pts(r(75, 99))
-                .tir2Pts(r(75, 99))
-                .finitionAuCercle(r(75, 99))
-                .floater(r(75, 99));
-    }
-
-    private void applyCroqueur(Player.PlayerBuilder b) {
-        fillAll(b, 1, 80);
-
-        b.tir3Pts(r(75, 97))
-                .tir2Pts(r(78, 99))
-                .lancerFranc(r(75, 97))
-                .floater(r(70, 95))
-                .finitionAuCercle(r(72, 97))
-                .agressivite(r(85, 99))
-                .ballhandling(r(62, 92))
-                .ego(99);
-
-        // Less collective / defense not a priority
-        b.passingSkills(r(1, 65))
-                .basketballIqDef(r(1, 72))
-                .defExterieur(r(1, 70))
-                .defPoste(r(1, 70))
-                .protectionCercle(r(1, 65))
-                .timingBlock(r(1, 65))
-                .coachability(r(1, 75));
-
-    }
-
-    private void applyWhiteShooter(Player.PlayerBuilder b) {
-        fillAll(b, 1, 84);
-
-        b.tir3Pts(r(78, 99))
-                .tir2Pts(r(72, 94))
-                .lancerFranc(r(78, 99))
-                .floater(r(70, 92))
-                .finitionAuCercle(r(70, 92))
-                .basketballIqOff(r(70, 94))
-                .iq(r(70, 94))
-                .passingSkills(r(65, 90))
-                .ballhandling(r(55, 85))
-                .coachability(r(75, 97))
-                .ego(r(15, 55));
-
-        b.physique(r(1, 75))
-                .protectionCercle(r(1, 70))
-                .timingBlock(r(1, 70));
-    }
-
-    private void applyThreePointShooter(Player.PlayerBuilder b) {
-        fillAll(b, 1, 82);
-
-        // Stats contributing to ThreePointSpecification offensive score must be elite.
-        // Everything else remains in [1..82] from fillAll().
-        b.speed(r(75, 99))
-                .size(r(75, 99))
-                .endurance(r(75, 99))
-                .tir3Pts(r(90, 99))
-                .agressivite(r(70,99))
-                .basketballIqOff(r(75, 99));
-    }
-
-    private void applyTwoPointScorer(Player.PlayerBuilder b) {
-        fillAll(b, 1, 82);
-
-        // Stats contributing to TwoPointSpecification offensive score must be elite.
-        // Everything else remains in [1..82] from fillAll().
-        b.speed(r(75, 99))
-                .size(r(75, 99))
-                .endurance(r(75, 99))
-                .finitionAuCercle(r(65, 90))
-                .tir2Pts(r(90, 99))
-                .agressivite(r(70,99))
-                .floater(r(40,75))
-                .basketballIqOff(r(75, 90));
-    }
-
-    private void applyDriveSpecialist(Player.PlayerBuilder b) {
-        fillAll(b, 1, 82);
-
-        // Stats contributing to DriveSpecification offensive score must be elite.
-        // Everything else remains in [1..82] from fillAll().
-        b.speed(r(80, 99))
-                .size(r(75, 99))
-                .endurance(r(75, 99))
-                .ballhandling(r(80, 99))
-                .finitionAuCercle(r(90, 99))
-                .floater(r(90, 99))
-                .agressivite(r(70,99))
-                .basketballIqOff(r(75, 99));
-    }
-
-    private void applyAllAround(Player.PlayerBuilder b) {
-        fillAll(b, 60, 90);
-        b.ego(r(20, 65));
-    }
-
-    private void applyAllStar(Player.PlayerBuilder b) {
-        fillAll(b, 75, 99);
-        b.ego(99)
-                .coachability(r(1, 80));
-    }
-
-    private void applyYoungStar(Player.PlayerBuilder b) {
-        fillAll(b, 20, 70);
-        b.potentielSkill(99);
     }
 
     public String generateRandomName() {

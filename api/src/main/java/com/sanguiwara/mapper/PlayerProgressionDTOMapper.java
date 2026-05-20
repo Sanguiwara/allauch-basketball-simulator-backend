@@ -1,21 +1,15 @@
 package com.sanguiwara.mapper;
 
-import com.sanguiwara.badges.BadgeCatalog;
-import com.sanguiwara.dto.BadgeDTO;
 import com.sanguiwara.dto.PlayerProgressionDTO;
 import com.sanguiwara.progression.PlayerProgression;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {BadgeDTOMapper.class, TemporaryModifierDTOMapper.class})
 public interface PlayerProgressionDTOMapper {
 
-    @Mapping(target = "badges", expression = "java(mapBadges(progression.badgeIds()))")
+    @Mapping(target = "badges", source = "badgeIds")
+    @Mapping(target = "temporaryModifiers", source = "temporaryModifiers")
     @Mapping(target = "tir3Pts", source = "delta.tir3Pts")
     @Mapping(target = "tir2Pts", source = "delta.tir2Pts")
     @Mapping(target = "lancerFranc", source = "delta.lancerFranc")
@@ -48,15 +42,4 @@ public interface PlayerProgressionDTOMapper {
     @Mapping(target = "leadership", source = "delta.leadership")
     @Mapping(target = "morale", source = "delta.morale")
     PlayerProgressionDTO toDto(PlayerProgression progression);
-
-    default List<BadgeDTO> mapBadges(Set<Long> badgeIds) {
-        if (badgeIds == null || badgeIds.isEmpty()) return List.of();
-        var badgeMap = BadgeCatalog.badgeMap();
-        return badgeIds.stream()
-                .sorted(Comparator.naturalOrder())
-                .map(badgeMap::get)
-                .filter(Objects::nonNull)
-                .map(b -> new BadgeDTO(b.id(), b.name(), b.dropRate(), b.types()))
-                .toList();
-    }
 }

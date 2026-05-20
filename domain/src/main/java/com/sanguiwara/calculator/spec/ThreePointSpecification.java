@@ -5,8 +5,8 @@ import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
 import com.sanguiwara.calculator.PlayerScoreCalculator;
 import com.sanguiwara.badges.ShotContext;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.Target;
 import com.sanguiwara.gameevent.ThreePointShotEvent;
 import com.sanguiwara.result.ThreePointShootingResult;
@@ -28,7 +28,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     // Intensity distribution is handled by ShotAttemptDistributor with shared constants across ShotSpec.
     private static final double ASSIST_BONUS_PCT = 0.25;
     private final Random random;
-    private final BadgeEngine badgeEngine;
+    private final PlayerModifierEngine modifierEngine;
 
     @Override
     public void distributeShotAttempts(GamePlan team) {
@@ -53,7 +53,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
         double basePct = (shooter.getPlayer().getTir3Pts() / RATING_NORMALIZATION_DIVISOR) * BASE_THREE_POINT_PROBABILITY_COEFFICIENT;
         double advantagePct = (advantage / ADVANTAGE_NORMALIZATION_DIVISOR) * ADVANTAGE_THREE_POINT_COEFFICIENT;
         double pct = basePct + advantagePct + assistBonusPct;
-        pct = badgeEngine.apply(shooter.getPlayer(), BadgeType.THREE_POINT, Target.SHOT_PCT, pct,
+        pct = modifierEngine.apply(shooter.getPlayer(), ModifierType.THREE_POINT, Target.SHOT_PCT, pct,
                 ShotContext.forShot(ShotType.THREE_POINT, isAssistedShot, advantage));
         return Math.clamp(pct, 0.075, 0.95);
     }
@@ -61,7 +61,7 @@ public class ThreePointSpecification implements ShotSpec<ThreePointShotEvent, Th
     @Override
     public double getDefensiveScoreForAShot(Player defender) {
         double score = PlayerScoreCalculator.calculateThreePtDefenseScore(defender);
-        return badgeEngine.apply(defender, BadgeType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
+        return modifierEngine.apply(defender, ModifierType.DEF_EXTER, Target.DEFENSE_SCORE, score, ShotContext.empty());
     }
 
 

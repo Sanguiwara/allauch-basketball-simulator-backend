@@ -6,6 +6,8 @@ public enum TrainingType {
     PHYSICAL,
     PLAYMAKING,
     MORALE,
-    TACTICAL
+    TACTICAL,
+    FREE_PLAY,
+    THREE_POINT_FOCUS
 }
 

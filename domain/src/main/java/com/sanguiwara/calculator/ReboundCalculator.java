@@ -3,8 +3,8 @@ package com.sanguiwara.calculator;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
 import com.sanguiwara.baserecords.Player;
-import com.sanguiwara.badges.BadgeEngine;
-import com.sanguiwara.badges.BadgeType;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
+import com.sanguiwara.badges.ModifierType;
 import com.sanguiwara.badges.ReboundContext;
 import com.sanguiwara.badges.Target;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class ReboundCalculator {
     private static final double ADVANTAGE_SCALE = 2.0;
 
     private final java.util.Random random;
-    private final BadgeEngine badgeEngine;
+    private final PlayerModifierEngine modifierEngine;
 
     public int evaluateOffensiveReboundForTeam(GamePlan offenseGamePlan, GamePlan defenseGamePlan) {
         double reboundAdvantage = evaluateReboundAdvantage(offenseGamePlan, defenseGamePlan);
@@ -88,7 +88,7 @@ public class ReboundCalculator {
     private double getPlayerReboundScore(InGamePlayer inGamePlayer, ReboundContext context) {
         Player player = inGamePlayer.getPlayer();
         double score = PlayerScoreCalculator.calculateReboundScore(player);
-        return badgeEngine.apply(player, BadgeType.REBOUND, Target.REBOUND_SCORE, score, context);
+        return modifierEngine.apply(player, ModifierType.REBOUND, Target.REBOUND_SCORE, score, context);
     }
 
     private InGamePlayer pickRebounder(List<InGamePlayer> potentialRebounders) {

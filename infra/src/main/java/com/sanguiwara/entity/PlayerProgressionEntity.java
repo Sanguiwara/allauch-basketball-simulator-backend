@@ -48,6 +48,20 @@ public class PlayerProgressionEntity {
     @Column(name = "badge_id", nullable = false)
     private Set<Long> badgeIds = new HashSet<>();
 
+    /**
+     * Snapshot of temporary modifiers gained during this progression event.
+     */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "player_progression_temporary_modifiers",
+            joinColumns = {
+                    @JoinColumn(name = "player_id", referencedColumnName = "player_id"),
+                    @JoinColumn(name = "event_type", referencedColumnName = "event_type"),
+                    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+            }
+    )
+    private Set<PlayerTemporaryModifierEmbeddable> temporaryModifiers = new HashSet<>();
+
     @Column(name = "tir_3_pts")
     private Integer tir3Pts;
 

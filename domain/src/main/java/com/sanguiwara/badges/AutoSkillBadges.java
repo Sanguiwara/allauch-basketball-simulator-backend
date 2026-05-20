@@ -73,30 +73,30 @@ public final class AutoSkillBadges {
 
     public enum Skill {
         PRECISION_3PTS(PRECISION_3PTS_FER_ID, PRECISION_3PTS_BRONZE_ID, PRECISION_3PTS_OR_ID, PRECISION_3PTS_PLATINE_ID,
-                "Precision 3pts", EnumSet.of(BadgeType.THREE_POINT)),
+                "Precision 3pts", EnumSet.of(ModifierType.THREE_POINT)),
         PRECISION_2PTS(PRECISION_2PTS_FER_ID, PRECISION_2PTS_BRONZE_ID, PRECISION_2PTS_OR_ID, PRECISION_2PTS_PLATINE_ID,
-                "Precision 2pts", EnumSet.of(BadgeType.TWO_POINT)),
+                "Precision 2pts", EnumSet.of(ModifierType.TWO_POINT)),
         DRIVE(DRIVE_FER_ID, DRIVE_BRONZE_ID, DRIVE_OR_ID, DRIVE_PLATINE_ID,
-                "Drive", EnumSet.of(BadgeType.DRIVE)),
+                "Drive", EnumSet.of(ModifierType.DRIVE)),
         REBOND(REBOND_FER_ID, REBOND_BRONZE_ID, REBOND_OR_ID, REBOND_PLATINE_ID,
-                "Rebond", EnumSet.of(BadgeType.REBOUND)),
+                "Rebond", EnumSet.of(ModifierType.REBOUND)),
         INTERCEPTION(INTERCEPTION_FER_ID, INTERCEPTION_BRONZE_ID, INTERCEPTION_OR_ID, INTERCEPTION_PLATINE_ID,
-                "Interception", EnumSet.of(BadgeType.STEAL)),
+                "Interception", EnumSet.of(ModifierType.STEAL)),
         CONTRE(CONTRE_FER_ID, CONTRE_BRONZE_ID, CONTRE_OR_ID, CONTRE_PLATINE_ID,
-                "Contre", EnumSet.of(BadgeType.BLOCK)),
+                "Contre", EnumSet.of(ModifierType.BLOCK)),
         QI_BASKET_OFF(QI_BASKET_OFF_FER_ID, QI_BASKET_OFF_BRONZE_ID, QI_BASKET_OFF_OR_ID, QI_BASKET_OFF_PLATINE_ID,
-                "QI Basket Off", EnumSet.of(BadgeType.ASSIST)),
+                "QI Basket Off", EnumSet.of(ModifierType.ASSIST)),
         DEF_EXTER(DEF_EXTER_FER_ID, DEF_EXTER_BRONZE_ID, DEF_EXTER_OR_ID, DEF_EXTER_PLATINE_ID,
-                "Def Exter", EnumSet.of(BadgeType.DEF_EXTER));
+                "Def Exter", EnumSet.of(ModifierType.DEF_EXTER));
 
         private final long ferId;
         private final long bronzeId;
         private final long orId;
         private final long platineId;
         private final String baseName;
-        private final Set<BadgeType> types;
+        private final Set<ModifierType> types;
 
-        Skill(long ferId, long bronzeId, long orId, long platineId, String baseName, Set<BadgeType> types) {
+        Skill(long ferId, long bronzeId, long orId, long platineId, String baseName, Set<ModifierType> types) {
             this.ferId = ferId;
             this.bronzeId = bronzeId;
             this.orId = orId;
@@ -110,7 +110,7 @@ public final class AutoSkillBadges {
         public long orId() { return orId; }
         public long platineId() { return platineId; }
         public String baseName() { return baseName; }
-        public Set<BadgeType> types() { return types; }
+        public Set<ModifierType> types() { return types; }
     }
 
     public enum Rank {
@@ -189,7 +189,7 @@ public final class AutoSkillBadges {
     }
 
     private static Badge rankedBadge(Skill skill, Rank rank, long id) {
-        EnumMap<BadgeType, List<Modifier>> mods = modifiersFor(skill, rank);
+        EnumMap<ModifierType, List<Modifier>> mods = modifiersFor(skill, rank);
         return new StandardBadge(
                 id,
                 skill.baseName() + " (" + rank.label() + ")",
@@ -199,18 +199,18 @@ public final class AutoSkillBadges {
         );
     }
 
-    private static EnumMap<BadgeType, List<Modifier>> modifiersFor(Skill skill, Rank rank) {
-        EnumMap<BadgeType, List<Modifier>> mods = new EnumMap<>(BadgeType.class);
+    private static EnumMap<ModifierType, List<Modifier>> modifiersFor(Skill skill, Rank rank) {
+        EnumMap<ModifierType, List<Modifier>> mods = new EnumMap<>(ModifierType.class);
 
         switch (skill) {
-            case PRECISION_3PTS -> mods.put(BadgeType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
-            case PRECISION_2PTS -> mods.put(BadgeType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
-            case DRIVE -> mods.put(BadgeType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
-            case REBOND -> mods.put(BadgeType.REBOUND, List.of(new Modifier(Target.REBOUND_SCORE, ModifierOp.MUL, scoreMult(rank))));
-            case INTERCEPTION -> mods.put(BadgeType.STEAL, List.of(new Modifier(Target.STEAL_SCORE, ModifierOp.MUL, scoreMult(rank))));
-            case CONTRE -> mods.put(BadgeType.BLOCK, List.of(new Modifier(Target.BLOCK_SCORE, ModifierOp.MUL, scoreMult(rank))));
-            case QI_BASKET_OFF -> mods.put(BadgeType.ASSIST, List.of(new Modifier(Target.PLAYMAKING_CONTRIBUTION, ModifierOp.MUL, playmakingMult(rank))));
-            case DEF_EXTER -> mods.put(BadgeType.DEF_EXTER, List.of(new Modifier(Target.DEFENSE_SCORE, ModifierOp.MUL, defenseMult(rank))));
+            case PRECISION_3PTS -> mods.put(ModifierType.THREE_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
+            case PRECISION_2PTS -> mods.put(ModifierType.TWO_POINT, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
+            case DRIVE -> mods.put(ModifierType.DRIVE, List.of(new Modifier(Target.SHOT_PCT, ModifierOp.ADD, shotPctBonus(rank))));
+            case REBOND -> mods.put(ModifierType.REBOUND, List.of(new Modifier(Target.REBOUND_SCORE, ModifierOp.MUL, scoreMult(rank))));
+            case INTERCEPTION -> mods.put(ModifierType.STEAL, List.of(new Modifier(Target.STEAL_SCORE, ModifierOp.MUL, scoreMult(rank))));
+            case CONTRE -> mods.put(ModifierType.BLOCK, List.of(new Modifier(Target.BLOCK_SCORE, ModifierOp.MUL, scoreMult(rank))));
+            case QI_BASKET_OFF -> mods.put(ModifierType.ASSIST, List.of(new Modifier(Target.PLAYMAKING_CONTRIBUTION, ModifierOp.MUL, playmakingMult(rank))));
+            case DEF_EXTER -> mods.put(ModifierType.DEF_EXTER, List.of(new Modifier(Target.DEFENSE_SCORE, ModifierOp.MUL, defenseMult(rank))));
         }
         return mods;
     }

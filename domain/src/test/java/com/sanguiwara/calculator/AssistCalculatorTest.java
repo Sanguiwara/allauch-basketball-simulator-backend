@@ -1,6 +1,6 @@
 package com.sanguiwara.calculator;
 
-import com.sanguiwara.badges.BadgeEngine;
+import com.sanguiwara.modifiers.PlayerModifierEngine;
 import com.sanguiwara.baserecords.DefenseType;
 import com.sanguiwara.baserecords.GamePlan;
 import com.sanguiwara.baserecords.InGamePlayer;
@@ -274,12 +274,12 @@ class AssistCalculatorTest {
     }
 
     private static AssistEnv newAssistEnv() {
-        BadgeEngine badgeEngine = new BadgeEngine();
+        PlayerModifierEngine modifierEngine = new PlayerModifierEngine();
         List<DefensiveScheme> schemes = List.of(
-                new RegularMan2ManScheme(badgeEngine),
-                new Zone23Scheme(badgeEngine),
-                new Zone212Scheme(badgeEngine),
-                new Zone32Scheme(badgeEngine)
+                new RegularMan2ManScheme(modifierEngine),
+                new Zone23Scheme(modifierEngine),
+                new Zone212Scheme(modifierEngine),
+                new Zone32Scheme(modifierEngine)
         );
         DefenseSchemeResolver resolver = new DefenseSchemeResolver(schemes);
         AssistCalculator calc = new AssistCalculator(resolver);
